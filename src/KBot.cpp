@@ -8,12 +8,23 @@ namespace KBot {
 
     // Called only once at the beginning of a game.
     void KBot::onStart() {
-        // Good luck, have fun!
-        Broodwar->sendText("gl hf");
+        // This bot is written for Terran, so make sure we are indeed Terran!
+        if (Broodwar->self()->getRace() != Races::Terran) {
+            Broodwar << "Wrong race selected! KBot has to be Terran." << std::endl;
+            Broodwar->leaveGame();
+        }
 
-        // Set the command optimization level so that common commands can be grouped
-        // and reduce the bot's APM (Actions Per Minute).
+        // This bot is written for one-on-one melee games.
+        if (Broodwar->getGameType() != GameTypes::Melee) {
+            Broodwar << "Unexpected game type. KBot might not work correctly." << std::endl;
+            // Unfortunate, but no reason to leave.
+        }
+
+        // Set the command optimization level so that common commands can be grouped.
         Broodwar->setCommandOptimizationLevel(2);
+
+        // Ready to go. Good luck, have fun!
+        Broodwar->sendText("gl hf");
     }
 
     // Called once at the end of a game.
@@ -138,43 +149,16 @@ namespace KBot {
     }
 
     // Called when the user attempts to send a text message.
-    void KBot::onSendText(std::string text) {
-        // If Flag::UserInput is disabled, then this function is not called.
-
-        // Send the text to the game if it is not being processed.
-        Broodwar->sendText("%s", text.c_str());
-
-        // Make sure to use %s and pass the text as a parameter,
-        // otherwise you may run into problems when you use the %(percent) character!
-    }
+    void KBot::onSendText(std::string text) {}
 
     // Called when the client receives a message from another Player.
-    void KBot::onReceiveText(BWAPI::Player player, std::string text) {
-        // Parse the received text
-        Broodwar << player->getName() << " said \"" << text << "\"" << std::endl;
-    }
+    void KBot::onReceiveText(BWAPI::Player player, std::string text) {}
 
     // Called when a Player leaves the game.
-    void KBot::onPlayerLeft(BWAPI::Player player) {
-        // Interact verbally with the other players in the game by
-        // announcing that the other player has left.
-        Broodwar->sendText("Goodbye %s!", player->getName().c_str());
-    }
+    void KBot::onPlayerLeft(BWAPI::Player player) {}
 
     // Called when a Nuke has been launched somewhere on the map.
-    void KBot::onNukeDetect(BWAPI::Position target) {
-        // Check if the target is a valid position
-        if (target) {
-            // if so, print the location of the nuclear strike target
-            Broodwar << "Nuclear Launch Detected at " << target << std::endl;
-        }
-        else {
-            // Otherwise, ask other players where the nuke is!
-            Broodwar->sendText("Where's the nuke?");
-        }
-
-        // You can also retrieve all the nuclear missile targets using Broodwar->getNukeDots()!
-    }
+    void KBot::onNukeDetect(BWAPI::Position target) {}
 
     // Called when a Unit becomes accessible.
     void KBot::onUnitDiscover(BWAPI::Unit unit) {}
