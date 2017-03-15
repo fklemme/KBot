@@ -116,13 +116,23 @@ namespace KBot {
                 } // closure: if idle
             }
             else if (u->getType() == UnitTypes::Terran_Marine) {
+                Broodwar->registerEvent([u](Game*) { Broodwar->drawCircleMap(u->getPosition(), 500, Colors::Yellow); }, nullptr, Broodwar->getLatencyFrames()); // debug!
                 if (u->isIdle()) {
                     // Update enemy locations
                     if (Broodwar->isVisible(mEnemyLocations.front()) && Broodwar->getUnitsOnTile(mEnemyLocations.front(), Filter::IsEnemy).empty())
                         mEnemyLocations.pop_front();
 
-                    // Random attack move! :P
-                    if (!mEnemyLocations.empty())
+                    // Defend, if there are only few marines.
+                    if (Broodwar->getUnitsInRadius(u->getPosition(), 500, Filter::GetType == UnitTypes::Terran_Marine && Filter::IsOwned).size() < 20) {
+                        auto nearbyEnemies = Broodwar->getUnitsInRadius(u->getPosition(), 500, Filter::IsEnemy);
+                        if (!nearbyEnemies.empty())
+                            u->attack(nearbyEnemies.getClosestUnit());
+                        else
+                            u->move(Position(Broodwar->self()->getStartLocation()));
+                    }
+
+                    // Otherwise, attack! :P
+                    else if (!mEnemyLocations.empty())
                         u->attack(Position(mEnemyLocations.front()));
                 }
             }
@@ -138,9 +148,9 @@ namespace KBot {
                 }
             }
             else if (u->getType().isResourceDepot()) { // A resource depot is a Command Center, Nexus, or Hatchery
-                Broodwar->registerEvent([u](Game*) { Broodwar->drawCircleMap(u->getPosition(), 250, Colors::Orange); }, nullptr, 200); // debug!
+                Broodwar->registerEvent([u](Game*) { Broodwar->drawCircleMap(u->getPosition(), 300, Colors::Green); }, nullptr, Broodwar->getLatencyFrames()); // debug!
                 // Limit amount of workers to produce.
-                if (Broodwar->getUnitsInRadius(u->getPosition(), 250, Filter::IsWorker && Filter::IsOwned).size() < 20) {
+                if (Broodwar->getUnitsInRadius(u->getPosition(), 300, Filter::IsWorker && Filter::IsOwned).size() < 20) {
                     // Order the depot to construct more workers! But only when it is idle.
                     if (u->isIdle() && !u->train(u->getType().getRace().getWorker())) {
                         // If that fails, draw the error at the location so that you can visibly see what went wrong!
