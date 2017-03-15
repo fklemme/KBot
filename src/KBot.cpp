@@ -1,6 +1,7 @@
 #include "KBot.h"
 
 #include <iostream>
+#include <random>
 
 namespace KBot {
 
@@ -36,6 +37,17 @@ namespace KBot {
         Broodwar->drawTextScreen(2, 0, "FPS: %d", Broodwar->getFPS());
         Broodwar->drawTextScreen(2, 10, "Average FPS: %f", Broodwar->getAverageFPS());
 
+        // Some more debug infos...
+        Broodwar->drawTextScreen(2, 20, "Supply used: %d", Broodwar->self()->supplyUsed());
+        Broodwar->drawTextScreen(2, 30, "Supply total: %d", Broodwar->self()->supplyTotal());
+        Broodwar->drawTextScreen(2, 40, "StartLocation count: %d", Broodwar->getStartLocations().size());
+        auto location0 = Broodwar->getStartLocations().at(0);
+        auto location1 = Broodwar->getStartLocations().at(1);
+        auto my_location = Broodwar->self()->getStartLocation();
+        Broodwar->drawTextScreen(2, 50, "StartLocation 1: %d, %d", location0.x, location0.y);
+        Broodwar->drawTextScreen(2, 60, "StartLocation 2: %d, %d", location1.x, location1.y);
+        Broodwar->drawTextScreen(2, 70, "My StartLocation: %d, %d", my_location.x, my_location.y);
+
         // Return if the game is a replay or is paused
         if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self())
             return;
@@ -44,6 +56,8 @@ namespace KBot {
         // Latency frames are the number of frames before commands are processed.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
+
+        std::default_random_engine generator;
 
         // Iterate through all the units that we own
         for (auto &u : Broodwar->self()->getUnits()) {
@@ -67,6 +81,7 @@ namespace KBot {
 
             // Finally make the unit do some stuff!
             // TODO: Remove all that demo stuff...
+            // For now and for fun, let's just build a simple marine rush bot using what we have. :)
 
 
             // If the unit is a worker unit
@@ -78,18 +93,46 @@ namespace KBot {
                     if (u->isCarryingGas() || u->isCarryingMinerals()) {
                         u->returnCargo();
                     }
-                    else if (!u->getPowerUp()) {  // The worker cannot harvest anything if it
-                                                  // is carrying a powerup such as a flag
-                        // Harvest from the nearest mineral patch or gas refinery
-                        if (!u->gather(u->getClosestUnit(Filter::IsMineralField || Filter::IsRefinery))) {
-                            // If the call fails, then print the last error message
-                            Broodwar << Broodwar->getLastError() << std::endl;
-                        }
-                    } // closure: has no powerup
+                    // Harvest from the nearest mineral patch or gas refinery
+                    else if (!u->gather(u->getClosestUnit(Filter::IsMineralField || Filter::IsRefinery))) {
+                        // If the call fails, then print the last error message
+                        Broodwar << Broodwar->getLastError() << std::endl;
+                    }
                 } // closure: if idle
             }
-            else if (u->getType().isResourceDepot()) // A resource depot is a Command Center, Nexus, or Hatchery
-            {
+            else if (u->getType() == UnitTypes::Terran_Marine) {
+                if (u->isIdle()) {
+                    // Random attack move! :P
+                    auto location = Broodwar->enemy()->getStartLocation();
+                    if (location == TilePositions::Unknown) {
+                        auto locations = Broodwar->getStartLocations();
+                        auto it = std::find(locations.begin(), locations.end(), my_location);
+                        if (it != locations.end())
+                            locations.erase(it);
+
+                        if (locations.size() == 1)
+                            location = locations.front();
+                        else {
+                            std::uniform_int_distribution<int> dist(0, locations.size() - 1);
+                            location = locations.at(dist(generator));
+                        }
+                    }
+
+                    u->attack(Position(location));
+                }
+            }
+            else if (u->getType() == UnitTypes::Terran_Barracks) {
+                if (u->isIdle()) {
+                    // Spam marines! :D
+                    if (!u->train(UnitTypes::Terran_Marine)) {
+                        Position pos = u->getPosition();
+                        Error lastErr = Broodwar->getLastError();
+                        Broodwar->registerEvent([pos, lastErr](Game*) { Broodwar->drawTextMap(pos, "%c%s", Text::White, lastErr.c_str()); },
+                            nullptr, Broodwar->getLatencyFrames());
+                    }
+                }
+            }
+            else if (u->getType().isResourceDepot()) { // A resource depot is a Command Center, Nexus, or Hatchery
                 // Order the depot to construct more workers! But only when it is idle.
                 if (u->isIdle() && !u->train(u->getType().getRace().getWorker())) {
                     // If that fails, draw the error at the location so that you can visibly see what went wrong!
@@ -97,55 +140,56 @@ namespace KBot {
                     // so create an event that keeps it on the screen for some frames
                     Position pos = u->getPosition();
                     Error lastErr = Broodwar->getLastError();
-                    Broodwar->registerEvent([pos, lastErr](Game*) { Broodwar->drawTextMap(pos, "%c%s", Text::White, lastErr.c_str()); },   // action
-                        nullptr,    // condition
-                        Broodwar->getLatencyFrames());  // frames to run
-
-                    // Retrieve the supply provider type in the case that we have run out of supplies
-                    UnitType supplyProviderType = u->getType().getRace().getSupplyProvider();
-                    static int lastChecked = 0;
-
-                    // If we are supply blocked and haven't tried constructing more recently
-                    if (lastErr == Errors::Insufficient_Supply &&
-                        lastChecked + 400 < Broodwar->getFrameCount() &&
-                        Broodwar->self()->incompleteUnitCount(supplyProviderType) == 0)
-                    {
-                        lastChecked = Broodwar->getFrameCount();
-
-                        // Retrieve a unit that is capable of constructing the supply needed
-                        Unit supplyBuilder = u->getClosestUnit(Filter::GetType == supplyProviderType.whatBuilds().first &&
-                            (Filter::IsIdle || Filter::IsGatheringMinerals) &&
-                            Filter::IsOwned);
-                        // If a unit was found
-                        if (supplyBuilder) {
-                            if (supplyProviderType.isBuilding()) {
-                                TilePosition targetBuildLocation = Broodwar->getBuildLocation(supplyProviderType, supplyBuilder->getTilePosition());
-                                if (targetBuildLocation) {
-                                    // Register an event that draws the target build location
-                                    Broodwar->registerEvent([targetBuildLocation, supplyProviderType](Game*)
-                                    {
-                                        Broodwar->drawBoxMap(Position(targetBuildLocation),
-                                            Position(targetBuildLocation + supplyProviderType.tileSize()),
-                                            Colors::Blue);
-                                    },
-                                        nullptr,  // condition
-                                        supplyProviderType.buildTime() + 100);  // frames to run
-
-                                    // Order the builder to construct the supply structure
-                                    supplyBuilder->build(supplyProviderType, targetBuildLocation);
-                                }
-                            }
-                            else {
-                                // Train the supply provider (Overlord) if the provider is not a structure
-                                supplyBuilder->train(supplyProviderType);
-                            }
-                        } // closure: supplyBuilder is valid
-                    } // closure: insufficient supply
+                    Broodwar->registerEvent([pos, lastErr](Game*) { Broodwar->drawTextMap(pos, "%c%s", Text::White, lastErr.c_str()); }, // action
+                        nullptr, // condition
+                        Broodwar->getLatencyFrames()); // frames to run
                 } // closure: failed to train idle unit
-
             }
-
         } // closure: unit iterator
+
+        // Build depos and racks!
+        static int delay = 0;
+        if (Broodwar->getFrameCount() > delay + 100) {
+            const auto &me = *Broodwar->self();
+            if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= 100) {
+                auto builder = Broodwar->getClosestUnit(Position(me.getStartLocation()),
+                    Filter::GetType == UnitTypes::Terran_SCV &&
+                    (Filter::IsIdle || Filter::IsGatheringMinerals) &&
+                    Filter::IsOwned);
+                auto building = UnitTypes::Terran_Supply_Depot;
+
+                if (builder) {
+                    auto location = Broodwar->getBuildLocation(building, builder->getTilePosition());
+                    if (location) {
+                        Broodwar->registerEvent([location, building](Game*) {
+                            Broodwar->drawBoxMap(Position(location), Position(location + building.tileSize()), Colors::Blue);
+                        }, nullptr, 100);
+
+                        builder->build(building, location); // FIXME: Print error on failure.
+                        delay = Broodwar->getFrameCount();
+                    }
+                }
+            }
+            else if (me.minerals() >= 150) {
+                auto builder = Broodwar->getClosestUnit((Position)me.getStartLocation(),
+                    Filter::GetType == UnitTypes::Terran_SCV &&
+                    (Filter::IsIdle || Filter::IsGatheringMinerals) &&
+                    Filter::IsOwned);
+                auto building = UnitTypes::Terran_Barracks;
+
+                if (builder) {
+                    auto location = Broodwar->getBuildLocation(building, builder->getTilePosition());
+                    if (location) {
+                        Broodwar->registerEvent([location, building](Game*) {
+                            Broodwar->drawBoxMap(Position(location), Position(location + building.tileSize()), Colors::Blue);
+                        }, nullptr, 100);
+
+                        builder->build(building, location); // FIXME: Print error on failure.
+                        delay = Broodwar->getFrameCount();
+                    }
+                }
+            }
+        }
     }
 
     // Called when the user attempts to send a text message.
