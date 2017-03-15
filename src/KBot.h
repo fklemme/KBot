@@ -1,6 +1,7 @@
 #pragma once
 
 #include <BWAPI.h>
+#include <deque>
 
 namespace KBot {
 
@@ -23,6 +24,8 @@ namespace KBot {
         virtual void onUnitRenegade(BWAPI::Unit unit);
         virtual void onSaveGame(std::string gameName);
         virtual void onUnitComplete(BWAPI::Unit unit);
+
+        std::deque<BWAPI::TilePosition> mEnemyLocations;
     };
 
 } // namespace

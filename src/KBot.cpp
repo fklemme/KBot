@@ -1,5 +1,6 @@
 #include "KBot.h"
 
+#include <cassert>
 #include <iostream>
 #include <random>
 
@@ -9,6 +10,8 @@ namespace KBot {
 
     // Called only once at the beginning of a game.
     void KBot::onStart() {
+        if (Broodwar->isReplay()) return;
+
         // This bot is written for Terran, so make sure we are indeed Terran!
         if (Broodwar->self()->getRace() != Races::Terran) {
             Broodwar << "Wrong race selected! KBot has to be Terran." << std::endl;
@@ -26,6 +29,23 @@ namespace KBot {
 
         // Ready to go. Good luck, have fun!
         Broodwar->sendText("gl hf");
+
+        // Try to figure out enemy location.
+        const auto enemyLocation = Broodwar->enemy()->getStartLocation();
+        if (enemyLocation != TilePositions::Unknown)
+            mEnemyLocations.push_back(enemyLocation);
+        else {
+            auto allLocations = Broodwar->getStartLocations();
+            const auto myLocation = Broodwar->self()->getStartLocation();
+            const auto myLocationIt = std::find(allLocations.begin(), allLocations.end(), Broodwar->self()->getStartLocation());
+            assert(myLocationIt != allLocations.end());
+            allLocations.erase(myLocationIt);
+            std::sort(allLocations.begin(), allLocations.end(), [myLocation](TilePosition a, TilePosition b) {
+                return myLocation.getDistance(a) < myLocation.getDistance(b);
+            });
+            std::copy(allLocations.begin(), allLocations.end(), std::back_inserter(mEnemyLocations));
+        }
+        assert(!mEnemyLocations.empty());
     }
 
     // Called once at the end of a game.
@@ -33,31 +53,26 @@ namespace KBot {
 
     // Called once for every execution of a logical frame in Broodwar.
     void KBot::onFrame() {
-        // Display the game frame rate as text in the upper left area of the screen
-        Broodwar->drawTextScreen(2, 0, "FPS: %d", Broodwar->getFPS());
-        Broodwar->drawTextScreen(2, 10, "Average FPS: %f", Broodwar->getAverageFPS());
-
-        // Some more debug infos...
-        Broodwar->drawTextScreen(2, 20, "Supply used: %d", Broodwar->self()->supplyUsed());
-        Broodwar->drawTextScreen(2, 30, "Supply total: %d", Broodwar->self()->supplyTotal());
-        Broodwar->drawTextScreen(2, 40, "StartLocation count: %d", Broodwar->getStartLocations().size());
-        auto location0 = Broodwar->getStartLocations().at(0);
-        auto location1 = Broodwar->getStartLocations().at(1);
-        auto my_location = Broodwar->self()->getStartLocation();
-        Broodwar->drawTextScreen(2, 50, "StartLocation 1: %d, %d", location0.x, location0.y);
-        Broodwar->drawTextScreen(2, 60, "StartLocation 2: %d, %d", location1.x, location1.y);
-        Broodwar->drawTextScreen(2, 70, "My StartLocation: %d, %d", my_location.x, my_location.y);
-
         // Return if the game is a replay or is paused
         if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self())
             return;
+
+        // Display the game frame rate as text in the upper left area of the screen
+        Broodwar->drawTextScreen(2, 0, "FPS: %d, APM: %d", Broodwar->getFPS(), Broodwar->getAPM());
+
+        // Some more debug infos...
+        const auto myLocation = Broodwar->self()->getStartLocation();
+        Broodwar->drawTextScreen(2, 10, "My StartLocation: %d, %d", myLocation.x, myLocation.y);
+        Broodwar->drawTextScreen(2, 20, "EnemyLocation count: %d", mEnemyLocations.size());
+        if (!mEnemyLocations.empty()) // Might be empty for a short period of time.
+            Broodwar->drawTextScreen(2, 30, "Next EnemyLocation: %d, %d", mEnemyLocations.front().x, mEnemyLocations.front().y);
+        else
+            Broodwar->drawTextScreen(2, 30, "No more enemies!? :O");
 
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
-
-        std::default_random_engine generator;
 
         // Iterate through all the units that we own
         for (auto &u : Broodwar->self()->getUnits()) {
@@ -102,23 +117,13 @@ namespace KBot {
             }
             else if (u->getType() == UnitTypes::Terran_Marine) {
                 if (u->isIdle()) {
+                    // Update enemy locations
+                    if (Broodwar->isVisible(mEnemyLocations.front()) && Broodwar->getUnitsOnTile(mEnemyLocations.front(), Filter::IsEnemy).empty())
+                        mEnemyLocations.pop_front();
+
                     // Random attack move! :P
-                    auto location = Broodwar->enemy()->getStartLocation();
-                    if (location == TilePositions::Unknown) {
-                        auto locations = Broodwar->getStartLocations();
-                        auto it = std::find(locations.begin(), locations.end(), my_location);
-                        if (it != locations.end())
-                            locations.erase(it);
-
-                        if (locations.size() == 1)
-                            location = locations.front();
-                        else {
-                            std::uniform_int_distribution<int> dist(0, locations.size() - 1);
-                            location = locations.at(dist(generator));
-                        }
-                    }
-
-                    u->attack(Position(location));
+                    if (!mEnemyLocations.empty())
+                        u->attack(Position(mEnemyLocations.front()));
                 }
             }
             else if (u->getType() == UnitTypes::Terran_Barracks) {
@@ -133,25 +138,29 @@ namespace KBot {
                 }
             }
             else if (u->getType().isResourceDepot()) { // A resource depot is a Command Center, Nexus, or Hatchery
-                // Order the depot to construct more workers! But only when it is idle.
-                if (u->isIdle() && !u->train(u->getType().getRace().getWorker())) {
-                    // If that fails, draw the error at the location so that you can visibly see what went wrong!
-                    // However, drawing the error once will only appear for a single frame
-                    // so create an event that keeps it on the screen for some frames
-                    Position pos = u->getPosition();
-                    Error lastErr = Broodwar->getLastError();
-                    Broodwar->registerEvent([pos, lastErr](Game*) { Broodwar->drawTextMap(pos, "%c%s", Text::White, lastErr.c_str()); }, // action
-                        nullptr, // condition
-                        Broodwar->getLatencyFrames()); // frames to run
-                } // closure: failed to train idle unit
+                Broodwar->registerEvent([u](Game*) { Broodwar->drawCircleMap(u->getPosition(), 250, Colors::Orange); }, nullptr, 200); // debug!
+                // Limit amount of workers to produce.
+                if (Broodwar->getUnitsInRadius(u->getPosition(), 250, Filter::IsWorker && Filter::IsOwned).size() < 20) {
+                    // Order the depot to construct more workers! But only when it is idle.
+                    if (u->isIdle() && !u->train(u->getType().getRace().getWorker())) {
+                        // If that fails, draw the error at the location so that you can visibly see what went wrong!
+                        // However, drawing the error once will only appear for a single frame
+                        // so create an event that keeps it on the screen for some frames
+                        Position pos = u->getPosition();
+                        Error lastErr = Broodwar->getLastError();
+                        Broodwar->registerEvent([pos, lastErr](Game*) { Broodwar->drawTextMap(pos, "%c%s", Text::White, lastErr.c_str()); }, // action
+                            nullptr, // condition
+                            Broodwar->getLatencyFrames()); // frames to run
+                    } // closure: failed to train idle unit
+                }
             }
         } // closure: unit iterator
 
         // Build depos and racks!
         static int delay = 0;
-        if (Broodwar->getFrameCount() > delay + 100) {
+        if (Broodwar->getFrameCount() > delay + 150) {
             const auto &me = *Broodwar->self();
-            if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= 100) {
+            if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice()) {
                 auto builder = Broodwar->getClosestUnit(Position(me.getStartLocation()),
                     Filter::GetType == UnitTypes::Terran_SCV &&
                     (Filter::IsIdle || Filter::IsGatheringMinerals) &&
@@ -170,8 +179,8 @@ namespace KBot {
                     }
                 }
             }
-            else if (me.minerals() >= 150) {
-                auto builder = Broodwar->getClosestUnit((Position)me.getStartLocation(),
+            else if (me.minerals() >= UnitTypes::Terran_Barracks.mineralPrice()) {
+                auto builder = Broodwar->getClosestUnit(Position(me.getStartLocation()),
                     Filter::GetType == UnitTypes::Terran_SCV &&
                     (Filter::IsIdle || Filter::IsGatheringMinerals) &&
                     Filter::IsOwned);
