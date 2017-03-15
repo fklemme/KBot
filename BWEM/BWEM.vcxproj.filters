@@ -33,6 +33,9 @@
     <ClCompile Include="src\cp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\examples.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\graph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -68,52 +71,67 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\area.h">
+    <ClInclude Include="include\BWEM\area.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\base.h">
+    <ClInclude Include="include\BWEM\base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\bwapiExt.h">
+    <ClInclude Include="include\BWEM\bwapiExt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\bwem.h">
+    <ClInclude Include="include\BWEM\bwem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\cp.h">
+    <ClInclude Include="include\BWEM\cp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\defs.h">
+    <ClInclude Include="include\BWEM\defs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graph.h">
+    <ClInclude Include="include\BWEM\examples.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\gridMap.h">
+    <ClInclude Include="include\BWEM\graph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\map.h">
+    <ClInclude Include="include\BWEM\gridMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mapDrawer.h">
+    <ClInclude Include="include\BWEM\map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mapImpl.h">
+    <ClInclude Include="include\BWEM\mapDrawer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mapPrinter.h">
+    <ClInclude Include="include\BWEM\mapImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\neutral.h">
+    <ClInclude Include="include\BWEM\mapPrinter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\tiles.h">
+    <ClInclude Include="include\BWEM\neutral.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\utils.h">
+    <ClInclude Include="include\BWEM\tiles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\winutils.h">
+    <ClInclude Include="include\BWEM\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BWEM\winutils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyBMP_1.06\EasyBMP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyBMP_1.06\EasyBMP_BMP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyBMP_1.06\EasyBMP_DataStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyBMP_1.06\EasyBMP_VariousBMPutilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

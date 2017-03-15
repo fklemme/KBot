@@ -8,6 +8,8 @@ namespace KBot {
 
     using namespace BWAPI;
 
+    KBot::KBot() : mMap(BWEM::Map::Instance()) {}
+
     // Called only once at the beginning of a game.
     void KBot::onStart() {
         if (Broodwar->isReplay()) return;
@@ -26,6 +28,16 @@ namespace KBot {
 
         // Set the command optimization level so that common commands can be grouped.
         Broodwar->setCommandOptimizationLevel(2);
+
+        // BWEM map initialization
+        mMap.Initialize();
+        mMap.EnableAutomaticPathAnalysis();
+        bool r = mMap.FindBasesForStartingLocations();
+        assert(r);
+
+        BWEM::utils::MapPrinter::Initialize(&mMap);
+        //BWEM::utils::printMap(mMap);    // will print the map into the file <StarCraftFolder>bwapi-data/map.bmp
+        //BWEM::utils::pathExample(mMap); // add to the printed map a path between two starting locations
 
         // Ready to go. Good luck, have fun!
         Broodwar->sendText("gl hf");

@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KBot", "KBot.vcxproj", "{B3B00EDB-613D-48A1-86A6-1C83E969E61B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D3875E76-E311-46B8-9502-BEF75A2EE3BE} = {D3875E76-E311-46B8-9502-BEF75A2EE3BE}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BWEM", "BWEM\BWEM.vcxproj", "{D3875E76-E311-46B8-9502-BEF75A2EE3BE}"
 EndProject

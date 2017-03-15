@@ -1,12 +1,15 @@
 #pragma once
 
 #include <BWAPI.h>
+#include <BWEM/bwem.h>
 #include <deque>
 
 namespace KBot {
 
     class KBot : public BWAPI::AIModule {
     public:
+        KBot();
+
         virtual void onStart();
         virtual void onEnd(bool isWinner);
         virtual void onFrame();
@@ -25,6 +28,7 @@ namespace KBot {
         virtual void onSaveGame(std::string gameName);
         virtual void onUnitComplete(BWAPI::Unit unit);
 
+        BWEM::Map &mMap;
         std::deque<BWAPI::TilePosition> mEnemyLocations;
     };
 

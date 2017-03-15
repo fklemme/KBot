@@ -47,15 +47,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)BWAPI\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)BWAPI\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)BWAPI\include;$(SolutionDir)BWEM\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)BWAPI\lib;$(OutDir);$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)d</TargetName>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)BWAPI\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)BWAPI\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)BWAPI\include;$(SolutionDir)BWEM\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)BWAPI\lib;$(OutDir);$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -68,7 +68,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>BWAPId.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>BWAPId.lib;BWEM.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>copy /y "$(OutputPath)$(TargetFileName)" "$(StarcraftAIPath)$(TargetFileName)"</Command>
@@ -94,7 +94,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>BWAPI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>BWAPI.lib;BWEM.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>copy /y "$(OutputPath)$(TargetFileName)" "$(StarcraftAIPath)$(TargetFileName)"</Command>

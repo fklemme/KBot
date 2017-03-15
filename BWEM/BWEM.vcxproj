@@ -44,10 +44,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)BWAPI\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)BWAPI\include;$(SolutionDir)BWEM\include\BWEM;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)BWAPI\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)BWAPI\include;$(SolutionDir)BWEM\include\BWEM;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -87,6 +87,7 @@
     <ClCompile Include="src\bwapiExt.cpp" />
     <ClCompile Include="src\bwem.cpp" />
     <ClCompile Include="src\cp.cpp" />
+    <ClCompile Include="src\examples.cpp" />
     <ClCompile Include="src\graph.cpp" />
     <ClCompile Include="src\gridMap.cpp" />
     <ClCompile Include="src\map.cpp" />
@@ -99,22 +100,27 @@
     <ClCompile Include="src\winutils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\area.h" />
-    <ClInclude Include="src\base.h" />
-    <ClInclude Include="src\bwapiExt.h" />
-    <ClInclude Include="src\bwem.h" />
-    <ClInclude Include="src\cp.h" />
-    <ClInclude Include="src\defs.h" />
-    <ClInclude Include="src\graph.h" />
-    <ClInclude Include="src\gridMap.h" />
-    <ClInclude Include="src\map.h" />
-    <ClInclude Include="src\mapDrawer.h" />
-    <ClInclude Include="src\mapImpl.h" />
-    <ClInclude Include="src\mapPrinter.h" />
-    <ClInclude Include="src\neutral.h" />
-    <ClInclude Include="src\tiles.h" />
-    <ClInclude Include="src\utils.h" />
-    <ClInclude Include="src\winutils.h" />
+    <ClInclude Include="EasyBMP_1.06\EasyBMP.h" />
+    <ClInclude Include="EasyBMP_1.06\EasyBMP_BMP.h" />
+    <ClInclude Include="EasyBMP_1.06\EasyBMP_DataStructures.h" />
+    <ClInclude Include="EasyBMP_1.06\EasyBMP_VariousBMPutilities.h" />
+    <ClInclude Include="include\BWEM\area.h" />
+    <ClInclude Include="include\BWEM\base.h" />
+    <ClInclude Include="include\BWEM\bwapiExt.h" />
+    <ClInclude Include="include\BWEM\bwem.h" />
+    <ClInclude Include="include\BWEM\cp.h" />
+    <ClInclude Include="include\BWEM\defs.h" />
+    <ClInclude Include="include\BWEM\examples.h" />
+    <ClInclude Include="include\BWEM\graph.h" />
+    <ClInclude Include="include\BWEM\gridMap.h" />
+    <ClInclude Include="include\BWEM\map.h" />
+    <ClInclude Include="include\BWEM\mapDrawer.h" />
+    <ClInclude Include="include\BWEM\mapImpl.h" />
+    <ClInclude Include="include\BWEM\mapPrinter.h" />
+    <ClInclude Include="include\BWEM\neutral.h" />
+    <ClInclude Include="include\BWEM\tiles.h" />
+    <ClInclude Include="include\BWEM\utils.h" />
+    <ClInclude Include="include\BWEM\winutils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
