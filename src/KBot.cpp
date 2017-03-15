@@ -4,6 +4,52 @@
 #include <iostream>
 #include <random>
 
+static void test() {
+    using namespace BWAPI;
+
+    static Position left, right;
+
+    Broodwar->drawCircleMap(left, 10, BWAPI::Colors::Red);
+    Broodwar->drawCircleMap(right, 10, BWAPI::Colors::Red);
+
+    // Testdistances
+    if (Broodwar->getMouseState(BWAPI::MouseButton::M_LEFT)) {
+        left.x = (Broodwar->getMousePosition().x + Broodwar->getScreenPosition().x);
+        left.y = (Broodwar->getMousePosition().y + Broodwar->getScreenPosition().y);
+    }
+
+    if (Broodwar->getMouseState(BWAPI::MouseButton::M_RIGHT)) {
+        right.x = (Broodwar->getMousePosition().x + Broodwar->getScreenPosition().x);
+        right.y = (Broodwar->getMousePosition().y + Broodwar->getScreenPosition().y);
+    }
+
+    Broodwar->drawCircleMap(left, 15, BWAPI::Colors::Red);
+    Broodwar->drawCircleMap(right, 15, BWAPI::Colors::Red);
+
+    int length;
+    const BWEM::CPPath& path = BWEM::Map::Instance().GetPath(left, right, &length);
+
+    if (path.empty()) { // no ChokePoint between a and b:
+                        // just draw a single line between them:
+        Broodwar->drawLineMap(left, right, BWAPI::Colors::Cyan);
+    }
+    else {
+        // draw a line between each ChokePoint in Path:
+        const BWEM::ChokePoint *cpPrevious = nullptr;
+        for (const BWEM::ChokePoint *cp : path)
+        {
+            if (cpPrevious)
+                Broodwar->drawLineMap(cpPrevious->Center().x * 8, cpPrevious->Center().y * 8, cp->Center().x * 8, cp->Center().y * 8, BWAPI::Colors::Cyan);
+            cpPrevious = cp;
+        }
+
+        Broodwar->drawLineMap(left.x, left.y, path.front()->Center().x * 8, path.front()->Center().y * 8, BWAPI::Colors::Cyan);
+        Broodwar->drawLineMap(right.x, right.y, path.back()->Center().x * 8, path.back()->Center().y * 8, BWAPI::Colors::Cyan);
+    }
+
+    //Broodwar->sendText("BWEM length: %i", length);
+}
+
 namespace KBot {
 
     using namespace BWAPI;
@@ -80,6 +126,10 @@ namespace KBot {
             Broodwar->drawTextScreen(2, 30, "Next EnemyLocation: %d, %d", mEnemyLocations.front().x, mEnemyLocations.front().y);
         else
             Broodwar->drawTextScreen(2, 30, "No more enemies!? :O");
+
+        // Draw map
+        //BWEM::utils::gridMapExample(mMap);
+        BWEM::utils::drawMap(mMap);
 
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
