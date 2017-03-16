@@ -129,7 +129,7 @@ namespace KBot {
 
         // Draw map
         //BWEM::utils::gridMapExample(mMap);
-        BWEM::utils::drawMap(mMap);
+        //BWEM::utils::drawMap(mMap);
 
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
@@ -178,10 +178,10 @@ namespace KBot {
                 } // closure: if idle
             }
             else if (u->getType() == UnitTypes::Terran_Marine) {
-                Broodwar->registerEvent([u](Game*) { Broodwar->drawCircleMap(u->getPosition(), 500, Colors::Yellow); }, nullptr, Broodwar->getLatencyFrames()); // debug!
+                //Broodwar->registerEvent([u](Game*) { Broodwar->drawCircleMap(u->getPosition(), 500, Colors::Yellow); }, nullptr, Broodwar->getLatencyFrames()); // debug!
                 if (u->isIdle()) {
                     // Update enemy locations
-                    if (Broodwar->isVisible(mEnemyLocations.front()) && Broodwar->getUnitsOnTile(mEnemyLocations.front(), Filter::IsEnemy).empty())
+                    while (Broodwar->isVisible(mEnemyLocations.front()) && Broodwar->getUnitsOnTile(mEnemyLocations.front(), Filter::IsEnemy).empty())
                         mEnemyLocations.pop_front();
 
                     // Defend, if there are only few marines.
@@ -189,7 +189,7 @@ namespace KBot {
                         auto nearbyEnemies = Broodwar->getUnitsInRadius(u->getPosition(), 500, Filter::IsEnemy);
                         if (!nearbyEnemies.empty())
                             u->attack(nearbyEnemies.getClosestUnit());
-                        else
+                        else if (u->getPosition().getDistance(Position(Broodwar->self()->getStartLocation())) > 100)
                             u->move(Position(Broodwar->self()->getStartLocation()));
                     }
 
@@ -210,7 +210,7 @@ namespace KBot {
                 }
             }
             else if (u->getType().isResourceDepot()) { // A resource depot is a Command Center, Nexus, or Hatchery
-                Broodwar->registerEvent([u](Game*) { Broodwar->drawCircleMap(u->getPosition(), 300, Colors::Green); }, nullptr, Broodwar->getLatencyFrames()); // debug!
+                //Broodwar->registerEvent([u](Game*) { Broodwar->drawCircleMap(u->getPosition(), 300, Colors::Green); }, nullptr, Broodwar->getLatencyFrames()); // debug!
                 // Limit amount of workers to produce.
                 if (Broodwar->getUnitsInRadius(u->getPosition(), 300, Filter::IsWorker && Filter::IsOwned).size() < 20) {
                     // Order the depot to construct more workers! But only when it is idle.
@@ -292,7 +292,19 @@ namespace KBot {
     void KBot::onUnitEvade(BWAPI::Unit unit) {}
 
     // Called when a previously invisible unit becomes visible.
-    void KBot::onUnitShow(BWAPI::Unit unit) {}
+    void KBot::onUnitShow(BWAPI::Unit unit) {
+        // Update enemy locations
+        if (Broodwar->self()->isEnemy(unit->getPlayer()) && unit->getType().isBuilding()) {
+            const auto myLocation = Broodwar->self()->getStartLocation();
+            TilePosition location{ unit->getPosition() };
+            if (std::find(mEnemyLocations.begin(), mEnemyLocations.end(), location) == mEnemyLocations.end()) {
+                Broodwar << "Found new enemy building: " << unit->getType() << std::endl;
+                const auto it = std::lower_bound(mEnemyLocations.begin(), mEnemyLocations.end(), location,
+                    [myLocation](TilePosition a, TilePosition b) { return myLocation.getDistance(a) < myLocation.getDistance(b); });
+                mEnemyLocations.insert(it, location);
+            }
+        }
+    }
 
     // Called just as a visible unit is becoming invisible.
     void KBot::onUnitHide(BWAPI::Unit unit) {}
