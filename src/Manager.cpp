@@ -34,6 +34,63 @@ namespace KBot {
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
 
+        // Iterate through all the units that we own
+        for (auto &u : Broodwar->self()->getUnits()) {
+            // Ignore the unit if it no longer exists
+            // Make sure to include this block when handling any Unit pointer!
+            if (!u->exists())
+                continue;
+
+            // Ignore the unit if it has one of the following status ailments
+            if (u->isLockedDown() || u->isMaelstrommed() || u->isStasised())
+                continue;
+
+            // Ignore the unit if it is in one of the following states
+            if (u->isLoaded() || !u->isPowered() || u->isStuck())
+                continue;
+
+            // Ignore the unit if it is incomplete or busy constructing
+            if (!u->isCompleted() || u->isConstructing())
+                continue;
+
+
+            // Finally make the unit do some stuff!
+            // TODO: Remove all that demo stuff...
+            // For now and for fun, let's just build a simple marine rush bot using what we have. :)
+
+
+            // If the unit is a worker unit
+            if (u->getType().isWorker()) {
+                // if our worker is idle
+                if (u->isIdle()) {
+                    // Order workers carrying a resource to return them to the center,
+                    // otherwise find a mineral patch to harvest.
+                    if (u->isCarryingGas() || u->isCarryingMinerals()) {
+                        u->returnCargo();
+                    }
+                    // Harvest from the nearest mineral patch or gas refinery
+                    else if (!u->gather(u->getClosestUnit(Filter::IsMineralField || Filter::IsRefinery))) {
+                        // If the call fails, then print the last error message
+                        Broodwar << Broodwar->getLastError() << std::endl;
+                    }
+                } // closure: if idle
+            }
+            else if (u->getType() == UnitTypes::Terran_Barracks) {
+                if (u->isIdle()) {
+                    // Spam marines! :D
+                    u->train(UnitTypes::Terran_Marine);
+                }
+            }
+            else if (u->getType().isResourceDepot()) { // A resource depot is a Command Center, Nexus, or Hatchery
+                                                       // Limit amount of workers to produce.
+                if (Broodwar->getUnitsInRadius(u->getPosition(), 300, Filter::IsWorker && Filter::IsOwned).size() < 20) {
+                    // Order the depot to construct more workers! But only when it is idle.
+                    if (u->isIdle())
+                        u->train(u->getType().getRace().getWorker());
+                }
+            }
+        } // closure: unit iterator
+
         // Build depos and racks!
         static int delay = 0;
         if (Broodwar->getFrameCount() > delay + 250) {

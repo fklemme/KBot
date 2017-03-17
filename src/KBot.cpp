@@ -35,18 +35,6 @@ namespace KBot {
         const bool r = m_map.FindBasesForStartingLocations();
         assert(r);
 
-        // Initialize possible enemy positions.
-        auto allLocations = Broodwar->getStartLocations();
-        const auto myLocation = Broodwar->self()->getStartLocation();
-        const auto myLocationIt = std::find(allLocations.begin(), allLocations.end(), myLocation);
-        assert(myLocationIt != allLocations.end());
-        allLocations.erase(myLocationIt);
-        std::sort(allLocations.begin(), allLocations.end(), [&](TilePosition a, TilePosition b) {
-            return myLocation.getDistance(a) < myLocation.getDistance(b);
-        });
-        m_enemyLocations = allLocations;
-        assert(!m_enemyLocations.empty());
-
         // Ready to go. Good luck, have fun!
         Broodwar->sendText("gl hf");
     }
@@ -66,14 +54,16 @@ namespace KBot {
         Broodwar->drawTextScreen(2, 10, "My StartLocation: %d, %d", myLocation.x, myLocation.y);
         Broodwar->drawTextScreen(2, 20, "EnemyLocation count: %d", m_enemyLocations.size());
 
+        const auto myLocationCenter = Position(Broodwar->self()->getStartLocation()) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
+        const auto gatheringPoint = Broodwar->getRegionAt(Position(Broodwar->self()->getStartLocation()))->getCenter();
+        Broodwar->drawCircleMap(myLocationCenter, 400, Colors::Green);
+        Broodwar->drawCircleMap(gatheringPoint, 150, Colors::Orange);
+
         if (!m_enemyLocations.empty()) {
             const auto enemyLocation = m_enemyLocations.front();
-            Broodwar->drawTextScreen(2, 30, "Nearest EnemyLocation: %d, %d", enemyLocation.x, enemyLocation.y);
+            Broodwar->drawTextScreen(2, 30, "Next EnemyLocation: %d, %d", enemyLocation.x, enemyLocation.y);
 
-            const auto myLocationCenter = Position(Broodwar->self()->getStartLocation()) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
             const auto path = m_map.GetPath(Position(myLocation), Position(enemyLocation));
-
-            Broodwar->drawCircleMap(myLocationCenter, 400, Colors::Green);
             if (!path.empty()) {
                 // Draw path
                 Broodwar->drawLineMap(myLocationCenter, Position(path.front()->Center()), Colors::Red);
@@ -81,11 +71,13 @@ namespace KBot {
                     Broodwar->drawLineMap(Position(path[i - 1]->Center()), Position(path[i]->Center()), Colors::Red);
                 Broodwar->drawLineMap(Position(path.back()->Center()), Position(enemyLocation), Colors::Red);
 
+                /*
                 // Draw choke point
                 Point<double, 1> correctionVector = myLocationCenter - Position(path.front()->Center());
                 correctionVector *= 100 / correctionVector.getLength();
                 m_chokeLocation = Position(path.front()->Center()) + correctionVector;
                 Broodwar->drawCircleMap(m_chokeLocation, 150, Colors::Orange);
+                */
             }
         }
 
@@ -93,6 +85,10 @@ namespace KBot {
         // Draw map (to slow for debug mode)
         //BWEM::utils::drawMap(m_map);
 #endif // !_DEBUG
+
+        // Update enemy locations
+        while (!m_enemyLocations.empty() && Broodwar->isVisible(m_enemyLocations.front()) && Broodwar->getUnitsOnTile(m_enemyLocations.front(), Filter::IsEnemy).empty())
+            m_enemyLocations.pop_front();
 
         // Update manager
         m_manager.update();
@@ -104,84 +100,6 @@ namespace KBot {
         // Latency frames are the number of frames before commands are processed.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
-
-        // Iterate through all the units that we own
-        for (auto &u : Broodwar->self()->getUnits()) {
-            // Ignore the unit if it no longer exists
-            // Make sure to include this block when handling any Unit pointer!
-            if (!u->exists())
-                continue;
-
-            // Ignore the unit if it has one of the following status ailments
-            if (u->isLockedDown() || u->isMaelstrommed() || u->isStasised())
-                continue;
-
-            // Ignore the unit if it is in one of the following states
-            if (u->isLoaded() || !u->isPowered() || u->isStuck())
-                continue;
-
-            // Ignore the unit if it is incomplete or busy constructing
-            if (!u->isCompleted() || u->isConstructing())
-                continue;
-
-
-            // Finally make the unit do some stuff!
-            // TODO: Remove all that demo stuff...
-            // For now and for fun, let's just build a simple marine rush bot using what we have. :)
-
-
-            // If the unit is a worker unit
-            if (u->getType().isWorker()) {
-                // if our worker is idle
-                if (u->isIdle()) {
-                    // Order workers carrying a resource to return them to the center,
-                    // otherwise find a mineral patch to harvest.
-                    if (u->isCarryingGas() || u->isCarryingMinerals()) {
-                        u->returnCargo();
-                    }
-                    // Harvest from the nearest mineral patch or gas refinery
-                    else if (!u->gather(u->getClosestUnit(Filter::IsMineralField || Filter::IsRefinery))) {
-                        // If the call fails, then print the last error message
-                        Broodwar << Broodwar->getLastError() << std::endl;
-                    }
-                } // closure: if idle
-            }
-            else if (u->getType() == UnitTypes::Terran_Marine) {
-                //Broodwar->registerEvent([u](Game*) { Broodwar->drawCircleMap(u->getPosition(), 500, Colors::Yellow); }, nullptr, Broodwar->getLatencyFrames()); // debug!
-                if (u->isIdle()) {
-                    // Update enemy locations
-                    while (!m_enemyLocations.empty() && Broodwar->isVisible(m_enemyLocations.front()) && Broodwar->getUnitsOnTile(m_enemyLocations.front(), Filter::IsEnemy).empty())
-                        m_enemyLocations.pop_front();
-
-                    // Defend, if there are only few marines.
-                    if (Broodwar->getUnitsInRadius(u->getPosition(), 400, Filter::GetType == UnitTypes::Terran_Marine && Filter::IsOwned).size() < 20) {
-                        auto nearbyEnemies = Broodwar->getUnitsInRadius(u->getPosition(), 500, Filter::IsEnemy);
-                        if (!nearbyEnemies.empty())
-                            u->attack(nearbyEnemies.getClosestUnit()->getPosition());
-                        else if (u->getPosition().getDistance(m_chokeLocation) > 150)
-                            u->move(m_chokeLocation);
-                    }
-
-                    // Otherwise, attack! :P
-                    else if (!m_enemyLocations.empty())
-                        u->attack(Position(m_enemyLocations.front()));
-                }
-            }
-            else if (u->getType() == UnitTypes::Terran_Barracks) {
-                if (u->isIdle()) {
-                    // Spam marines! :D
-                    u->train(UnitTypes::Terran_Marine);
-                }
-            }
-            else if (u->getType().isResourceDepot()) { // A resource depot is a Command Center, Nexus, or Hatchery
-                // Limit amount of workers to produce.
-                if (Broodwar->getUnitsInRadius(u->getPosition(), 300, Filter::IsWorker && Filter::IsOwned).size() < 20) {
-                    // Order the depot to construct more workers! But only when it is idle.
-                    if (u->isIdle())
-                        u->train(u->getType().getRace().getWorker());
-                }
-            }
-        } // closure: unit iterator
     }
 
     // Called when the user attempts to send a text message.
@@ -210,7 +128,7 @@ namespace KBot {
             TilePosition location{ unit->getPosition() };
             if (std::find(m_enemyLocations.begin(), m_enemyLocations.end(), location) == m_enemyLocations.end()) {
                 const auto it = std::lower_bound(m_enemyLocations.begin(), m_enemyLocations.end(), location,
-                    [myLocation](TilePosition a, TilePosition b) { return myLocation.getDistance(a) < myLocation.getDistance(b); });
+                    [&](TilePosition a, TilePosition b) { return myLocation.getDistance(a) < myLocation.getDistance(b); });
                 m_enemyLocations.insert(it, location);
             }
         }
@@ -248,5 +166,26 @@ namespace KBot {
 
     // Called when the state of a unit changes from incomplete to complete.
     void KBot::onUnitComplete(BWAPI::Unit unit) {}
+
+    BWAPI::TilePosition KBot::getNextEnemyLocation() {
+        if (!m_enemyLocations.empty())
+            return m_enemyLocations.front();
+        else {
+            const auto myLocation = Broodwar->self()->getStartLocation();
+            auto locations = Broodwar->getStartLocations();
+            std::sort(locations.begin(), locations.end(), [&](TilePosition a, TilePosition b) {
+                return myLocation.getDistance(a) < myLocation.getDistance(b);
+            });
+            std::stable_sort(locations.begin(), locations.end(), [](TilePosition a, TilePosition b) {
+                return Broodwar->isExplored(a) < Broodwar->isExplored(b);
+            });
+            if (!Broodwar->isExplored(locations.front()))
+                return locations.front();
+
+            static std::default_random_engine generator;
+            std::uniform_int_distribution<int> dist(0, locations.size() - 1);
+            return locations[dist(generator)];
+        }
+    }
 
 } // namespace

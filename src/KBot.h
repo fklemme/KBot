@@ -35,13 +35,14 @@ namespace KBot {
         Manager &manager() { return m_manager; }
         General &general() { return m_general; }
 
+        BWAPI::TilePosition getNextEnemyLocation();
+
     private:
         BWEM::Map &m_map;
         Manager m_manager;
         General m_general;
 
         std::deque<BWAPI::TilePosition> m_enemyLocations;
-        BWAPI::Position m_chokeLocation;
     };
 
 } // namespace
