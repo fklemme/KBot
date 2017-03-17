@@ -5,6 +5,7 @@
 #include <deque>
 
 #include "Manager.h"
+#include "General.h"
 
 namespace KBot {
 
@@ -30,10 +31,17 @@ namespace KBot {
         virtual void onSaveGame(std::string gameName);
         virtual void onUnitComplete(BWAPI::Unit unit);
 
-        Manager m_manager;
+        BWEM::Map &map() { return m_map; };
+        Manager &manager() { return m_manager; }
+        General &general() { return m_general; }
 
+    private:
         BWEM::Map &m_map;
+        Manager m_manager;
+        General m_general;
+
         std::deque<BWAPI::TilePosition> m_enemyLocations;
+        BWAPI::Position m_chokeLocation;
     };
 
 } // namespace

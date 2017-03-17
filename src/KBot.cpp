@@ -8,7 +8,7 @@ namespace KBot {
 
     using namespace BWAPI;
 
-    KBot::KBot() : m_manager(*this), m_map(BWEM::Map::Instance()) {}
+    KBot::KBot() : m_map(BWEM::Map::Instance()), m_manager(*this), m_general(*this) {}
 
     // Called only once at the beginning of a game.
     void KBot::onStart() {
@@ -35,13 +35,6 @@ namespace KBot {
         const bool r = m_map.FindBasesForStartingLocations();
         assert(r);
 
-        //BWEM::utils::MapPrinter::Initialize(&m_map);
-        //BWEM::utils::printMap(m_map);    // will print the map into the file <StarCraftFolder>bwapi-data/map.bmp
-        //BWEM::utils::pathExample(m_map); // add to the printed map a path between two starting locations
-
-        // Ready to go. Good luck, have fun!
-        Broodwar->sendText("gl hf");
-
         // Initialize possible enemy positions.
         auto allLocations = Broodwar->getStartLocations();
         const auto myLocation = Broodwar->self()->getStartLocation();
@@ -53,6 +46,9 @@ namespace KBot {
         });
         m_enemyLocations = allLocations;
         assert(!m_enemyLocations.empty());
+
+        // Ready to go. Good luck, have fun!
+        Broodwar->sendText("gl hf");
     }
 
     // Called once at the end of a game.
@@ -65,38 +61,44 @@ namespace KBot {
             return;
 
         // Display some debug information
-        Broodwar->drawTextScreen(2, 0, "FPS: %d, APM: %d", Broodwar->getFPS(), Broodwar->getAPM());
         const auto myLocation = Broodwar->self()->getStartLocation();
+        Broodwar->drawTextScreen(2, 0, "FPS: %d, APM: %d", Broodwar->getFPS(), Broodwar->getAPM());
         Broodwar->drawTextScreen(2, 10, "My StartLocation: %d, %d", myLocation.x, myLocation.y);
         Broodwar->drawTextScreen(2, 20, "EnemyLocation count: %d", m_enemyLocations.size());
-        if (!m_enemyLocations.empty()) // Might be empty for a short period of time.
-            Broodwar->drawTextScreen(2, 30, "Next EnemyLocation: %d, %d", m_enemyLocations.front().x, m_enemyLocations.front().y);
-        else
-            Broodwar->drawTextScreen(2, 30, "No more enemies!? :O");
 
-#ifndef _DEBUG
-        // Draw map (to slow for debug mode)
-        BWEM::utils::drawMap(m_map);
-#endif // !_DEBUG
-
-        // Draw path to enemy and some regions
         if (!m_enemyLocations.empty()) {
-            const auto myLocation = Broodwar->self()->getStartLocation();
             const auto enemyLocation = m_enemyLocations.front();
-            const auto path = m_map.GetPath(Position(Broodwar->self()->getStartLocation()), Position(enemyLocation));
+            Broodwar->drawTextScreen(2, 30, "Nearest EnemyLocation: %d, %d", enemyLocation.x, enemyLocation.y);
 
-            Broodwar->drawCircleMap(Position(myLocation), 400, Colors::Green);
+            const auto myLocationCenter = Position(Broodwar->self()->getStartLocation()) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
+            const auto path = m_map.GetPath(Position(myLocation), Position(enemyLocation));
+
+            Broodwar->drawCircleMap(myLocationCenter, 400, Colors::Green);
             if (!path.empty()) {
-                Broodwar->drawLineMap(Position(Broodwar->self()->getStartLocation()), Position(path.front()->Center()), Colors::Red);
-                Broodwar->drawCircleMap(Position(path.front()->Center()), 200, Colors::Orange);
+                // Draw path
+                Broodwar->drawLineMap(myLocationCenter, Position(path.front()->Center()), Colors::Red);
                 for (std::size_t i = 1; i < path.size(); ++i)
                     Broodwar->drawLineMap(Position(path[i - 1]->Center()), Position(path[i]->Center()), Colors::Red);
                 Broodwar->drawLineMap(Position(path.back()->Center()), Position(enemyLocation), Colors::Red);
+
+                // Draw choke point
+                Point<double, 1> correctionVector = myLocationCenter - Position(path.front()->Center());
+                correctionVector *= 100 / correctionVector.getLength();
+                m_chokeLocation = Position(path.front()->Center()) + correctionVector;
+                Broodwar->drawCircleMap(m_chokeLocation, 150, Colors::Orange);
             }
         }
 
+#ifndef _DEBUG
+        // Draw map (to slow for debug mode)
+        //BWEM::utils::drawMap(m_map);
+#endif // !_DEBUG
+
         // Update manager
         m_manager.update();
+
+        // Update general
+        m_general.update();
 
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
@@ -152,12 +154,12 @@ namespace KBot {
                         m_enemyLocations.pop_front();
 
                     // Defend, if there are only few marines.
-                    if (Broodwar->getUnitsInRadius(u->getPosition(), 500, Filter::GetType == UnitTypes::Terran_Marine && Filter::IsOwned).size() < 20) {
+                    if (Broodwar->getUnitsInRadius(u->getPosition(), 400, Filter::GetType == UnitTypes::Terran_Marine && Filter::IsOwned).size() < 20) {
                         auto nearbyEnemies = Broodwar->getUnitsInRadius(u->getPosition(), 500, Filter::IsEnemy);
                         if (!nearbyEnemies.empty())
-                            u->attack(nearbyEnemies.getClosestUnit());
-                        else if (u->getPosition().getDistance(Position(Broodwar->self()->getStartLocation())) > 100)
-                            u->move(Position(Broodwar->self()->getStartLocation()));
+                            u->attack(nearbyEnemies.getClosestUnit()->getPosition());
+                        else if (u->getPosition().getDistance(m_chokeLocation) > 150)
+                            u->move(m_chokeLocation);
                     }
 
                     // Otherwise, attack! :P
@@ -168,29 +170,15 @@ namespace KBot {
             else if (u->getType() == UnitTypes::Terran_Barracks) {
                 if (u->isIdle()) {
                     // Spam marines! :D
-                    if (!u->train(UnitTypes::Terran_Marine)) {
-                        Position pos = u->getPosition();
-                        Error lastErr = Broodwar->getLastError();
-                        Broodwar->registerEvent([pos, lastErr](Game*) { Broodwar->drawTextMap(pos, "%c%s", Text::White, lastErr.c_str()); },
-                            nullptr, Broodwar->getLatencyFrames());
-                    }
+                    u->train(UnitTypes::Terran_Marine);
                 }
             }
             else if (u->getType().isResourceDepot()) { // A resource depot is a Command Center, Nexus, or Hatchery
-                //Broodwar->registerEvent([u](Game*) { Broodwar->drawCircleMap(u->getPosition(), 300, Colors::Green); }, nullptr, Broodwar->getLatencyFrames()); // debug!
                 // Limit amount of workers to produce.
                 if (Broodwar->getUnitsInRadius(u->getPosition(), 300, Filter::IsWorker && Filter::IsOwned).size() < 20) {
                     // Order the depot to construct more workers! But only when it is idle.
-                    if (u->isIdle() && !u->train(u->getType().getRace().getWorker())) {
-                        // If that fails, draw the error at the location so that you can visibly see what went wrong!
-                        // However, drawing the error once will only appear for a single frame
-                        // so create an event that keeps it on the screen for some frames
-                        Position pos = u->getPosition();
-                        Error lastErr = Broodwar->getLastError();
-                        Broodwar->registerEvent([pos, lastErr](Game*) { Broodwar->drawTextMap(pos, "%c%s", Text::White, lastErr.c_str()); }, // action
-                            nullptr, // condition
-                            Broodwar->getLatencyFrames()); // frames to run
-                    } // closure: failed to train idle unit
+                    if (u->isIdle())
+                        u->train(u->getType().getRace().getWorker());
                 }
             }
         } // closure: unit iterator
