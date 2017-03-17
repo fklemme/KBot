@@ -4,6 +4,8 @@
 #include <BWEM/bwem.h>
 #include <deque>
 
+#include "Manager.h"
+
 namespace KBot {
 
     class KBot : public BWAPI::AIModule {
@@ -28,8 +30,10 @@ namespace KBot {
         virtual void onSaveGame(std::string gameName);
         virtual void onUnitComplete(BWAPI::Unit unit);
 
-        BWEM::Map &mMap;
-        std::deque<BWAPI::TilePosition> mEnemyLocations;
+        Manager m_manager;
+
+        BWEM::Map &m_map;
+        std::deque<BWAPI::TilePosition> m_enemyLocations;
     };
 
 } // namespace

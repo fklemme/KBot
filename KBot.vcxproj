@@ -69,6 +69,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>BWAPId.lib;BWEM.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <CustomBuildStep>
       <Command>copy /y "$(OutputPath)$(TargetFileName)" "$(StarcraftAIPath)$(TargetFileName)"</Command>
@@ -108,10 +109,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\KBot.h" />
+    <ClInclude Include="src\Manager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DllMain.cpp" />
     <ClCompile Include="src\KBot.cpp" />
+    <ClCompile Include="src\Manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

@@ -4,57 +4,11 @@
 #include <iostream>
 #include <random>
 
-static void test() {
-    using namespace BWAPI;
-
-    static Position left, right;
-
-    Broodwar->drawCircleMap(left, 10, BWAPI::Colors::Red);
-    Broodwar->drawCircleMap(right, 10, BWAPI::Colors::Red);
-
-    // Testdistances
-    if (Broodwar->getMouseState(BWAPI::MouseButton::M_LEFT)) {
-        left.x = (Broodwar->getMousePosition().x + Broodwar->getScreenPosition().x);
-        left.y = (Broodwar->getMousePosition().y + Broodwar->getScreenPosition().y);
-    }
-
-    if (Broodwar->getMouseState(BWAPI::MouseButton::M_RIGHT)) {
-        right.x = (Broodwar->getMousePosition().x + Broodwar->getScreenPosition().x);
-        right.y = (Broodwar->getMousePosition().y + Broodwar->getScreenPosition().y);
-    }
-
-    Broodwar->drawCircleMap(left, 15, BWAPI::Colors::Red);
-    Broodwar->drawCircleMap(right, 15, BWAPI::Colors::Red);
-
-    int length;
-    const BWEM::CPPath& path = BWEM::Map::Instance().GetPath(left, right, &length);
-
-    if (path.empty()) { // no ChokePoint between a and b:
-                        // just draw a single line between them:
-        Broodwar->drawLineMap(left, right, BWAPI::Colors::Cyan);
-    }
-    else {
-        // draw a line between each ChokePoint in Path:
-        const BWEM::ChokePoint *cpPrevious = nullptr;
-        for (const BWEM::ChokePoint *cp : path)
-        {
-            if (cpPrevious)
-                Broodwar->drawLineMap(cpPrevious->Center().x * 8, cpPrevious->Center().y * 8, cp->Center().x * 8, cp->Center().y * 8, BWAPI::Colors::Cyan);
-            cpPrevious = cp;
-        }
-
-        Broodwar->drawLineMap(left.x, left.y, path.front()->Center().x * 8, path.front()->Center().y * 8, BWAPI::Colors::Cyan);
-        Broodwar->drawLineMap(right.x, right.y, path.back()->Center().x * 8, path.back()->Center().y * 8, BWAPI::Colors::Cyan);
-    }
-
-    //Broodwar->sendText("BWEM length: %i", length);
-}
-
 namespace KBot {
 
     using namespace BWAPI;
 
-    KBot::KBot() : mMap(BWEM::Map::Instance()) {}
+    KBot::KBot() : m_manager(*this), m_map(BWEM::Map::Instance()) {}
 
     // Called only once at the beginning of a game.
     void KBot::onStart() {
@@ -76,34 +30,29 @@ namespace KBot {
         Broodwar->setCommandOptimizationLevel(2);
 
         // BWEM map initialization
-        mMap.Initialize();
-        mMap.EnableAutomaticPathAnalysis();
-        bool r = mMap.FindBasesForStartingLocations();
+        m_map.Initialize();
+        m_map.EnableAutomaticPathAnalysis();
+        const bool r = m_map.FindBasesForStartingLocations();
         assert(r);
 
-        BWEM::utils::MapPrinter::Initialize(&mMap);
-        //BWEM::utils::printMap(mMap);    // will print the map into the file <StarCraftFolder>bwapi-data/map.bmp
-        //BWEM::utils::pathExample(mMap); // add to the printed map a path between two starting locations
+        BWEM::utils::MapPrinter::Initialize(&m_map);
+        //BWEM::utils::printMap(m_map);    // will print the map into the file <StarCraftFolder>bwapi-data/map.bmp
+        //BWEM::utils::pathExample(m_map); // add to the printed map a path between two starting locations
 
         // Ready to go. Good luck, have fun!
         Broodwar->sendText("gl hf");
 
-        // Try to figure out enemy location.
-        const auto enemyLocation = Broodwar->enemy()->getStartLocation();
-        if (enemyLocation != TilePositions::Unknown)
-            mEnemyLocations.push_back(enemyLocation);
-        else {
-            auto allLocations = Broodwar->getStartLocations();
-            const auto myLocation = Broodwar->self()->getStartLocation();
-            const auto myLocationIt = std::find(allLocations.begin(), allLocations.end(), Broodwar->self()->getStartLocation());
-            assert(myLocationIt != allLocations.end());
-            allLocations.erase(myLocationIt);
-            std::sort(allLocations.begin(), allLocations.end(), [myLocation](TilePosition a, TilePosition b) {
-                return myLocation.getDistance(a) < myLocation.getDistance(b);
-            });
-            std::copy(allLocations.begin(), allLocations.end(), std::back_inserter(mEnemyLocations));
-        }
-        assert(!mEnemyLocations.empty());
+        // Initialize possible enemy positions.
+        auto allLocations = Broodwar->getStartLocations();
+        const auto myLocation = Broodwar->self()->getStartLocation();
+        const auto myLocationIt = std::find(allLocations.begin(), allLocations.end(), myLocation);
+        assert(myLocationIt != allLocations.end());
+        allLocations.erase(myLocationIt);
+        std::sort(allLocations.begin(), allLocations.end(), [&](TilePosition a, TilePosition b) {
+            return myLocation.getDistance(a) < myLocation.getDistance(b);
+        });
+        m_enemyLocations = allLocations;
+        assert(!m_enemyLocations.empty());
     }
 
     // Called once at the end of a game.
@@ -115,21 +64,37 @@ namespace KBot {
         if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self())
             return;
 
-        // Display the game frame rate as text in the upper left area of the screen
+        // Display some debug information
         Broodwar->drawTextScreen(2, 0, "FPS: %d, APM: %d", Broodwar->getFPS(), Broodwar->getAPM());
-
-        // Some more debug infos...
         const auto myLocation = Broodwar->self()->getStartLocation();
         Broodwar->drawTextScreen(2, 10, "My StartLocation: %d, %d", myLocation.x, myLocation.y);
-        Broodwar->drawTextScreen(2, 20, "EnemyLocation count: %d", mEnemyLocations.size());
-        if (!mEnemyLocations.empty()) // Might be empty for a short period of time.
-            Broodwar->drawTextScreen(2, 30, "Next EnemyLocation: %d, %d", mEnemyLocations.front().x, mEnemyLocations.front().y);
+        Broodwar->drawTextScreen(2, 20, "EnemyLocation count: %d", m_enemyLocations.size());
+        if (!m_enemyLocations.empty()) // Might be empty for a short period of time.
+            Broodwar->drawTextScreen(2, 30, "Next EnemyLocation: %d, %d", m_enemyLocations.front().x, m_enemyLocations.front().y);
         else
             Broodwar->drawTextScreen(2, 30, "No more enemies!? :O");
 
         // Draw map
-        //BWEM::utils::gridMapExample(mMap);
-        //BWEM::utils::drawMap(mMap);
+        BWEM::utils::drawMap(m_map);
+
+        // Draw path to enemy and some regions
+        if (!m_enemyLocations.empty()) {
+            const auto myLocation = Broodwar->self()->getStartLocation();
+            const auto enemyLocation = m_enemyLocations.front();
+            const auto path = m_map.GetPath(Position(Broodwar->self()->getStartLocation()), Position(enemyLocation));
+
+            Broodwar->drawCircleMap(Position(myLocation), 400, Colors::Green);
+            if (!path.empty()) {
+                Broodwar->drawLineMap(Position(Broodwar->self()->getStartLocation()), Position(path.front()->Center()), Colors::Red);
+                Broodwar->drawCircleMap(Position(path.front()->Center()), 200, Colors::Orange);
+                for (std::size_t i = 1; i < path.size(); ++i)
+                    Broodwar->drawLineMap(Position(path[i - 1]->Center()), Position(path[i]->Center()), Colors::Red);
+                Broodwar->drawLineMap(Position(path.back()->Center()), Position(enemyLocation), Colors::Red);
+            }
+        }
+
+        // Update manager
+        m_manager.update();
 
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
@@ -181,8 +146,8 @@ namespace KBot {
                 //Broodwar->registerEvent([u](Game*) { Broodwar->drawCircleMap(u->getPosition(), 500, Colors::Yellow); }, nullptr, Broodwar->getLatencyFrames()); // debug!
                 if (u->isIdle()) {
                     // Update enemy locations
-                    while (Broodwar->isVisible(mEnemyLocations.front()) && Broodwar->getUnitsOnTile(mEnemyLocations.front(), Filter::IsEnemy).empty())
-                        mEnemyLocations.pop_front();
+                    while (!m_enemyLocations.empty() && Broodwar->isVisible(m_enemyLocations.front()) && Broodwar->getUnitsOnTile(m_enemyLocations.front(), Filter::IsEnemy).empty())
+                        m_enemyLocations.pop_front();
 
                     // Defend, if there are only few marines.
                     if (Broodwar->getUnitsInRadius(u->getPosition(), 500, Filter::GetType == UnitTypes::Terran_Marine && Filter::IsOwned).size() < 20) {
@@ -194,8 +159,8 @@ namespace KBot {
                     }
 
                     // Otherwise, attack! :P
-                    else if (!mEnemyLocations.empty())
-                        u->attack(Position(mEnemyLocations.front()));
+                    else if (!m_enemyLocations.empty())
+                        u->attack(Position(m_enemyLocations.front()));
                 }
             }
             else if (u->getType() == UnitTypes::Terran_Barracks) {
@@ -227,50 +192,6 @@ namespace KBot {
                 }
             }
         } // closure: unit iterator
-
-        // Build depos and racks!
-        static int delay = 0;
-        if (Broodwar->getFrameCount() > delay + 150) {
-            const auto &me = *Broodwar->self();
-            if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice()) {
-                auto builder = Broodwar->getClosestUnit(Position(me.getStartLocation()),
-                    Filter::GetType == UnitTypes::Terran_SCV &&
-                    (Filter::IsIdle || Filter::IsGatheringMinerals) &&
-                    Filter::IsOwned);
-                auto building = UnitTypes::Terran_Supply_Depot;
-
-                if (builder) {
-                    auto location = Broodwar->getBuildLocation(building, builder->getTilePosition());
-                    if (location) {
-                        Broodwar->registerEvent([location, building](Game*) {
-                            Broodwar->drawBoxMap(Position(location), Position(location + building.tileSize()), Colors::Blue);
-                        }, nullptr, 100);
-
-                        builder->build(building, location); // FIXME: Print error on failure.
-                        delay = Broodwar->getFrameCount();
-                    }
-                }
-            }
-            else if (me.minerals() >= UnitTypes::Terran_Barracks.mineralPrice()) {
-                auto builder = Broodwar->getClosestUnit(Position(me.getStartLocation()),
-                    Filter::GetType == UnitTypes::Terran_SCV &&
-                    (Filter::IsIdle || Filter::IsGatheringMinerals) &&
-                    Filter::IsOwned);
-                auto building = UnitTypes::Terran_Barracks;
-
-                if (builder) {
-                    auto location = Broodwar->getBuildLocation(building, builder->getTilePosition());
-                    if (location) {
-                        Broodwar->registerEvent([location, building](Game*) {
-                            Broodwar->drawBoxMap(Position(location), Position(location + building.tileSize()), Colors::Blue);
-                        }, nullptr, 100);
-
-                        builder->build(building, location); // FIXME: Print error on failure.
-                        delay = Broodwar->getFrameCount();
-                    }
-                }
-            }
-        }
     }
 
     // Called when the user attempts to send a text message.
@@ -297,11 +218,10 @@ namespace KBot {
         if (Broodwar->self()->isEnemy(unit->getPlayer()) && unit->getType().isBuilding()) {
             const auto myLocation = Broodwar->self()->getStartLocation();
             TilePosition location{ unit->getPosition() };
-            if (std::find(mEnemyLocations.begin(), mEnemyLocations.end(), location) == mEnemyLocations.end()) {
-                Broodwar << "Found new enemy building: " << unit->getType() << std::endl;
-                const auto it = std::lower_bound(mEnemyLocations.begin(), mEnemyLocations.end(), location,
+            if (std::find(m_enemyLocations.begin(), m_enemyLocations.end(), location) == m_enemyLocations.end()) {
+                const auto it = std::lower_bound(m_enemyLocations.begin(), m_enemyLocations.end(), location,
                     [myLocation](TilePosition a, TilePosition b) { return myLocation.getDistance(a) < myLocation.getDistance(b); });
-                mEnemyLocations.insert(it, location);
+                m_enemyLocations.insert(it, location);
             }
         }
     }
@@ -313,7 +233,13 @@ namespace KBot {
     void KBot::onUnitCreate(BWAPI::Unit unit) {}
 
     // Called when a unit is removed from the game either through death or other means.
-    void KBot::onUnitDestroy(BWAPI::Unit unit) {}
+    void KBot::onUnitDestroy(BWAPI::Unit unit) {
+        // Update BWEM information
+        if (unit->getType().isMineralField())
+            m_map.OnMineralDestroyed(unit);
+        else if (unit->getType().isSpecialBuilding())
+            m_map.OnStaticBuildingDestroyed(unit);
+    }
 
     // Called when a unit changes its UnitType.
     void KBot::onUnitMorph(BWAPI::Unit unit) {
