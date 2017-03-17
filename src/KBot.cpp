@@ -35,7 +35,7 @@ namespace KBot {
         const bool r = m_map.FindBasesForStartingLocations();
         assert(r);
 
-        BWEM::utils::MapPrinter::Initialize(&m_map);
+        //BWEM::utils::MapPrinter::Initialize(&m_map);
         //BWEM::utils::printMap(m_map);    // will print the map into the file <StarCraftFolder>bwapi-data/map.bmp
         //BWEM::utils::pathExample(m_map); // add to the printed map a path between two starting locations
 
@@ -74,8 +74,10 @@ namespace KBot {
         else
             Broodwar->drawTextScreen(2, 30, "No more enemies!? :O");
 
-        // Draw map
+#ifndef _DEBUG
+        // Draw map (to slow for debug mode)
         BWEM::utils::drawMap(m_map);
+#endif // !_DEBUG
 
         // Draw path to enemy and some regions
         if (!m_enemyLocations.empty()) {
