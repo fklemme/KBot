@@ -69,7 +69,7 @@ namespace KBot {
                 m_squadState = SquadState::defend;
             break;
         case SquadState::defend:
-            if (m_squad.size() >= 20) {
+            if (enemiesNearBase.empty() && m_squad.size() >= 20) {
                 m_squadState = SquadState::attack;
             }
             break;
@@ -77,13 +77,14 @@ namespace KBot {
             throw std::logic_error("Unknown SquadState!");
         }
 
-        for (const auto unit : m_squad) {
-            // Remove dead units
-            if (!unit->exists()) {
-                m_squad.erase(unit); // FIXME: This might not be safe.
-                continue;
-            }
+        // Remove dead units
+        for (auto it = m_squad.begin(); it != m_squad.end();) {
+            if (!(*it)->exists())
+                it = m_squad.erase(it);
+            else ++it;
+        }
 
+        for (const auto unit : m_squad) {
             // Ignore the unit if it has one of the following status ailments
             if (unit->isLockedDown() || unit->isMaelstrommed() || unit->isStasised())
                 continue;
@@ -100,19 +101,18 @@ namespace KBot {
                         unit->attack(Position(m_kBot.getNextEnemyLocation()));
                     break;
                 case SquadState::attack:
-                    //if (unit->getDistance(m_squad.getPosition()) > 400) {
-                    //    // Regroup!
-                    //    const Point<double> vector = unit->getPosition() - m_squad.getPosition();
-                    //    const auto position = m_squad.getPosition() + vector * 400 / vector.getLength();
-                    //    unit->attack(position);
-                    //    // debug
-                    //    Broodwar->registerEvent([unit, position](Game*) {
-                    //        Broodwar->drawLineMap(unit->getPosition(), position, Colors::Purple);
-                    //        Broodwar->drawCircleMap(position, 20, Colors::Grey);
-                    //    }, [unit](Game*) { return unit->exists(); }, Broodwar->getLatencyFrames());
-                    //}
-                    //else
-                    if (unit->isIdle())
+                    if (unit->getDistance(m_squad.getPosition()) > 400) {
+                        // Regroup!
+                        const Point<double> vector = unit->getPosition() - m_squad.getPosition();
+                        const auto position = m_squad.getPosition() + vector * 400 / vector.getLength();
+                        unit->attack(position);
+                        // debug
+                        Broodwar->registerEvent([unit, position](Game*) {
+                            Broodwar->drawLineMap(unit->getPosition(), position, Colors::Purple);
+                            Broodwar->drawCircleMap(position, 20, Colors::Grey);
+                        }, [unit](Game*) { return unit->exists(); }, Broodwar->getLatencyFrames());
+                    }
+                    else if (unit->isIdle())
                         // Attack!
                         unit->attack(Position(m_kBot.getNextEnemyLocation()));
                     break;

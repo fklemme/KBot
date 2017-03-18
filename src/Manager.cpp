@@ -37,13 +37,14 @@ namespace KBot {
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
 
-        for (const auto unit : m_units) {
-            // Remove dead units
-            if (!unit->exists()) {
-                m_units.erase(unit); // FIXME: This might not be safe.
-                continue;
-            }
+        // Remove dead units
+        for (auto it = m_units.begin(); it != m_units.end();) {
+            if (!(*it)->exists())
+                it = m_units.erase(it);
+            else ++it;
+        }
 
+        for (const auto unit : m_units) {
             // Ignore the unit if it has one of the following status ailments
             if (unit->isLockedDown() || unit->isMaelstrommed() || unit->isStasised())
                 continue;
@@ -55,7 +56,6 @@ namespace KBot {
             // Ignore the unit if it is incomplete or busy constructing
             //if (!unit->isCompleted() || u->isConstructing())
             //    continue;
-
 
             // If the unit is a worker unit
             if (unit->getType().isWorker()) {
