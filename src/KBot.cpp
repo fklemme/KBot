@@ -55,9 +55,7 @@ namespace KBot {
         Broodwar->drawTextScreen(2, 20, "EnemyLocation count: %d", m_enemyLocations.size());
 
         const auto myLocationCenter = Position(Broodwar->self()->getStartLocation()) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
-        const auto gatheringPoint = Broodwar->getRegionAt(Position(Broodwar->self()->getStartLocation()))->getCenter();
         Broodwar->drawCircleMap(myLocationCenter, 400, Colors::Green);
-        Broodwar->drawCircleMap(gatheringPoint, 150, Colors::Orange);
 
         if (!m_enemyLocations.empty()) {
             const auto enemyLocation = m_enemyLocations.front();
@@ -70,14 +68,6 @@ namespace KBot {
                 for (std::size_t i = 1; i < path.size(); ++i)
                     Broodwar->drawLineMap(Position(path[i - 1]->Center()), Position(path[i]->Center()), Colors::Red);
                 Broodwar->drawLineMap(Position(path.back()->Center()), Position(enemyLocation), Colors::Red);
-
-                /*
-                // Draw choke point
-                Point<double, 1> correctionVector = myLocationCenter - Position(path.front()->Center());
-                correctionVector *= 100 / correctionVector.getLength();
-                m_chokeLocation = Position(path.front()->Center()) + correctionVector;
-                Broodwar->drawCircleMap(m_chokeLocation, 150, Colors::Orange);
-                */
             }
         }
 
@@ -89,6 +79,22 @@ namespace KBot {
         // Update enemy locations
         while (!m_enemyLocations.empty() && Broodwar->isVisible(m_enemyLocations.front()) && Broodwar->getUnitsOnTile(m_enemyLocations.front(), Filter::IsEnemy).empty())
             m_enemyLocations.pop_front();
+
+        // Transfer ownership of constructed units to manager/general.
+        if (!m_underConstruction.empty()) {
+            for (auto it = m_underConstruction.begin(); it != m_underConstruction.end();) {
+                auto unit = *it;
+                if (unit->exists() && unit->isCompleted() && !unit->isBeingConstructed()) {
+                    // Dispatch
+                    if (unit->getType().isBuilding() || unit->getType().isWorker())
+                        m_manager.transferOwnership(unit);
+                    else
+                        m_general.transferOwnership(unit);
+                    it = m_underConstruction.erase(it);
+                }
+                else ++it;
+            }
+        }
 
         // Update manager
         m_manager.update();
@@ -138,7 +144,10 @@ namespace KBot {
     void KBot::onUnitHide(BWAPI::Unit unit) {}
 
     // Called when any unit is created.
-    void KBot::onUnitCreate(BWAPI::Unit unit) {}
+    void KBot::onUnitCreate(BWAPI::Unit unit) {
+        if (unit->exists() && unit->getPlayer() == Broodwar->self())
+            m_underConstruction.push_back(unit);
+    }
 
     // Called when a unit is removed from the game either through death or other means.
     void KBot::onUnitDestroy(BWAPI::Unit unit) {

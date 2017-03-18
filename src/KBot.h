@@ -36,6 +36,7 @@ namespace KBot {
         General &general() { return m_general; }
 
         BWAPI::TilePosition getNextEnemyLocation();
+        std::size_t getEnemyLocationCount() { return m_enemyLocations.size(); }
 
     private:
         BWEM::Map &m_map;
@@ -43,6 +44,7 @@ namespace KBot {
         General m_general;
 
         std::deque<BWAPI::TilePosition> m_enemyLocations;
+        std::deque<BWAPI::Unit> m_underConstruction;
     };
 
 } // namespace

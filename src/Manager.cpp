@@ -1,6 +1,6 @@
 #include "Manager.h"
 
-#include <BWAPI.h>
+#include "KBot.h"
 
 namespace KBot {
 
@@ -70,8 +70,7 @@ namespace KBot {
                     }
                     // Harvest from the nearest mineral patch or gas refinery
                     else if (!u->gather(u->getClosestUnit(Filter::IsMineralField || Filter::IsRefinery))) {
-                        // If the call fails, then print the last error message
-                        Broodwar << Broodwar->getLastError() << std::endl;
+                        // No visible minerals.
                     }
                 } // closure: if idle
             }
@@ -81,12 +80,12 @@ namespace KBot {
                     u->train(UnitTypes::Terran_Marine);
                 }
             }
-            else if (u->getType().isResourceDepot()) { // A resource depot is a Command Center, Nexus, or Hatchery
-                                                       // Limit amount of workers to produce.
-                if (Broodwar->getUnitsInRadius(u->getPosition(), 300, Filter::IsWorker && Filter::IsOwned).size() < 20) {
+            else if (u->getType().isResourceDepot()) {
+                // Limit amount of workers to produce.
+                if (Broodwar->getUnitsInRadius(u->getPosition(), 400, Filter::IsWorker && Filter::IsOwned).size() < 20) {
                     // Order the depot to construct more workers! But only when it is idle.
                     if (u->isIdle())
-                        u->train(u->getType().getRace().getWorker());
+                        u->train(UnitTypes::Terran_SCV);
                 }
             }
         } // closure: unit iterator
@@ -98,16 +97,18 @@ namespace KBot {
             if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice()) {
                 if (buildNearPosition(UnitTypes::Terran_Supply_Depot, me.getStartLocation()))
                     delay = Broodwar->getFrameCount();
-                else
-                    Broodwar << Broodwar->getLastError() << std::endl;
             }
             else if (me.minerals() >= UnitTypes::Terran_Barracks.mineralPrice()) {
                 if (buildNearPosition(UnitTypes::Terran_Barracks, me.getStartLocation()))
                     delay = Broodwar->getFrameCount();
-                else
-                    Broodwar << Broodwar->getLastError() << std::endl;
             }
         }
+    }
+
+    void Manager::transferOwnership(BWAPI::Unit unit) {
+        Broodwar->registerEvent([unit](Game*) {
+            Broodwar->drawTextMap(Position(unit->getPosition()), "Manager: %s", unit->getType().c_str());
+        }, [unit](Game*) { return unit->exists(); }, 250);
     }
 
 } // namespace

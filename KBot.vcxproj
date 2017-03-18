@@ -46,7 +46,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
+    <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)BWAPI\include;$(SolutionDir)BWEM\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)BWAPI\lib;$(OutDir);$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)d</TargetName>

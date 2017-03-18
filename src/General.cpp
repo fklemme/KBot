@@ -1,6 +1,5 @@
 #include "General.h"
 
-#include <BWAPI.h>
 #include "KBot.h"
 
 namespace KBot {
@@ -10,54 +9,58 @@ namespace KBot {
     General::General(KBot &parent) : m_kBot(parent) {}
 
     void General::update() {
+        // Draw squad radius
+        if (!m_squad.empty())
+            Broodwar->drawCircleMap(m_squad.getPosition(), 400, Colors::Red);
+
+        // Draw individual radius
+        //for (const auto unit : m_squad)
+        //    Broodwar->drawCircleMap(unit->getPosition(), 200, Colors::Yellow);
+
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
 
-        // Iterate through all the units that we own
-        for (auto &u : Broodwar->self()->getUnits()) {
-            // Ignore the unit if it no longer exists
-            // Make sure to include this block when handling any Unit pointer!
-            if (!u->exists())
+        for (const auto unit : m_squad) {
+            // Remove dead units
+            if (!unit->exists()) {
+                m_squad.erase(unit);
                 continue;
+            }
 
             // Ignore the unit if it has one of the following status ailments
-            if (u->isLockedDown() || u->isMaelstrommed() || u->isStasised())
+            if (unit->isLockedDown() || unit->isMaelstrommed() || unit->isStasised())
                 continue;
 
             // Ignore the unit if it is in one of the following states
-            if (u->isLoaded() || !u->isPowered() || u->isStuck())
+            if (unit->isLoaded() || !unit->isPowered() || unit->isStuck())
                 continue;
 
-            // Ignore the unit if it is incomplete or busy constructing
-            if (!u->isCompleted() || u->isConstructing())
-                continue;
+            if (unit->getType() == UnitTypes::Terran_Marine) {
+                if (!Broodwar->getUnitsInRadius(unit->getPosition(), 200, Filter::IsEnemy).empty())
+                    // FIXME: Don't spam commands im enemy is near?
+                    continue;
 
-
-            // Finally make the unit do some stuff!
-            // TODO: Remove all that demo stuff...
-            // For now and for fun, let's just build a simple marine rush bot using what we have. :)
-
-
-            // If the unit is a worker unit
-            if (u->getType() == UnitTypes::Terran_Marine) {
-                if (u->isIdle()) {
-                    const auto gatheringPoint = Broodwar->getRegionAt(Position(Broodwar->self()->getStartLocation()))->getCenter();
-                    // Defend, if there are only few marines.
-                    if (Broodwar->getUnitsInRadius(u->getPosition(), 400, Filter::GetType == UnitTypes::Terran_Marine && Filter::IsOwned).size() < 20) {
-                        auto nearbyEnemies = Broodwar->getUnitsInRadius(u->getPosition(), 400, Filter::IsEnemy);
-                        if (!nearbyEnemies.empty())
-                            u->attack(nearbyEnemies.getClosestUnit()->getPosition());
-                        else if (u->getPosition().getDistance(gatheringPoint) > 150)
-                            u->attack(gatheringPoint);
-                    }
-                    // Otherwise, attack! :P
-                    else
-                        u->attack(Position(m_kBot.getNextEnemyLocation()));
-                }
+                // If we haven't found an enemy yet, scout!
+                if (m_kBot.getEnemyLocationCount() == 0)
+                    unit->attack(Position(m_kBot.getNextEnemyLocation()));
+                // If far away from squad and alone, go there and join squad.
+                else if (unit->getDistance(m_squad.getPosition()) > 400 && Broodwar->getUnitsInRadius(unit->getPosition(), 200, Filter::GetType == UnitTypes::Terran_Marine && Filter::IsOwned).size() < 10)
+                    unit->attack(m_squad.getPosition());
+                // Otherwise, if we're big enough, let's attack!
+                else if (m_squad.size() >= 20)
+                    unit->attack(Position(m_kBot.getNextEnemyLocation()));
             }
-        } // closure: unit iterator
+        }
+    }
+
+    void General::transferOwnership(BWAPI::Unit unit) {
+        Broodwar->registerEvent([unit](Game*) {
+            Broodwar->drawTextMap(Position(unit->getPosition()), "General: %s", unit->getType().c_str());
+        }, [unit](Game*) { return unit->exists(); }, 250);
+
+        m_squad.insert(unit);
     }
 
 } // namespace
