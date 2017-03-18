@@ -60,15 +60,6 @@ namespace KBot {
         if (!m_enemyLocations.empty()) {
             const auto enemyLocation = m_enemyLocations.front();
             Broodwar->drawTextScreen(2, 30, "Next EnemyLocation: %d, %d", enemyLocation.x, enemyLocation.y);
-
-            const auto path = m_map.GetPath(Position(myLocation), Position(enemyLocation));
-            if (!path.empty()) {
-                // Draw path
-                Broodwar->drawLineMap(myLocationCenter, Position(path.front()->Center()), Colors::Red);
-                for (std::size_t i = 1; i < path.size(); ++i)
-                    Broodwar->drawLineMap(Position(path[i - 1]->Center()), Position(path[i]->Center()), Colors::Red);
-                Broodwar->drawLineMap(Position(path.back()->Center()), Position(enemyLocation), Colors::Red);
-            }
         }
 
 #ifndef _DEBUG

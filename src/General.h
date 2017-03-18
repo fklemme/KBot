@@ -6,6 +6,8 @@ namespace KBot {
 
     class KBot;
 
+    enum class SquadState {scout, attack, defend};
+
     class General {
     public:
         General(KBot &parent);
@@ -19,6 +21,7 @@ namespace KBot {
     private:
         KBot &m_kBot;
 
+        SquadState m_squadState;
         BWAPI::Unitset m_squad;
     };
 

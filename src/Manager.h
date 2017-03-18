@@ -18,6 +18,8 @@ namespace KBot {
 
     private:
         KBot &m_kBot;
+
+        BWAPI::Unitset m_units;
     };
 
 } // namespace

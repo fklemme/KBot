@@ -29,63 +29,61 @@ namespace KBot {
     Manager::Manager(KBot &parent) : m_kBot(parent) {}
 
     void Manager::update() {
+        // Display debug information
+        Broodwar->drawTextScreen(2, 50, "Manager: -");
+
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
 
-        // Iterate through all the units that we own
-        for (auto &u : Broodwar->self()->getUnits()) {
-            // Ignore the unit if it no longer exists
-            // Make sure to include this block when handling any Unit pointer!
-            if (!u->exists())
+        for (const auto unit : m_units) {
+            // Remove dead units
+            if (!unit->exists()) {
+                m_units.erase(unit); // FIXME: This might not be safe.
                 continue;
+            }
 
             // Ignore the unit if it has one of the following status ailments
-            if (u->isLockedDown() || u->isMaelstrommed() || u->isStasised())
+            if (unit->isLockedDown() || unit->isMaelstrommed() || unit->isStasised())
                 continue;
 
             // Ignore the unit if it is in one of the following states
-            if (u->isLoaded() || !u->isPowered() || u->isStuck())
+            if (unit->isLoaded() || !unit->isPowered() || unit->isStuck())
                 continue;
 
             // Ignore the unit if it is incomplete or busy constructing
-            if (!u->isCompleted() || u->isConstructing())
-                continue;
-
-
-            // Finally make the unit do some stuff!
-            // TODO: Remove all that demo stuff...
-            // For now and for fun, let's just build a simple marine rush bot using what we have. :)
+            //if (!unit->isCompleted() || u->isConstructing())
+            //    continue;
 
 
             // If the unit is a worker unit
-            if (u->getType().isWorker()) {
+            if (unit->getType().isWorker()) {
                 // if our worker is idle
-                if (u->isIdle()) {
+                if (unit->isIdle()) {
                     // Order workers carrying a resource to return them to the center,
                     // otherwise find a mineral patch to harvest.
-                    if (u->isCarryingGas() || u->isCarryingMinerals()) {
-                        u->returnCargo();
+                    if (unit->isCarryingGas() || unit->isCarryingMinerals()) {
+                        unit->returnCargo();
                     }
                     // Harvest from the nearest mineral patch or gas refinery
-                    else if (!u->gather(u->getClosestUnit(Filter::IsMineralField || Filter::IsRefinery))) {
+                    else if (!unit->gather(unit->getClosestUnit(Filter::IsMineralField || Filter::IsRefinery))) {
                         // No visible minerals.
                     }
                 } // closure: if idle
             }
-            else if (u->getType() == UnitTypes::Terran_Barracks) {
-                if (u->isIdle()) {
+            else if (unit->getType() == UnitTypes::Terran_Barracks) {
+                if (unit->isIdle()) {
                     // Spam marines! :D
-                    u->train(UnitTypes::Terran_Marine);
+                    unit->train(UnitTypes::Terran_Marine);
                 }
             }
-            else if (u->getType().isResourceDepot()) {
+            else if (unit->getType().isResourceDepot()) {
                 // Limit amount of workers to produce.
-                if (Broodwar->getUnitsInRadius(u->getPosition(), 400, Filter::IsWorker && Filter::IsOwned).size() < 20) {
+                if (Broodwar->getUnitsInRadius(unit->getPosition(), 400, Filter::IsWorker && Filter::IsOwned).size() < 20) {
                     // Order the depot to construct more workers! But only when it is idle.
-                    if (u->isIdle())
-                        u->train(UnitTypes::Terran_SCV);
+                    if (unit->isIdle())
+                        unit->train(UnitTypes::Terran_SCV);
                 }
             }
         } // closure: unit iterator
@@ -109,6 +107,8 @@ namespace KBot {
         Broodwar->registerEvent([unit](Game*) {
             Broodwar->drawTextMap(Position(unit->getPosition()), "Manager: %s", unit->getType().c_str());
         }, [unit](Game*) { return unit->exists(); }, 250);
+
+        m_units.insert(unit);
     }
 
 } // namespace
