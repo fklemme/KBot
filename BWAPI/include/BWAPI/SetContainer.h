@@ -51,7 +51,7 @@ namespace BWAPI
       return count(value) != 0;
     }
 
-	SetContainer& operator=(const SetContainer&) = default;
+	//SetContainer& operator=(const SetContainer&) = default;
   };
 
 }
