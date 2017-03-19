@@ -51,16 +51,27 @@ namespace KBot {
         // Display some debug information
         const auto myLocation = Broodwar->self()->getStartLocation();
         Broodwar->drawTextScreen(2, 0, "FPS: %d, APM: %d", Broodwar->getFPS(), Broodwar->getAPM());
-        Broodwar->drawTextScreen(2, 10, "My StartLocation: %d, %d", myLocation.x, myLocation.y);
-        Broodwar->drawTextScreen(2, 20, "EnemyLocation count: %d", m_enemyLocations.size());
-
-        const auto myLocationCenter = Position(Broodwar->self()->getStartLocation()) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
-        Broodwar->drawCircleMap(myLocationCenter, 400, Colors::Green);
+        Broodwar->drawTextScreen(2, 10, "My start location: %d, %d", myLocation.x, myLocation.y);
+        Broodwar->drawTextScreen(2, 20, "Enemy location count: %d", m_enemyLocations.size());
 
         if (!m_enemyLocations.empty()) {
             const auto enemyLocation = m_enemyLocations.front();
-            Broodwar->drawTextScreen(2, 30, "Next EnemyLocation: %d, %d", enemyLocation.x, enemyLocation.y);
+            Broodwar->drawTextScreen(2, 30, "Next enemy location: %d, %d", enemyLocation.x, enemyLocation.y);
         }
+        else
+            Broodwar->drawTextScreen(2, 30, "Next enemy location: Unknown");
+
+        Broodwar->drawTextScreen(200, 0, "Under construction:");
+        for (std::size_t i = 0; i < m_underConstruction.size(); ++i) {
+            assert(m_underConstruction[i]->exists()); // FIXME: might fail!
+            const auto type = m_underConstruction[i]->getType();
+            const int progress = 100 - (100 * m_underConstruction[i]->getRemainingBuildTime() / type.buildTime());
+            Broodwar->drawTextScreen(200, 10 * (i + 1), " - %s (%d %%)", type.c_str(), progress);
+        }
+
+        // TODO: Move to Base
+        const auto myLocationCenter = Position(Broodwar->self()->getStartLocation()) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
+        Broodwar->drawCircleMap(myLocationCenter, 400, Colors::Green);
 
 #ifndef _DEBUG
         // Draw map (to slow for debug mode)
@@ -70,22 +81,6 @@ namespace KBot {
         // Update enemy locations
         while (!m_enemyLocations.empty() && Broodwar->isVisible(m_enemyLocations.front()) && Broodwar->getUnitsOnTile(m_enemyLocations.front(), Filter::IsEnemy).empty())
             m_enemyLocations.erase(m_enemyLocations.begin());
-
-        // Transfer ownership of constructed units to manager/general.
-        if (!m_underConstruction.empty()) {
-            for (auto it = m_underConstruction.begin(); it != m_underConstruction.end();) {
-                auto unit = *it;
-                if (unit->exists() && unit->isCompleted() && !unit->isBeingConstructed()) {
-                    // Dispatch
-                    if (unit->getType().isBuilding() || unit->getType().isWorker())
-                        m_manager.transferOwnership(unit);
-                    else
-                        m_general.transferOwnership(unit);
-                    it = m_underConstruction.erase(it);
-                }
-                else ++it;
-            }
-        }
 
         // Update manager
         m_manager.update();
@@ -176,7 +171,21 @@ namespace KBot {
     }
 
     // Called when the state of a unit changes from incomplete to complete.
-    void KBot::onUnitComplete(BWAPI::Unit unit) {}
+    void KBot::onUnitComplete(BWAPI::Unit unit) {
+        assert(unit->exists());
+
+        if (unit->getPlayer() == Broodwar->self()) {
+            const auto it = std::find(m_underConstruction.begin(), m_underConstruction.end(), unit);
+            assert(it != m_underConstruction.end());
+            m_underConstruction.erase(it);
+
+            // Dispatch
+            if (unit->getType().isBuilding() || unit->getType().isWorker())
+                m_manager.transferOwnership(unit);
+            else
+                m_general.transferOwnership(unit);
+        }
+    }
 
     BWAPI::TilePosition KBot::getNextEnemyLocation() {
         if (!m_enemyLocations.empty())
