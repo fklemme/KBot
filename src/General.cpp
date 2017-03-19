@@ -33,6 +33,8 @@ namespace KBot {
                 if (hit != m_squads.end()) {
                     std::copy(hit->begin(), hit->end(), std::inserter(*it, it->end()));
                     m_squads.erase(hit);
+                    // Hold all units as some of them might have old, invalid commands.
+                    it->stop();
                     break;
                 }
             }
