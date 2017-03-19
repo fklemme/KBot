@@ -1,16 +1,15 @@
 #pragma once
 
 #include <BWAPI.h>
+#include "Squad.h"
 
 namespace KBot {
 
     class KBot;
 
-    enum class SquadState {scout, attack, defend};
-
     class General {
     public:
-        General(KBot &parent);
+        General(KBot &kBot);
 
         // Is called every KBot::onFrame().
         void update();
@@ -20,9 +19,7 @@ namespace KBot {
 
     private:
         KBot &m_kBot;
-
-        SquadState m_squadState;
-        BWAPI::Unitset m_squad;
+        std::deque<Squad> m_squads;
     };
 
 } // namespace

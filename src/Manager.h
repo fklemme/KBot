@@ -8,7 +8,7 @@ namespace KBot {
 
     class Manager {
     public:
-        Manager(KBot &parent);
+        Manager(KBot &kBot);
 
         // Is called every KBot::onFrame().
         void update();
@@ -18,7 +18,6 @@ namespace KBot {
 
     private:
         KBot &m_kBot;
-
         BWAPI::Unitset m_units;
     };
 

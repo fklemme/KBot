@@ -115,12 +115,14 @@
     <ClInclude Include="src\General.h" />
     <ClInclude Include="src\KBot.h" />
     <ClInclude Include="src\Manager.h" />
+    <ClInclude Include="src\Squad.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DllMain.cpp" />
     <ClCompile Include="src\General.cpp" />
     <ClCompile Include="src\KBot.cpp" />
     <ClCompile Include="src\Manager.cpp" />
+    <ClCompile Include="src\Squad.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

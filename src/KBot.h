@@ -2,7 +2,6 @@
 
 #include <BWAPI.h>
 #include <BWEM/bwem.h>
-#include <deque>
 
 #include "Manager.h"
 #include "General.h"

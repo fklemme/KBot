@@ -26,7 +26,7 @@ namespace KBot {
         return false;
     }
 
-    Manager::Manager(KBot &parent) : m_kBot(parent) {}
+    Manager::Manager(KBot &kBot) : m_kBot(kBot) {}
 
     void Manager::update() {
         // Display debug information
@@ -37,6 +37,7 @@ namespace KBot {
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
 
+        // TODO: switch to onDestroy(). This is not save before C++14.
         // Remove dead units
         for (auto it = m_units.begin(); it != m_units.end();) {
             if (!(*it)->exists())
