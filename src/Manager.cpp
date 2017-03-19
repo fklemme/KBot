@@ -37,15 +37,9 @@ namespace KBot {
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
 
-        // TODO: switch to onDestroy(). This is not save before C++14.
-        // Remove dead units
-        for (auto it = m_units.begin(); it != m_units.end();) {
-            if (!(*it)->exists())
-                it = m_units.erase(it);
-            else ++it;
-        }
-
         for (const auto unit : m_units) {
+            assert(unit->exists());
+
             // Ignore the unit if it has one of the following status ailments
             if (unit->isLockedDown() || unit->isMaelstrommed() || unit->isStasised())
                 continue;
@@ -120,12 +114,16 @@ namespace KBot {
         }
     }
 
-    void Manager::transferOwnership(BWAPI::Unit unit) {
+    void Manager::transferOwnership(Unit unit) {
         Broodwar->registerEvent([unit](Game*) {
             Broodwar->drawTextMap(Position(unit->getPosition()), "Manager: %s", unit->getType().c_str());
         }, [unit](Game*) { return unit->exists(); }, 250);
 
         m_units.insert(unit);
+    }
+
+    void Manager::onUnitDestroy(Unit unit) {
+        m_units.erase(unit);
     }
 
 } // namespace

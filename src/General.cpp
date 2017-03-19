@@ -21,7 +21,10 @@ namespace KBot {
         Broodwar->drawTextScreen(2, 110, "Squad sizes: %s", squadSizes.c_str());
         Broodwar->drawTextScreen(2, 120, "Enemies near base: %d", enemiesNearBase.size());
 
-        // TODO: Remove empty squads!
+        // Remove empty squads
+        decltype(m_squads)::const_iterator it;
+        while ((it = std::find_if(m_squads.begin(), m_squads.end(), [](const Squad &squad) { return squad.empty(); })) != m_squads.end())
+            m_squads.erase(it);
 
         // Merge nearby squads
         bool merge = true;
@@ -50,7 +53,7 @@ namespace KBot {
             squad.update();
     }
 
-    void General::transferOwnership(BWAPI::Unit unit) {
+    void General::transferOwnership(Unit unit) {
         Broodwar->registerEvent([unit](Game*) {
             Broodwar->drawTextMap(Position(unit->getPosition()), "General: %s", unit->getType().c_str());
         }, [unit](Game*) { return unit->exists(); }, 250);
@@ -67,6 +70,11 @@ namespace KBot {
         Squad squad(m_kBot);
         squad.insert(unit);
         m_squads.push_back(squad);
+    }
+
+    void General::onUnitDestroy(Unit unit) {
+        for (auto &squad : m_squads)
+            squad.erase(unit);
     }
 
 } // namespace

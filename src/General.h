@@ -16,6 +16,7 @@ namespace KBot {
 
         // Transfer ownership of a unit to general.
         void transferOwnership(BWAPI::Unit unit);
+        void onUnitDestroy(BWAPI::Unit unit);
 
     private:
         KBot &m_kBot;

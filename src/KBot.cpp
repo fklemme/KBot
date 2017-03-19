@@ -142,6 +142,15 @@ namespace KBot {
 
     // Called when a unit is removed from the game either through death or other means.
     void KBot::onUnitDestroy(BWAPI::Unit unit) {
+        assert(!unit->exists());
+
+        if (unit->getPlayer() == Broodwar->self())
+            // Dispatch
+            if (unit->getType().isBuilding() || unit->getType().isWorker())
+                m_manager.onUnitDestroy(unit);
+            else
+                m_general.onUnitDestroy(unit);
+
         // Update BWEM information
         if (unit->getType().isMineralField())
             m_map.OnMineralDestroyed(unit);
@@ -179,7 +188,7 @@ namespace KBot {
                     for (const auto &base : area.Bases())
                         locations.push_back(base.Location());
             }
-            
+
             // Always exclude our own base.
             const auto myLocation = Broodwar->self()->getStartLocation();
             const auto it = std::find(locations.begin(), locations.end(), myLocation);

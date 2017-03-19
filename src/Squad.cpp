@@ -76,15 +76,9 @@ namespace KBot {
             throw std::logic_error("Unknown SquadState!");
         }
 
-        // TODO: switch to onDestroy(). This is not save before C++14.
-        // Remove dead units
-        for (auto it = begin(); it != end();) {
-            if (!(*it)->exists())
-                it = erase(it);
-            else ++it;
-        }
-
         for (const auto unit : *this) {
+            assert(unit->exists());
+
             // Ignore the unit if it has one of the following status ailments
             if (unit->isLockedDown() || unit->isMaelstrommed() || unit->isStasised())
                 continue;
