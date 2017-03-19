@@ -15,6 +15,7 @@ namespace KBot {
         Squad(KBot &kBot);
 
         void update();
+        SquadState getState() const { return m_state; }
 
     private:
         KBot *m_kBot; // reference would permit default operator=()

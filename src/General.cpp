@@ -26,25 +26,29 @@ namespace KBot {
         while ((it = std::find_if(m_squads.begin(), m_squads.end(), [](const Squad &squad) { return squad.empty(); })) != m_squads.end())
             m_squads.erase(it);
 
-        // Merge nearby squads
+        // Merge nearby and defensive squads
         bool merge = true;
         while (merge) {
             for (auto it = m_squads.begin(); it != m_squads.end(); ++it) {
                 auto hit = std::find_if(it + 1, m_squads.end(), [it](const Squad &squad) {
-                    return it->getPosition().getDistance(squad.getPosition()) < 200;
+                    return (it->getPosition().getDistance(squad.getPosition()) < 200)
+                        || (it->getPosition().getDistance(squad.getPosition()) < 500
+                            && it->getState() == SquadState::defend && squad.getState() == SquadState::defend);
                 });
+
                 if (hit != m_squads.end()) {
                     // Hold all units as some of them might have old, invalid orders.
                     it->stop();
                     hit->stop();
-                    // Merge *hit into *it.
+                    // Merge squad *hit into *it.
                     std::copy(hit->begin(), hit->end(), std::inserter(*it, it->end()));
-                    // Remove empty *hit.
-                    // This invalidates all container iterators, so we have to start all over again!
+                    // Remove empty squad *hit.
                     m_squads.erase(hit);
+                    // This invalidates all container iterators, so we have to start all over again!
                     break;
                 }
             }
+            // No squads to merge left.
             merge = false;
         }
 
