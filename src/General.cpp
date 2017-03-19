@@ -31,10 +31,14 @@ namespace KBot {
                     return it->getPosition().getDistance(squad.getPosition()) < 200;
                 });
                 if (hit != m_squads.end()) {
-                    std::copy(hit->begin(), hit->end(), std::inserter(*it, it->end()));
-                    m_squads.erase(hit);
-                    // Hold all units as some of them might have old, invalid commands.
+                    // Hold all units as some of them might have old, invalid orders.
                     it->stop();
+                    hit->stop();
+                    // Merge *hit into *it.
+                    std::copy(hit->begin(), hit->end(), std::inserter(*it, it->end()));
+                    // Remove empty *hit.
+                    // This invalidates all container iterators, so we have to start all over again!
+                    m_squads.erase(hit);
                     break;
                 }
             }
