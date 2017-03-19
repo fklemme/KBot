@@ -93,13 +93,29 @@ namespace KBot {
         static int delay = 0;
         if (Broodwar->getFrameCount() > delay + 250) {
             const auto &me = *Broodwar->self();
-            if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice()) {
-                if (buildNearPosition(UnitTypes::Terran_Supply_Depot, me.getStartLocation()))
-                    delay = Broodwar->getFrameCount();
-            }
-            else if (me.minerals() >= UnitTypes::Terran_Barracks.mineralPrice()) {
-                if (buildNearPosition(UnitTypes::Terran_Barracks, me.getStartLocation()))
-                    delay = Broodwar->getFrameCount();
+            const auto location = me.getStartLocation();
+            UnitType toBeBuild = UnitTypes::None;
+
+            if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice())
+                toBeBuild = UnitTypes::Terran_Supply_Depot;
+            else if (me.minerals() >= UnitTypes::Terran_Barracks.mineralPrice())
+                toBeBuild = UnitTypes::Terran_Barracks;
+
+            if (toBeBuild != UnitTypes::None) {
+                if (!buildNearPosition(toBeBuild, location)) {
+                    // Location might not be explored yet. Send SCV.
+                    auto builder = Broodwar->getClosestUnit(Position(location),
+                        Filter::GetType == UnitTypes::Terran_SCV &&
+                        (Filter::IsIdle || Filter::IsGatheringMinerals) &&
+                        Filter::IsOwned);
+
+                    if (builder) {
+                        auto buildLocation = Broodwar->getBuildLocation(toBeBuild, location);
+                        if (buildLocation/* && Broodwar->isExplored(...)*/)
+                            builder->move(Position(buildLocation));
+                    }
+                }
+                delay = Broodwar->getFrameCount();
             }
         }
     }
