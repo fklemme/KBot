@@ -171,8 +171,22 @@ namespace KBot {
         if (!m_enemyLocations.empty())
             return m_enemyLocations.front();
         else {
+            // Places to scout
+            auto locations = m_map.StartingLocations();
+            if (std::all_of(locations.begin(), locations.end(), [](const TilePosition &p) { return Broodwar->isExplored(p); })) {
+                locations.clear();
+                for (const auto &area : m_map.Areas())
+                    for (const auto &base : area.Bases())
+                        locations.push_back(base.Location());
+            }
+            
+            // Always exclude our own base.
             const auto myLocation = Broodwar->self()->getStartLocation();
-            auto locations = Broodwar->getStartLocations();
+            const auto it = std::find(locations.begin(), locations.end(), myLocation);
+            assert(it != locations.end());
+            locations.erase(it);
+
+            // Order location by isExplored and distance to own base.
             std::sort(locations.begin(), locations.end(), [&](TilePosition a, TilePosition b) {
                 return myLocation.getDistance(a) < myLocation.getDistance(b);
             });
@@ -182,6 +196,7 @@ namespace KBot {
             if (!Broodwar->isExplored(locations.front()))
                 return locations.front();
 
+            // If all locations are already explored, return a random location.
             static std::default_random_engine generator;
             std::uniform_int_distribution<int> dist(0, locations.size() - 1);
             return locations[dist(generator)];

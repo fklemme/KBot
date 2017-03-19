@@ -104,7 +104,8 @@ namespace KBot {
                     if (unit->getDistance(getPosition()) > 400 && !unit->isUnderAttack()) {
                         // Regroup!
                         const Point<double> vector = unit->getPosition() - getPosition();
-                        auto position = getPosition() + vector * 400 / vector.getLength();
+                        // Move further to the middle to prevent sticky behavior.
+                        auto position = getPosition() + vector * 300 / vector.getLength();
                         if (!Broodwar->isWalkable(WalkPosition(position)))
                             position = Position(m_kBot->getNextEnemyLocation());
                         unit->attack(position);
