@@ -56,15 +56,22 @@ namespace KBot {
         const auto enemiesNearBase = Broodwar->getUnitsInRadius(Position(Broodwar->self()->getStartLocation()), 1000, Filter::IsEnemy);
 
         // Update squad state
+        const auto oldState = m_state;
         switch (m_state) {
         case SquadState::scout:
-            if (m_kBot->getEnemyLocationCount() > 0)
-                m_state = SquadState::defend;
+            if (m_kBot->getEnemyLocationCount() > 0) {
+                if (!enemiesNearBase.empty() || size() < 10)
+                    m_state = SquadState::attack;
+                else
+                    m_state = SquadState::defend;
+            }
             break;
         case SquadState::attack:
-            if (m_kBot->getEnemyLocationCount() == 0)
+            if (!enemiesNearBase.empty())
+                m_state = SquadState::defend;
+            else if (m_kBot->getEnemyLocationCount() == 0)
                 m_state = SquadState::scout;
-            else if (!enemiesNearBase.empty() || size() < 10)
+            else if (size() < 10)
                 m_state = SquadState::defend;
             break;
         case SquadState::defend:
@@ -75,6 +82,8 @@ namespace KBot {
         default:
             throw std::logic_error("Unknown SquadState!");
         }
+        if (m_state != oldState)
+            this->stop(); // reassign orders
 
         for (const auto unit : *this) {
             assert(unit->exists());
@@ -102,7 +111,7 @@ namespace KBot {
                         auto position = getPosition() + vector * 300 / vector.getLength();
                         if (!Broodwar->isWalkable(WalkPosition(position)))
                             position = Position(m_kBot->getNextEnemyLocation());
-                        unit->attack(position);
+                        unit->attack(position); // FIXME: still pretty spammy
                         // debug
                         Broodwar->registerEvent([unit, position](Game*) {
                             Broodwar->drawLineMap(unit->getPosition(), position, Colors::Purple);
@@ -118,7 +127,7 @@ namespace KBot {
                         unit->attack(Position(Broodwar->self()->getStartLocation()));
                     else if (unit->isIdle() && !enemiesNearBase.empty())
                         // Defend!
-                        unit->attack(unit->getClosestUnit(Filter::IsEnemy));
+                        unit->attack(unit->getClosestUnit(Filter::IsEnemy)->getPosition());
                     break;
                 default:
                     throw std::logic_error("Unknown SquadState!");
