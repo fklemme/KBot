@@ -48,10 +48,6 @@ namespace KBot {
             if (unit->isLoaded() || !unit->isPowered() || unit->isStuck())
                 continue;
 
-            // Ignore the unit if it is incomplete or busy constructing
-            //if (!unit->isCompleted() || u->isConstructing())
-            //    continue;
-
             // If the unit is a worker unit
             if (unit->getType().isWorker()) {
                 // if our worker is idle

@@ -51,12 +51,12 @@ namespace KBot {
         // Display some debug information
         const auto myLocation = Broodwar->self()->getStartLocation();
         Broodwar->drawTextScreen(2, 0, "FPS: %d, APM: %d", Broodwar->getFPS(), Broodwar->getAPM());
-        Broodwar->drawTextScreen(2, 10, "My start location: %d, %d", myLocation.x, myLocation.y);
+        Broodwar->drawTextScreen(2, 10, "My start location: (%d, %d)", myLocation.x, myLocation.y);
         Broodwar->drawTextScreen(2, 20, "Enemy location count: %d", m_enemyLocations.size());
 
         if (!m_enemyLocations.empty()) {
             const auto enemyLocation = m_enemyLocations.front();
-            Broodwar->drawTextScreen(2, 30, "Next enemy location: %d, %d", enemyLocation.x, enemyLocation.y);
+            Broodwar->drawTextScreen(2, 30, "Next enemy location: (%d, %d)", enemyLocation.x, enemyLocation.y);
         }
         else
             Broodwar->drawTextScreen(2, 30, "Next enemy location: Unknown");
