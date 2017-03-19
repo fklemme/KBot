@@ -20,7 +20,7 @@ namespace KBot {
 
     private:
         KBot &m_kBot;
-        std::deque<Squad> m_squads;
+        std::vector<Squad> m_squads;
     };
 
 } // namespace

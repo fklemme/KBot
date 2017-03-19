@@ -69,7 +69,7 @@ namespace KBot {
 
         // Update enemy locations
         while (!m_enemyLocations.empty() && Broodwar->isVisible(m_enemyLocations.front()) && Broodwar->getUnitsOnTile(m_enemyLocations.front(), Filter::IsEnemy).empty())
-            m_enemyLocations.pop_front();
+            m_enemyLocations.erase(m_enemyLocations.begin());
 
         // Transfer ownership of constructed units to manager/general.
         if (!m_underConstruction.empty()) {
@@ -136,7 +136,9 @@ namespace KBot {
 
     // Called when any unit is created.
     void KBot::onUnitCreate(BWAPI::Unit unit) {
-        if (unit->exists() && unit->getPlayer() == Broodwar->self())
+        assert(unit->exists());
+
+        if (unit->getPlayer() == Broodwar->self())
             m_underConstruction.push_back(unit);
     }
 

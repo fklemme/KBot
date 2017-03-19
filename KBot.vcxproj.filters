@@ -13,6 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Economy">
+      <UniqueIdentifier>{c49b0264-3fda-437e-9525-9a824501b22e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Economy">
+      <UniqueIdentifier>{11aa0530-4e0f-4c0a-af5e-322ae776aafa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Army">
+      <UniqueIdentifier>{ecf3db8e-efbc-4d62-9172-bad99d8fab51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Army">
+      <UniqueIdentifier>{c69fe78d-cdac-48ed-a639-bdfb2049f6e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\KBot.cpp">
@@ -21,28 +33,34 @@
     <ClCompile Include="src\DllMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Base.cpp">
+      <Filter>Source Files\Economy</Filter>
+    </ClCompile>
     <ClCompile Include="src\Manager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Economy</Filter>
     </ClCompile>
     <ClCompile Include="src\General.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Army</Filter>
     </ClCompile>
     <ClCompile Include="src\Squad.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Army</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\KBot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Base.h">
+      <Filter>Header Files\Economy</Filter>
+    </ClInclude>
     <ClInclude Include="src\Manager.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Economy</Filter>
     </ClInclude>
     <ClInclude Include="src\General.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Army</Filter>
     </ClInclude>
     <ClInclude Include="src\Squad.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Army</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

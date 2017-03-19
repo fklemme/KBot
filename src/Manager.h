@@ -1,6 +1,7 @@
 #pragma once
 
 #include <BWAPI.h>
+#include "Base.h"
 
 namespace KBot {
 
@@ -19,6 +20,7 @@ namespace KBot {
 
     private:
         KBot &m_kBot;
+        std::vector<Base> m_bases; // TODO...
         BWAPI::Unitset m_units;
     };
 

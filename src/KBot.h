@@ -42,8 +42,8 @@ namespace KBot {
         Manager m_manager;
         General m_general;
 
-        std::deque<BWAPI::TilePosition> m_enemyLocations;
-        std::deque<BWAPI::Unit> m_underConstruction;
+        std::vector<BWAPI::TilePosition> m_enemyLocations;
+        std::vector<BWAPI::Unit> m_underConstruction;
     };
 
 } // namespace
