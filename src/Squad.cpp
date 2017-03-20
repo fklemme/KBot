@@ -102,25 +102,32 @@ namespace KBot {
                 case SquadState::attack:
                     if (distance(unit->getPosition(), getPosition()) > 400 && !unit->isUnderAttack()) {
                         // Regroup!
-                        const Point<double> vector = unit->getPosition() - getPosition();
-                        // Move further to the middle to prevent sticky behavior.
-                        auto position = getPosition() + vector * 300 / vector.getLength();
-                        if (!Broodwar->isWalkable(WalkPosition(position)))
-                            position = Position(m_kBot->getNextEnemyLocation());
-                        unit->attack(position); // FIXME: still pretty spammy
-                        // debug
-                        Broodwar->registerEvent([unit, position](Game*) {
-                            Broodwar->drawLineMap(unit->getPosition(), position, Colors::Purple);
-                        }, [unit](Game*) { return unit->exists(); }, Broodwar->getLatencyFrames());
+                        // Prevent spamming, check if order is already set.
+                        if (unit->getOrder() != Orders::AttackMove || distance(unit->getOrderTargetPosition(), getPosition()) >= 400) {
+                            const Point<double> vector = unit->getPosition() - getPosition();
+                            // Move further to the middle to prevent edge-sticky behavior.
+                            auto position = getPosition() + vector * 300 / vector.getLength();
+                            if (!Broodwar->isWalkable(WalkPosition(position)))
+                                // Fallback: Go to the middle. TODO: Still pretty crappy behavior!
+                                position = getPosition();
+                            unit->attack(position);
+                            // debug
+                            Broodwar->registerEvent([unit, position](Game*) {
+                                Broodwar->drawLineMap(unit->getPosition(), position, Colors::Purple);
+                            }, [unit](Game*) { return unit->exists(); }, Broodwar->getLatencyFrames());
+                        }
                     }
                     else if (unit->isIdle())
                         // Attack!
                         unit->attack(Position(m_kBot->getNextEnemyLocation()));
                     break;
                 case SquadState::defend:
-                    if (distance(unit->getPosition(), Broodwar->self()->getStartLocation()) > 1000)
+                    if (distance(unit->getPosition(), Broodwar->self()->getStartLocation()) > 1000) {
                         // Retreat!
-                        unit->attack(Position(Broodwar->self()->getStartLocation()));
+                        // Prevent spamming, check if order is already set.
+                        if (unit->getOrder() != Orders::AttackMove || distance(unit->getOrderTargetPosition(), Broodwar->self()->getStartLocation()) > 1000)
+                            unit->attack(Position(Broodwar->self()->getStartLocation()));
+                    }
                     else if (unit->isIdle() && !enemiesNearBase.empty())
                         // Defend!
                         unit->attack(unit->getClosestUnit(Filter::IsEnemy)->getPosition());
