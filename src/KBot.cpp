@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <random>
+#include "utils.h"
 
 namespace KBot {
 
@@ -123,7 +124,7 @@ namespace KBot {
             TilePosition location{ unit->getPosition() };
             if (std::find(m_enemyLocations.begin(), m_enemyLocations.end(), location) == m_enemyLocations.end()) {
                 const auto it = std::lower_bound(m_enemyLocations.begin(), m_enemyLocations.end(), location,
-                    [&](TilePosition a, TilePosition b) { return myLocation.getApproxDistance(a) < myLocation.getApproxDistance(b); });
+                    [&](TilePosition a, TilePosition b) { return distance(myLocation, a) < distance(myLocation, b); });
                 m_enemyLocations.insert(it, location);
             }
         }
@@ -211,7 +212,7 @@ namespace KBot {
 
             // Order location by isExplored and distance to own base.
             std::sort(locations.begin(), locations.end(), [&](TilePosition a, TilePosition b) {
-                return myLocation.getApproxDistance(a) < myLocation.getApproxDistance(b);
+                return distance(myLocation, a) < distance(myLocation, b);
             });
             std::stable_sort(locations.begin(), locations.end(), [](TilePosition a, TilePosition b) {
                 return Broodwar->isExplored(a) < Broodwar->isExplored(b);

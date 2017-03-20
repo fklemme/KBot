@@ -1,6 +1,7 @@
 #include "General.h"
 
 #include "KBot.h"
+#include "utils.h"
 
 namespace KBot {
 
@@ -40,8 +41,8 @@ namespace KBot {
         while (merge) {
             for (auto it = m_squads.begin(); it != m_squads.end(); ++it) {
                 auto hit = std::find_if(it + 1, m_squads.end(), [it](const Squad &squad) {
-                    return (it->getPosition().getApproxDistance(squad.getPosition()) < 200)
-                        || (it->getPosition().getApproxDistance(squad.getPosition()) < 500
+                    return (distance(it->getPosition(), squad.getPosition()) < 200)
+                        || (distance(it->getPosition(), squad.getPosition()) < 500
                             && it->getState() == SquadState::defend && squad.getState() == SquadState::defend);
                 });
 
@@ -68,7 +69,7 @@ namespace KBot {
         }, [unit](Game*) { return unit->exists(); }, 250);
 
         for (auto &squad : m_squads) {
-            if (unit->getPosition().getApproxDistance(squad.getPosition()) < 400) {
+            if (distance(unit->getPosition(), squad.getPosition()) < 400) {
                 // Join squad
                 squad.insert(unit);
                 return;

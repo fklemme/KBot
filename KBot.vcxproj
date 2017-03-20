@@ -115,6 +115,7 @@
     <ClInclude Include="src\KBot.h" />
     <ClInclude Include="src\Manager.h" />
     <ClInclude Include="src\Squad.h" />
+    <ClInclude Include="src\utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Base.cpp" />

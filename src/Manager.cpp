@@ -1,6 +1,7 @@
 #include "Manager.h"
 
 #include "KBot.h"
+#include "utils.h"
 
 namespace KBot {
 
@@ -33,8 +34,8 @@ namespace KBot {
 
         // Assign unit to nearest base.
         const auto it = std::min_element(m_bases.begin(), m_bases.end(), [&unit](const Base &a, const Base &b) {
-            return unit->getPosition().getApproxDistance(Position(a.getPosition()))
-                < unit->getPosition().getApproxDistance(Position(b.getPosition()));
+            return distance(unit->getPosition(), a.getPosition())
+                < distance(unit->getPosition(), b.getPosition());
         });
         assert(it != m_bases.end());
         it->transferOwnership(unit);

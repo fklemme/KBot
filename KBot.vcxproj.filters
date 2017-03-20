@@ -62,6 +62,9 @@
     <ClInclude Include="src\Squad.h">
       <Filter>Header Files\Army</Filter>
     </ClInclude>
+    <ClInclude Include="src\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
