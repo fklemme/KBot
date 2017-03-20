@@ -23,7 +23,6 @@ namespace KBot {
 
     void Squad::update() {
         // Draw squad radius and path to enemy
-        // TODO: remove empty check
         if (!empty()) {
             Broodwar->drawCircleMap(getPosition(), 400, Colors::Red);
             Broodwar->drawTextMap(getPosition(), "Squad: %s", to_string(m_state).c_str());
@@ -42,10 +41,6 @@ namespace KBot {
                     Broodwar->drawLineMap(getPosition(), Position(enemyLocation), Colors::Red);
             }
         }
-
-        // Draw individual radius
-        //for (const auto unit : *this)
-        //    Broodwar->drawCircleMap(unit->getPosition(), 200, Colors::Yellow);
 
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
@@ -85,7 +80,7 @@ namespace KBot {
         if (m_state != oldState)
             this->stop(); // reassign orders
 
-        for (const auto unit : *this) {
+        for (const auto &unit : *this) {
             assert(unit->exists());
 
             // Ignore the unit if it has one of the following status ailments

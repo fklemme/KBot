@@ -72,10 +72,6 @@ namespace KBot {
             Broodwar->drawTextScreen(200, 10 * (i + 1), " - %s (%d %%)", type.c_str(), progress);
         }
 
-        // TODO: Move to Base
-        const auto myLocationCenter = Position(Broodwar->self()->getStartLocation()) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
-        Broodwar->drawCircleMap(myLocationCenter, 400, Colors::Green);
-
 #ifndef _DEBUG
         // Draw map (to slow for debug mode)
         //BWEM::utils::drawMap(m_map);

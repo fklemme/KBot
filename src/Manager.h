@@ -23,7 +23,6 @@ namespace KBot {
     private:
         KBot &m_kBot;
         std::vector<Base> m_bases;
-        BWAPI::Unitset m_unitsWithoutBase;
     };
 
 } // namespace
