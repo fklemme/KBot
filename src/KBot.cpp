@@ -66,7 +66,11 @@ namespace KBot {
 
         Broodwar->drawTextScreen(200, 0, "Under construction:");
         for (std::size_t i = 0; i < m_underConstruction.size(); ++i) {
-            assert(m_underConstruction[i]->exists()); // FIXME: might fail!
+            if (!m_underConstruction[i]->exists()) {
+                // TODO: Might need a change if this is used somewhere else as well.
+                m_underConstruction.erase(m_underConstruction.begin() + i--);
+                continue;
+            }
             const auto type = m_underConstruction[i]->getType();
             const int progress = 100 - (100 * m_underConstruction[i]->getRemainingBuildTime() / type.buildTime());
             Broodwar->drawTextScreen(200, 10 * (i + 1), " - %s (%d %%)", type.c_str(), progress);
