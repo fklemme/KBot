@@ -21,6 +21,15 @@ namespace KBot {
         Broodwar->drawTextScreen(2, 110, "Squad sizes: %s", squadSizes.c_str());
         Broodwar->drawTextScreen(2, 120, "Enemies near base: %d", enemiesNearBase.size());
 
+        // Update squads
+        for (auto &squad : m_squads)
+            squad.update();
+
+        // Prevent spamming by only running our onFrame once every number of latency frames.
+        // Latency frames are the number of frames before commands are processed.
+        if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
+            return;
+
         // Remove empty squads
         decltype(m_squads)::const_iterator it;
         while ((it = std::find_if(m_squads.begin(), m_squads.end(), [](const Squad &squad) { return squad.empty(); })) != m_squads.end())
@@ -51,10 +60,6 @@ namespace KBot {
             // No squads to merge left.
             merge = false;
         }
-
-        // Update squads
-        for (auto &squad : m_squads)
-            squad.update();
     }
 
     void General::transferOwnership(const Unit &unit) {
