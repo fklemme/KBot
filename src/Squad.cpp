@@ -104,7 +104,7 @@ namespace KBot {
                         unit->attack(Position(m_kBot->getNextEnemyLocation()));
                     break;
                 case SquadState::attack:
-                    if (unit->getDistance(getPosition()) > 400 && !unit->isUnderAttack()) {
+                    if (unit->getPosition().getApproxDistance(getPosition()) > 400 && !unit->isUnderAttack()) {
                         // Regroup!
                         const Point<double> vector = unit->getPosition() - getPosition();
                         // Move further to the middle to prevent sticky behavior.
@@ -122,7 +122,7 @@ namespace KBot {
                         unit->attack(Position(m_kBot->getNextEnemyLocation()));
                     break;
                 case SquadState::defend:
-                    if (unit->getDistance(Position(Broodwar->self()->getStartLocation())) > 1000)
+                    if (unit->getPosition().getApproxDistance(Position(Broodwar->self()->getStartLocation())) > 1000)
                         // Retreat!
                         unit->attack(Position(Broodwar->self()->getStartLocation()));
                     else if (unit->isIdle() && !enemiesNearBase.empty())

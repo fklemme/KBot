@@ -2,6 +2,8 @@
 
 namespace KBot {
 
-    Base::Base(KBot &kBot) : m_kBot(kBot) {}
+    using namespace BWAPI;
+
+    Base::Base(KBot &kBot, const TilePosition &location) : m_kBot(kBot), m_location(location) {}
 
 } // namespace

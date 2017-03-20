@@ -35,6 +35,9 @@ namespace KBot {
         const bool r = m_map.FindBasesForStartingLocations();
         assert(r);
 
+        // Create initial base
+        m_manager.createBase(Broodwar->self()->getStartLocation());
+
         // Ready to go. Good luck, have fun!
         Broodwar->sendText("gl hf");
     }
@@ -120,7 +123,7 @@ namespace KBot {
             TilePosition location{ unit->getPosition() };
             if (std::find(m_enemyLocations.begin(), m_enemyLocations.end(), location) == m_enemyLocations.end()) {
                 const auto it = std::lower_bound(m_enemyLocations.begin(), m_enemyLocations.end(), location,
-                    [&](TilePosition a, TilePosition b) { return myLocation.getDistance(a) < myLocation.getDistance(b); });
+                    [&](TilePosition a, TilePosition b) { return myLocation.getApproxDistance(a) < myLocation.getApproxDistance(b); });
                 m_enemyLocations.insert(it, location);
             }
         }
@@ -208,7 +211,7 @@ namespace KBot {
 
             // Order location by isExplored and distance to own base.
             std::sort(locations.begin(), locations.end(), [&](TilePosition a, TilePosition b) {
-                return myLocation.getDistance(a) < myLocation.getDistance(b);
+                return myLocation.getApproxDistance(a) < myLocation.getApproxDistance(b);
             });
             std::stable_sort(locations.begin(), locations.end(), [](TilePosition a, TilePosition b) {
                 return Broodwar->isExplored(a) < Broodwar->isExplored(b);

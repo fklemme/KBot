@@ -37,7 +37,7 @@ namespace KBot {
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
 
-        for (const auto unit : m_units) {
+        for (const auto unit : m_unitsWithoutBase) {
             assert(unit->exists());
 
             // Ignore the unit if it has one of the following status ailments
@@ -110,16 +110,20 @@ namespace KBot {
         }
     }
 
-    void Manager::transferOwnership(Unit unit) {
+    void Manager::createBase(const TilePosition &location) {
+        m_bases.emplace_back(m_kBot, location);
+    }
+
+    void Manager::transferOwnership(const Unit &unit) {
         Broodwar->registerEvent([unit](Game*) {
             Broodwar->drawTextMap(Position(unit->getPosition()), "Manager: %s", unit->getType().c_str());
         }, [unit](Game*) { return unit->exists(); }, 250);
 
-        m_units.insert(unit);
+        m_unitsWithoutBase.insert(unit);
     }
 
-    void Manager::onUnitDestroy(Unit unit) {
-        m_units.erase(unit);
+    void Manager::onUnitDestroy(const Unit &unit) {
+        m_unitsWithoutBase.erase(unit);
     }
 
 } // namespace

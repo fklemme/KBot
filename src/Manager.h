@@ -14,14 +14,16 @@ namespace KBot {
         // Is called every KBot::onFrame().
         void update();
 
+        void createBase(const BWAPI::TilePosition &location);
+
         // Transfer ownership of a unit to manager.
-        void transferOwnership(BWAPI::Unit unit);
-        void onUnitDestroy(BWAPI::Unit unit);
+        void transferOwnership(const BWAPI::Unit &unit);
+        void onUnitDestroy(const BWAPI::Unit &unit);
 
     private:
         KBot &m_kBot;
-        std::vector<Base> m_bases; // TODO...
-        BWAPI::Unitset m_units;
+        std::vector<Base> m_bases;
+        BWAPI::Unitset m_unitsWithoutBase;
     };
 
 } // namespace

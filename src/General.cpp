@@ -31,8 +31,8 @@ namespace KBot {
         while (merge) {
             for (auto it = m_squads.begin(); it != m_squads.end(); ++it) {
                 auto hit = std::find_if(it + 1, m_squads.end(), [it](const Squad &squad) {
-                    return (it->getPosition().getDistance(squad.getPosition()) < 200)
-                        || (it->getPosition().getDistance(squad.getPosition()) < 500
+                    return (it->getPosition().getApproxDistance(squad.getPosition()) < 200)
+                        || (it->getPosition().getApproxDistance(squad.getPosition()) < 500
                             && it->getState() == SquadState::defend && squad.getState() == SquadState::defend);
                 });
 
@@ -57,13 +57,13 @@ namespace KBot {
             squad.update();
     }
 
-    void General::transferOwnership(Unit unit) {
+    void General::transferOwnership(const Unit &unit) {
         Broodwar->registerEvent([unit](Game*) {
             Broodwar->drawTextMap(Position(unit->getPosition()), "General: %s", unit->getType().c_str());
         }, [unit](Game*) { return unit->exists(); }, 250);
 
         for (auto &squad : m_squads) {
-            if (unit->getDistance(squad.getPosition()) < 400) {
+            if (unit->getPosition().getApproxDistance(squad.getPosition()) < 400) {
                 // Join squad
                 squad.insert(unit);
                 return;
@@ -76,7 +76,7 @@ namespace KBot {
         m_squads.push_back(squad);
     }
 
-    void General::onUnitDestroy(Unit unit) {
+    void General::onUnitDestroy(const Unit &unit) {
         for (auto &squad : m_squads)
             squad.erase(unit);
     }
