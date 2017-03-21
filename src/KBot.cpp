@@ -72,7 +72,7 @@ namespace KBot {
             }
             const auto type = m_underConstruction[i]->getType();
             const int progress = 100 - (100 * m_underConstruction[i]->getRemainingBuildTime() / type.buildTime());
-            Broodwar->drawTextScreen(200, 10 * (i + 1), " - %s (%d %%)", type.c_str(), progress);
+            Broodwar->drawTextScreen(200, 10 * (i + 1), " - %s (%d %%)", type.getName().substr(7).c_str(), progress);
         }
 
 #ifndef _DEBUG

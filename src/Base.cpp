@@ -35,15 +35,26 @@ namespace KBot {
         // Display debug information
         const auto center = Position(m_position) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
         Broodwar->drawCircleMap(center, 400, Colors::Green);
+        Broodwar->drawBoxMap(Position(m_position), Position(m_position + UnitTypes::Terran_Command_Center.tileSize()), Colors::Green);
 
         // Show membership
         for (const auto &unit : m_units)
             Broodwar->drawLineMap(center, unit->getPosition(), Colors::Grey);
 
+        // Print resource information
+        Broodwar->drawTextMap(center, "Minerals: %d / %d", m_mineralWorkers.size(), int(2.5 * m_minerals.size()));
+        Broodwar->drawTextMap(m_gas.getPosition(), "Gas: %d / %d", m_gasWorkers.size(), 3 * m_gas.size());
+
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
+
+        // Update base resources
+        m_minerals = Broodwar->getUnitsInRadius(center, 400, Filter::IsMineralField); // TODO: Use BWEM instead?
+        m_mineralWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsWorker && Filter::IsGatheringMinerals && Filter::IsOwned);
+        m_gas = Broodwar->getUnitsInRadius(center, 400, Filter::GetType == UnitTypes::Resource_Vespene_Geyser || (Filter::IsRefinery && Filter::IsOwned));
+        m_gasWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsWorker && Filter::IsGatheringGas && Filter::IsOwned);
 
         for (const auto &unit : m_units) {
             assert(unit->exists());
@@ -120,7 +131,7 @@ namespace KBot {
             else if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice())
                 toBeBuild = UnitTypes::Terran_Supply_Depot;
             else if (me.minerals() >= (1 + 0.5
-                * Broodwar->getUnitsInRadius(Position(m_position), 1000, Filter::GetType == UnitTypes::Terran_Barracks).size())
+                * Broodwar->getUnitsInRadius(Position(m_position), 1000, Filter::GetType == UnitTypes::Terran_Barracks && Filter::IsOwned).size())
                 * UnitTypes::Terran_Barracks.mineralPrice())
                 toBeBuild = UnitTypes::Terran_Barracks;
 
