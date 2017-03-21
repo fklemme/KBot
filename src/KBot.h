@@ -31,10 +31,16 @@ namespace KBot {
         virtual void onUnitComplete(BWAPI::Unit unit);
 
         BWEM::Map &map() { return m_map; };
-        Manager &manager() { return m_manager; }
-        General &general() { return m_general; }
+        const BWEM::Map &map() const { return m_map; };
 
-        BWAPI::TilePosition getNextEnemyLocation();
+        Manager &manager() { return m_manager; }
+        const Manager &manager() const { return m_manager; }
+
+        General &general() { return m_general; }
+        const General &general() const { return m_general; }
+
+        BWAPI::TilePosition getNextBaseLocation() const;
+        BWAPI::TilePosition getNextEnemyLocation() const;
         std::size_t getEnemyLocationCount() const { return m_enemyLocations.size(); }
 
     private:

@@ -191,10 +191,29 @@ namespace KBot {
         }
     }
 
-    BWAPI::TilePosition KBot::getNextEnemyLocation() {
+    TilePosition KBot::getNextBaseLocation() const {
+        std::vector<TilePosition> positions;
+        for (const auto &area : m_map.Areas()) {
+            for (const auto &base : area.Bases())
+                if (std::all_of(m_manager.getBases().begin(), m_manager.getBases().end(),
+                    [&base](const Base &b) { return b.getPosition() != base.Location(); }))
+                    positions.push_back(base.Location());
+        }
+
+        // Order position by and distance to own starting base.
+        std::sort(positions.begin(), positions.end(), [this](TilePosition a, TilePosition b) {
+            const auto startPosition = manager().getBases().front().getPosition();
+            return distance(startPosition, a) < distance(startPosition, b);
+        });
+
+        return positions.front();
+    }
+
+    TilePosition KBot::getNextEnemyLocation() const {
         if (!m_enemyLocations.empty())
             return m_enemyLocations.front();
         else {
+            // TODO: Update with multiple own bases?
             // Places to scout
             auto locations = m_map.StartingLocations();
             if (std::all_of(locations.begin(), locations.end(), [](const TilePosition &p) { return Broodwar->isExplored(p); })) {

@@ -14,6 +14,7 @@ namespace KBot {
         // Is called every KBot::onFrame().
         void update();
 
+        const std::vector<Base> &getBases() const { return m_bases; }
         void createBase(const BWAPI::TilePosition &location);
 
         // Transfer ownership of a unit to manager.

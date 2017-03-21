@@ -21,6 +21,13 @@ namespace KBot {
         // Latency frames are the number of frames before commands are processed.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
+
+        // TODO: When and how to expand? Just a expand test so far...
+        TilePosition max(Broodwar->mapWidth(), Broodwar->mapHeight());
+        const auto scv_count = Broodwar->getUnitsInRectangle(Position(0, 0), Position(max), Filter::IsWorker).size();
+        const auto natural = m_kBot.getNextBaseLocation();
+        if (m_bases.size() == 1 && scv_count >= 20)
+            createBase(natural);
     }
 
     void Manager::createBase(const TilePosition &location) {

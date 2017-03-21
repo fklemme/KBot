@@ -9,14 +9,14 @@ namespace KBot {
 
     namespace {
         // Helper for easy building placement.
-        bool buildNearPosition(UnitType unit, TilePosition position) {
+        bool buildAtOrNearPosition(UnitType unit, TilePosition position) {
             auto builder = Broodwar->getClosestUnit(Position(position),
                 Filter::GetType == UnitTypes::Terran_SCV &&
                 (Filter::IsIdle || Filter::IsGatheringMinerals) &&
                 Filter::IsOwned);
 
             if (builder) {
-                auto location = Broodwar->getBuildLocation(unit, position);
+                auto location = Broodwar->canBuildHere(position, unit, builder) ? position : Broodwar->getBuildLocation(unit, position);
                 if (location) {
                     Broodwar->registerEvent([unit, location](Game*) {
                         Broodwar->drawBoxMap(Position(location), Position(location + unit.tileSize()), Colors::Blue);
@@ -103,28 +103,31 @@ namespace KBot {
             }
         } // closure: unit iterator
 
-        // Build depos and racks!
+        // Build all the structures!
         static int delay = 0;
         if (Broodwar->getFrameCount() > delay + 250) {
             const auto &me = *Broodwar->self();
-            const auto location = me.getStartLocation();
             UnitType toBeBuild = UnitTypes::None;
 
-            if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice())
+            if (Broodwar->getUnitsOnTile(m_location, Filter::IsResourceDepot).empty() && me.minerals() >= UnitTypes::Terran_Command_Center.mineralPrice())
+                toBeBuild = UnitTypes::Terran_Command_Center;
+            else if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice())
                 toBeBuild = UnitTypes::Terran_Supply_Depot;
-            else if (me.minerals() >= UnitTypes::Terran_Barracks.mineralPrice())
+            else if (me.minerals() >= (1 + 0.5
+                * Broodwar->getUnitsInRadius(Position(m_location), 1000, Filter::GetType == UnitTypes::Terran_Barracks).size())
+                * UnitTypes::Terran_Barracks.mineralPrice())
                 toBeBuild = UnitTypes::Terran_Barracks;
 
             if (toBeBuild != UnitTypes::None) {
-                if (!buildNearPosition(toBeBuild, location)) {
+                if (!buildAtOrNearPosition(toBeBuild, m_location)) {
                     // Location might not be explored yet. Send SCV.
-                    auto builder = Broodwar->getClosestUnit(Position(location),
+                    auto builder = Broodwar->getClosestUnit(Position(m_location),
                         Filter::GetType == UnitTypes::Terran_SCV &&
                         (Filter::IsIdle || Filter::IsGatheringMinerals) &&
                         Filter::IsOwned);
 
                     if (builder) {
-                        auto buildLocation = Broodwar->getBuildLocation(toBeBuild, location);
+                        auto buildLocation = Broodwar->getBuildLocation(toBeBuild, m_location);
                         if (buildLocation/* && Broodwar->isExplored(...)*/)
                             builder->move(Position(buildLocation));
                     }
