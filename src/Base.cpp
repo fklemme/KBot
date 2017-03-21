@@ -1,6 +1,7 @@
 #include "Base.h"
 
 #include "KBot.h"
+#include "utils.h"
 
 namespace KBot {
 
@@ -19,7 +20,7 @@ namespace KBot {
                 if (location) {
                     Broodwar->registerEvent([unit, location](Game*) {
                         Broodwar->drawBoxMap(Position(location), Position(location + unit.tileSize()), Colors::Blue);
-                    }, nullptr, 250);
+                    }, nullptr, 1000);
 
                     return builder->build(unit, location);
                 }
@@ -61,8 +62,28 @@ namespace KBot {
                         unit->returnCargo();
                     }
                     // Harvest from the nearest mineral patch or gas refinery
-                    else if (!unit->gather(unit->getClosestUnit(Filter::IsMineralField || Filter::IsRefinery))) {
-                        // No visible minerals.
+                    const auto resource = unit->getClosestUnit(Filter::IsMineralField || Filter::IsRefinery, 400);
+                    if (resource) {
+                        const bool r = unit->gather(resource);
+                        assert(r);
+                    }
+                    else {
+                        // Easy workaround for now: Use BWEM to find the next minerals.
+                        const auto &minerals = m_kBot.map().Minerals();
+                        using MineralsPtr = decltype(*minerals.begin());
+                        const auto it = std::min_element(minerals.begin(), minerals.end(), [&unit](MineralsPtr a, MineralsPtr b) {
+                            return distance(unit->getPosition(), a->Pos()) < distance(unit->getPosition(), b->Pos());
+                        });
+                        assert(it != minerals.end()); // FIXME: No more minerals! :O
+                        // The unit might not be accessable, so just move there.
+                        const auto &mineral = **it;
+                        unit->move(mineral.Pos());
+                        // debug
+                        Broodwar->registerEvent([unit, &mineral](Game*) {
+                            Broodwar->drawLineMap(unit->getPosition(), mineral.Pos(), Colors::Purple);
+                        }, [unit, &mineral](Game*) {
+                            return unit->exists() && unit->getOrder() == Orders::Move && unit->getOrderTargetPosition() == mineral.Pos();
+                        }, 1000);
                     }
                 } // closure: if idle
             }

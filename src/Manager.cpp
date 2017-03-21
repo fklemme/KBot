@@ -28,10 +28,6 @@ namespace KBot {
     }
 
     void Manager::transferOwnership(const Unit &unit) {
-        Broodwar->registerEvent([unit](Game*) {
-            Broodwar->drawTextMap(Position(unit->getPosition()), "Manager: %s", unit->getType().c_str());
-        }, [unit](Game*) { return unit->exists(); }, 250);
-
         // Assign unit to nearest base.
         const auto it = std::min_element(m_bases.begin(), m_bases.end(), [&unit](const Base &a, const Base &b) {
             return distance(unit->getPosition(), a.getPosition())
