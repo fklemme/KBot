@@ -59,8 +59,10 @@ namespace KBot {
         const auto oldState = m_state;
         switch (m_state) {
         case SquadState::scout:
-            if (m_kBot->getEnemyPositionCount() > 0) {
-                if (!enemiesNearBase.empty() || size() < 10)
+            if (!enemiesNearBase.empty())
+                m_state = SquadState::defend;
+            else if (m_kBot->getEnemyPositionCount() > 0) {
+                if (size() >= 20)
                     m_state = SquadState::attack;
                 else
                     m_state = SquadState::defend;
@@ -75,8 +77,11 @@ namespace KBot {
                 m_state = SquadState::defend;
             break;
         case SquadState::defend:
-            if (enemiesNearBase.empty() && size() >= 20) {
-                m_state = SquadState::attack;
+            if (enemiesNearBase.empty()) {
+                if (m_kBot->getEnemyPositionCount() == 0)
+                    m_state = SquadState::scout;
+                if (size() >= 20)
+                    m_state = SquadState::attack;
             }
             break;
         default:
@@ -114,8 +119,8 @@ namespace KBot {
                             // Move further to the middle to prevent edge-sticky behavior.
                             auto position = getPosition() + vector * 300 / vector.getLength();
                             if (!Broodwar->isWalkable(WalkPosition(position)))
-                                // Fallback: Go to the middle. TODO: Still pretty crappy behavior!
-                                position = getPosition();
+                                // Fallback: Go to the unit nearest to the middle.
+                                position = getClosestUnit(Filter::GetType == UnitTypes::Terran_Marine && Filter::IsOwned)->getPosition();
                             unit->attack(position);
                             // debug
                             Broodwar->registerEvent([unit, position](Game*) {
