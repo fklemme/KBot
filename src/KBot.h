@@ -39,16 +39,16 @@ namespace KBot {
         General &general() { return m_general; }
         const General &general() const { return m_general; }
 
-        BWAPI::TilePosition getNextBaseLocation() const;
-        BWAPI::TilePosition getNextEnemyLocation() const;
-        std::size_t getEnemyLocationCount() const { return m_enemyLocations.size(); }
+        BWAPI::TilePosition getNextBasePosition() const;
+        BWAPI::TilePosition getNextEnemyPosition() const;
+        std::size_t getEnemyPositionCount() const { return m_enemyPositions.size(); }
 
     private:
         BWEM::Map &m_map;
         Manager m_manager;
         General m_general;
 
-        std::vector<BWAPI::TilePosition> m_enemyLocations;
+        std::vector<BWAPI::TilePosition> m_enemyPositions;
         std::vector<BWAPI::Unit> m_underConstruction;
     };
 

@@ -15,6 +15,7 @@ namespace KBot {
             squadSizes += ", " + std::to_string(squad.size());
         squadSizes = squadSizes.empty() ? "No squads" : squadSizes.substr(2);
 
+        // TODO: Update to multiple base concept.
         const auto enemiesNearBase = Broodwar->getUnitsInRadius(Position(Broodwar->self()->getStartLocation()), 1000, Filter::IsEnemy);
 
         // Display debug information

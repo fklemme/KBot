@@ -25,13 +25,13 @@ namespace KBot {
         // TODO: When and how to expand? Just a expand test so far...
         TilePosition max(Broodwar->mapWidth(), Broodwar->mapHeight());
         const auto scv_count = Broodwar->getUnitsInRectangle(Position(0, 0), Position(max), Filter::IsWorker).size();
-        const auto natural = m_kBot.getNextBaseLocation();
+        const auto natural = m_kBot.getNextBasePosition();
         if (m_bases.size() == 1 && scv_count >= 20)
             createBase(natural);
     }
 
-    void Manager::createBase(const TilePosition &location) {
-        m_bases.emplace_back(m_kBot, location);
+    void Manager::createBase(const TilePosition &position) {
+        m_bases.emplace_back(m_kBot, position);
     }
 
     void Manager::transferOwnership(const Unit &unit) {

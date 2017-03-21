@@ -53,17 +53,15 @@ namespace KBot {
             return;
 
         // Display some debug information
-        const auto myLocation = Broodwar->self()->getStartLocation();
         Broodwar->drawTextScreen(2, 0, "FPS: %d, APM: %d", Broodwar->getFPS(), Broodwar->getAPM());
-        Broodwar->drawTextScreen(2, 10, "My start location: (%d, %d)", myLocation.x, myLocation.y);
-        Broodwar->drawTextScreen(2, 20, "Enemy location count: %d", m_enemyLocations.size());
+        Broodwar->drawTextScreen(2, 10, "Enemy position count: %d", m_enemyPositions.size());
 
-        if (!m_enemyLocations.empty()) {
-            const auto enemyLocation = m_enemyLocations.front();
-            Broodwar->drawTextScreen(2, 30, "Next enemy location: (%d, %d)", enemyLocation.x, enemyLocation.y);
+        if (!m_enemyPositions.empty()) {
+            const auto enemyPosition = m_enemyPositions.front();
+            Broodwar->drawTextScreen(2, 20, "Next enemy position: (%d, %d)", enemyPosition.x, enemyPosition.y);
         }
         else
-            Broodwar->drawTextScreen(2, 30, "Next enemy location: Unknown");
+            Broodwar->drawTextScreen(2, 20, "Next enemy position: Unknown");
 
         Broodwar->drawTextScreen(200, 0, "Under construction:");
         for (std::size_t i = 0; i < m_underConstruction.size(); ++i) {
@@ -82,9 +80,9 @@ namespace KBot {
         //BWEM::utils::drawMap(m_map);
 #endif // !_DEBUG
 
-        // Update enemy locations
-        while (!m_enemyLocations.empty() && Broodwar->isVisible(m_enemyLocations.front()) && Broodwar->getUnitsOnTile(m_enemyLocations.front(), Filter::IsEnemy).empty())
-            m_enemyLocations.erase(m_enemyLocations.begin());
+        // Update enemy positions
+        while (!m_enemyPositions.empty() && Broodwar->isVisible(m_enemyPositions.front()) && Broodwar->getUnitsOnTile(m_enemyPositions.front(), Filter::IsEnemy).empty())
+            m_enemyPositions.erase(m_enemyPositions.begin());
 
         // Update manager
         m_manager.update();
@@ -118,14 +116,14 @@ namespace KBot {
 
     // Called when a previously invisible unit becomes visible.
     void KBot::onUnitShow(BWAPI::Unit unit) {
-        // Update enemy locations
+        // Update enemy positions
         if (Broodwar->self()->isEnemy(unit->getPlayer()) && unit->getType().isBuilding()) {
-            const auto myLocation = Broodwar->self()->getStartLocation();
-            TilePosition location{ unit->getPosition() };
-            if (std::find(m_enemyLocations.begin(), m_enemyLocations.end(), location) == m_enemyLocations.end()) {
-                const auto it = std::lower_bound(m_enemyLocations.begin(), m_enemyLocations.end(), location,
-                    [&](TilePosition a, TilePosition b) { return distance(myLocation, a) < distance(myLocation, b); });
-                m_enemyLocations.insert(it, location);
+            const auto myPosition = Broodwar->self()->getStartLocation();
+            TilePosition position(unit->getPosition());
+            if (std::find(m_enemyPositions.begin(), m_enemyPositions.end(), position) == m_enemyPositions.end()) {
+                const auto it = std::lower_bound(m_enemyPositions.begin(), m_enemyPositions.end(), position,
+                    [&](TilePosition a, TilePosition b) { return distance(myPosition, a) < distance(myPosition, b); });
+                m_enemyPositions.insert(it, position);
             }
         }
     }
@@ -191,7 +189,7 @@ namespace KBot {
         }
     }
 
-    TilePosition KBot::getNextBaseLocation() const {
+    TilePosition KBot::getNextBasePosition() const {
         std::vector<TilePosition> positions;
         for (const auto &area : m_map.Areas()) {
             for (const auto &base : area.Bases())
@@ -209,40 +207,40 @@ namespace KBot {
         return positions.front();
     }
 
-    TilePosition KBot::getNextEnemyLocation() const {
-        if (!m_enemyLocations.empty())
-            return m_enemyLocations.front();
+    TilePosition KBot::getNextEnemyPosition() const {
+        if (!m_enemyPositions.empty())
+            return m_enemyPositions.front();
         else {
-            // TODO: Update with multiple own bases?
-            // Places to scout
-            auto locations = m_map.StartingLocations();
-            if (std::all_of(locations.begin(), locations.end(), [](const TilePosition &p) { return Broodwar->isExplored(p); })) {
-                locations.clear();
+            // TODO: Update to multiple own bases concept?
+            // Positions to scout
+            auto positions = m_map.StartingLocations();
+            if (std::all_of(positions.begin(), positions.end(), [](const TilePosition &p) { return Broodwar->isExplored(p); })) {
+                positions.clear();
                 for (const auto &area : m_map.Areas())
                     for (const auto &base : area.Bases())
-                        locations.push_back(base.Location());
+                        positions.push_back(base.Location());
             }
 
             // Always exclude our own base.
-            const auto myLocation = Broodwar->self()->getStartLocation();
-            const auto it = std::find(locations.begin(), locations.end(), myLocation);
-            assert(it != locations.end());
-            locations.erase(it);
+            const auto myPosition = Broodwar->self()->getStartLocation();
+            const auto it = std::find(positions.begin(), positions.end(), myPosition);
+            assert(it != positions.end());
+            positions.erase(it);
 
-            // Order location by isExplored and distance to own base.
-            std::sort(locations.begin(), locations.end(), [&](TilePosition a, TilePosition b) {
-                return distance(myLocation, a) < distance(myLocation, b);
+            // Order positions by isExplored and distance to own base.
+            std::sort(positions.begin(), positions.end(), [&](TilePosition a, TilePosition b) {
+                return distance(myPosition, a) < distance(myPosition, b);
             });
-            std::stable_sort(locations.begin(), locations.end(), [](TilePosition a, TilePosition b) {
+            std::stable_sort(positions.begin(), positions.end(), [](TilePosition a, TilePosition b) {
                 return Broodwar->isExplored(a) < Broodwar->isExplored(b);
             });
-            if (!Broodwar->isExplored(locations.front()))
-                return locations.front();
+            if (!Broodwar->isExplored(positions.front()))
+                return positions.front();
 
-            // If all locations are already explored, return a random location.
+            // If all positions are already explored, return a random position.
             static std::default_random_engine generator;
-            std::uniform_int_distribution<int> dist(0, locations.size() - 1);
-            return locations[dist(generator)];
+            std::uniform_int_distribution<int> dist(0, positions.size() - 1);
+            return positions[dist(generator)];
         }
     }
 

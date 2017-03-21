@@ -16,24 +16,24 @@ namespace KBot {
                 Filter::IsOwned);
 
             if (builder) {
-                auto location = Broodwar->canBuildHere(position, unit, builder) ? position : Broodwar->getBuildLocation(unit, position);
-                if (location) {
-                    Broodwar->registerEvent([unit, location](Game*) {
-                        Broodwar->drawBoxMap(Position(location), Position(location + unit.tileSize()), Colors::Blue);
+                auto buildPosition = Broodwar->canBuildHere(position, unit, builder) ? position : Broodwar->getBuildLocation(unit, position);
+                if (buildPosition) {
+                    Broodwar->registerEvent([unit, buildPosition](Game*) {
+                        Broodwar->drawBoxMap(Position(buildPosition), Position(buildPosition + unit.tileSize()), Colors::Blue);
                     }, nullptr, 1000);
 
-                    return builder->build(unit, location);
+                    return builder->build(unit, buildPosition);
                 }
             }
             return false;
         }
     }
 
-    Base::Base(KBot &kBot, const TilePosition &location) : m_kBot(kBot), m_location(location) {}
+    Base::Base(KBot &kBot, const TilePosition &position) : m_kBot(kBot), m_position(position) {}
 
     void Base::update() {
         // Display debug information
-        const auto center = Position(m_location) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
+        const auto center = Position(m_position) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
         Broodwar->drawCircleMap(center, 400, Colors::Green);
 
         // Prevent spamming by only running our onFrame once every number of latency frames.
@@ -109,27 +109,27 @@ namespace KBot {
             const auto &me = *Broodwar->self();
             UnitType toBeBuild = UnitTypes::None;
 
-            if (Broodwar->getUnitsOnTile(m_location, Filter::IsResourceDepot).empty() && me.minerals() >= UnitTypes::Terran_Command_Center.mineralPrice())
+            if (Broodwar->getUnitsOnTile(m_position, Filter::IsResourceDepot).empty() && me.minerals() >= UnitTypes::Terran_Command_Center.mineralPrice())
                 toBeBuild = UnitTypes::Terran_Command_Center;
             else if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice())
                 toBeBuild = UnitTypes::Terran_Supply_Depot;
             else if (me.minerals() >= (1 + 0.5
-                * Broodwar->getUnitsInRadius(Position(m_location), 1000, Filter::GetType == UnitTypes::Terran_Barracks).size())
+                * Broodwar->getUnitsInRadius(Position(m_position), 1000, Filter::GetType == UnitTypes::Terran_Barracks).size())
                 * UnitTypes::Terran_Barracks.mineralPrice())
                 toBeBuild = UnitTypes::Terran_Barracks;
 
             if (toBeBuild != UnitTypes::None) {
-                if (!buildAtOrNearPosition(toBeBuild, m_location)) {
-                    // Location might not be explored yet. Send SCV.
-                    auto builder = Broodwar->getClosestUnit(Position(m_location),
+                if (!buildAtOrNearPosition(toBeBuild, m_position)) {
+                    // Position might not be explored yet. Send SCV.
+                    auto builder = Broodwar->getClosestUnit(Position(m_position),
                         Filter::GetType == UnitTypes::Terran_SCV &&
                         (Filter::IsIdle || Filter::IsGatheringMinerals) &&
                         Filter::IsOwned);
 
                     if (builder) {
-                        auto buildLocation = Broodwar->getBuildLocation(toBeBuild, m_location);
-                        if (buildLocation/* && Broodwar->isExplored(...)*/)
-                            builder->move(Position(buildLocation));
+                        auto buildPosition = Broodwar->getBuildLocation(toBeBuild, m_position);
+                        if (buildPosition/* && Broodwar->isExplored(...)*/)
+                            builder->move(Position(buildPosition));
                     }
                 }
                 delay = Broodwar->getFrameCount();

@@ -15,7 +15,7 @@ namespace KBot {
         void update();
 
         const std::vector<Base> &getBases() const { return m_bases; }
-        void createBase(const BWAPI::TilePosition &location);
+        void createBase(const BWAPI::TilePosition &position);
 
         // Transfer ownership of a unit to manager.
         void transferOwnership(const BWAPI::Unit &unit);
