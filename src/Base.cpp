@@ -32,6 +32,11 @@ namespace KBot {
     Base::Base(KBot &kBot, const TilePosition &position) : m_kBot(kBot), m_position(position) {}
 
     void Base::update() {
+        const auto mineralWorkerRatio = 2;
+        const auto gasWorkerRatio = 3;
+        const auto targetMineralWorkers = std::size_t(std::ceil(mineralWorkerRatio * m_minerals.size()));
+        const auto targetGasWorkers = std::size_t(std::ceil(gasWorkerRatio * m_gas.size()));
+
         // Display debug information
         const auto center = Position(m_position) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
         Broodwar->drawCircleMap(center, 400, Colors::Green);
@@ -42,8 +47,8 @@ namespace KBot {
             Broodwar->drawLineMap(center, unit->getPosition(), Colors::Grey);
 
         // Print resource information
-        Broodwar->drawTextMap(center, "Minerals: %d / %d", m_mineralWorkers.size(), int(2.5 * m_minerals.size()));
-        Broodwar->drawTextMap(m_gas.getPosition(), "Gas: %d / %d", m_gasWorkers.size(), 3 * m_gas.size());
+        Broodwar->drawTextMap(center, "Minerals: %d / %d", m_mineralWorkers.size(), targetMineralWorkers);
+        Broodwar->drawTextMap(m_gas.getPosition(), "Gas: %d / %d", m_gasWorkers.size(), targetGasWorkers);
 
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
@@ -71,14 +76,11 @@ namespace KBot {
             if (unit->getType().isWorker()) {
                 // if our worker is idle
                 if (unit->isIdle()) {
-                    // Order workers carrying a resource to return them to the center,
-                    // otherwise find a mineral patch to harvest.
-                    if (unit->isCarryingGas() || unit->isCarryingMinerals()) {
+                    const auto resource = Broodwar->getClosestUnit(center, Filter::IsMineralField /*|| Filter::IsRefinery*/, 400);
+                    // Order workers carrying a resource to return them to the center
+                    if (unit->isCarryingGas() || unit->isCarryingMinerals())
                         unit->returnCargo();
-                    }
-                    // Harvest from the nearest mineral patch or gas refinery
-                    const auto resource = unit->getClosestUnit(Filter::IsMineralField || Filter::IsRefinery, 400);
-                    if (resource) {
+                    else if (resource) {
                         const bool r = unit->gather(resource);
                         assert(r);
                     }
@@ -93,6 +95,7 @@ namespace KBot {
                         // The unit might not be accessable, so just move there.
                         const auto &mineral = **it;
                         unit->move(mineral.Pos());
+
                         // debug
                         Broodwar->registerEvent([unit, &mineral](Game*) {
                             Broodwar->drawLineMap(unit->getPosition(), mineral.Pos(), Colors::Purple);
@@ -100,7 +103,7 @@ namespace KBot {
                             return unit->exists() && unit->getOrder() == Orders::Move && unit->getOrderTargetPosition() == mineral.Pos();
                         }, 1000);
                     }
-                } // closure: if idle
+                }
             }
             else if (unit->getType() == UnitTypes::Terran_Barracks) {
                 if (unit->isIdle()) {
@@ -110,13 +113,13 @@ namespace KBot {
             }
             else if (unit->getType().isResourceDepot()) {
                 // Limit amount of workers to produce.
-                if (Broodwar->getUnitsInRadius(unit->getPosition(), 400, Filter::IsWorker && Filter::IsOwned).size() < 20) {
+                if (m_mineralWorkers.size() < targetMineralWorkers /*|| m_gasWorkers.size() < targetGasWorkers*/) {
                     // Order the depot to construct more workers! But only when it is idle.
                     if (unit->isIdle())
                         unit->train(UnitTypes::Terran_SCV);
                 }
             }
-        } // closure: unit iterator
+        }
 
         // Build all the structures!
         static int delay = 0;
@@ -145,7 +148,7 @@ namespace KBot {
 
                     if (builder) {
                         auto buildPosition = Broodwar->getBuildLocation(toBeBuild, m_position);
-                        if (buildPosition/* && Broodwar->isExplored(...)*/)
+                        if (buildPosition /*&& Broodwar->isExplored(...)*/)
                             builder->move(Position(buildPosition));
                     }
                 }

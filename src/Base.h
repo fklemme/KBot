@@ -7,6 +7,8 @@ namespace KBot {
     class KBot;
 
     class Base {
+        friend class Manager;
+
     public:
         Base(KBot &kBot, const BWAPI::TilePosition &position);
 

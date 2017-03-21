@@ -10,6 +10,10 @@ namespace KBot {
     Manager::Manager(KBot &kBot) : m_kBot(kBot) {}
 
     void Manager::update() {
+        // TODO: redundant in Manager and Base!
+        const auto mineralWorkerRatio = 2;
+        const auto gasWorkerRatio = 3;
+
         // Display debug information
         Broodwar->drawTextScreen(2, 50, "Manager: -");
 
@@ -28,6 +32,21 @@ namespace KBot {
         const auto natural = m_kBot.getNextBasePosition();
         if (m_bases.size() == 1 && scv_count >= 20)
             createBase(natural);
+
+        // Transfer workers
+        for (int i = 0; i < (int)m_bases.size() - 1; ++i) {
+            auto &base = m_bases[i];
+            const auto targetMineralWorkers = std::size_t(std::ceil(mineralWorkerRatio * base.m_minerals.size()));
+            const auto targetGasWorkers = std::size_t(std::ceil(gasWorkerRatio * base.m_gas.size()));
+
+            // TODO: Gas stuff...
+            if (base.m_mineralWorkers.size() > targetMineralWorkers) {
+                auto unit = *base.m_mineralWorkers.begin();
+                base.m_units.erase(unit);
+                unit->stop();
+                m_bases.back().transferOwnership(unit);
+            }
+        }
     }
 
     void Manager::createBase(const TilePosition &position) {
