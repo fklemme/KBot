@@ -23,16 +23,20 @@ namespace KBot {
     Squad::Squad(KBot &kBot) : m_kBot(&kBot), m_state(SquadState::scout) {}
 
     void Squad::update() {
-        // Draw squad radius and path to enemy
         if (!empty()) {
+            // Draw squad radius
             Broodwar->drawCircleMap(getPosition(), 400, Colors::Red);
             Broodwar->drawTextMap(getPosition(), "Squad: %s", to_string(m_state).c_str());
 
+            // Show membership
+            for (const auto &unit : *this)
+                Broodwar->drawLineMap(getPosition(), unit->getPosition(), Colors::Grey);
+
+            // Draw path to enemy
             if (m_kBot->getEnemyPositionCount() > 0) {
                 const auto enemyPosition = Position(m_kBot->getNextEnemyPosition());
                 const auto path = m_kBot->map().GetPath(getPosition(), enemyPosition);
                 if (!path.empty()) {
-                    // Draw path
                     Broodwar->drawLineMap(getPosition(), Position(path.front()->Center()), Colors::Red);
                     for (std::size_t i = 1; i < path.size(); ++i)
                         Broodwar->drawLineMap(Position(path[i - 1]->Center()), Position(path[i]->Center()), Colors::Red);
@@ -78,9 +82,11 @@ namespace KBot {
         default:
             throw std::logic_error("Unknown SquadState!");
         }
+        // Reassign orders on state change
         if (m_state != oldState)
-            this->stop(); // reassign orders
+            this->stop();
 
+        // TODO: Move unit logic
         for (const auto &unit : *this) {
             assert(unit->exists());
 

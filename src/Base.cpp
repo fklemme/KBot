@@ -36,6 +36,10 @@ namespace KBot {
         const auto center = Position(m_position) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
         Broodwar->drawCircleMap(center, 400, Colors::Green);
 
+        // Show membership
+        for (const auto &unit : m_units)
+            Broodwar->drawLineMap(center, unit->getPosition(), Colors::Grey);
+
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
@@ -109,8 +113,10 @@ namespace KBot {
             const auto &me = *Broodwar->self();
             UnitType toBeBuild = UnitTypes::None;
 
-            if (Broodwar->getUnitsOnTile(m_position, Filter::IsResourceDepot).empty() && me.minerals() >= UnitTypes::Terran_Command_Center.mineralPrice())
-                toBeBuild = UnitTypes::Terran_Command_Center;
+            if (Broodwar->getUnitsOnTile(m_position, Filter::IsResourceDepot).empty()) {
+                if (me.minerals() >= UnitTypes::Terran_Command_Center.mineralPrice())
+                    toBeBuild = UnitTypes::Terran_Command_Center;
+            }
             else if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice())
                 toBeBuild = UnitTypes::Terran_Supply_Depot;
             else if (me.minerals() >= (1 + 0.5
@@ -120,7 +126,7 @@ namespace KBot {
 
             if (toBeBuild != UnitTypes::None) {
                 if (!buildAtOrNearPosition(toBeBuild, m_position)) {
-                    // Position might not be explored yet. Send SCV.
+                    // Position might not be fully explored yet. Send SCV.
                     auto builder = Broodwar->getClosestUnit(Position(m_position),
                         Filter::GetType == UnitTypes::Terran_SCV &&
                         (Filter::IsIdle || Filter::IsGatheringMinerals) &&
