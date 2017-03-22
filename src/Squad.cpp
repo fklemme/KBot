@@ -104,6 +104,9 @@ namespace KBot {
                 continue;
 
             if (unit->getType() == UnitTypes::Terran_Marine) {
+                int unitPathLength;
+                BWEM::CPPath unitPath;
+
                 switch (m_state) {
                 case SquadState::scout:
                     if (unit->isIdle())
@@ -111,20 +114,29 @@ namespace KBot {
                         unit->attack(Position(m_kBot->getNextEnemyPosition()));
                     break;
                 case SquadState::attack:
-                    if (distance(unit->getPosition(), getPosition()) > 400 && !unit->isUnderAttack()) {
+                    unitPath = m_kBot->map().GetPath(unit->getPosition(), getPosition(), &unitPathLength);
+                    if (unitPathLength > 400 && !unit->isUnderAttack()) {
                         // Regroup!
-                        // Prevent spamming, check if order is already set.
+                        // Prevent spamming, check if order is already set. TODO: Still bad bahavior.
                         if (unit->getOrder() != Orders::AttackMove || distance(unit->getOrderTargetPosition(), getPosition()) >= 400) {
-                            const Point<double> vector = unit->getPosition() - getPosition();
-                            // Move further to the middle to prevent edge-sticky behavior.
-                            auto position = getPosition() + vector * 300 / vector.getLength();
-                            if (!Broodwar->isWalkable(WalkPosition(position)))
-                                // Fallback: Go to the unit nearest to the middle.
-                                position = getClosestUnit(Filter::GetType == UnitTypes::Terran_Marine && Filter::IsOwned)->getPosition();
-                            unit->attack(position);
+                            Position orderPosition, lastNode;
+                            if (unitPath.empty())
+                                lastNode = unit->getPosition();
+                            else
+                                lastNode = Position(unitPath.back()->Pos(BWEM::ChokePoint::node::middle));
+
+                            if (getPosition().getApproxDistance(lastNode) <= 300)
+                                orderPosition = lastNode;
+                            else {
+                                // Move further to the middle to prevent edge-sticky behavior.
+                                const Point<double> vector = lastNode - getPosition();
+                                orderPosition = getPosition() + vector * 300 / vector.getLength();
+                            }
+                            unit->attack(orderPosition);
+
                             // debug
-                            Broodwar->registerEvent([unit, position](Game*) {
-                                Broodwar->drawLineMap(unit->getPosition(), position, Colors::Purple);
+                            Broodwar->registerEvent([unit, orderPosition](Game*) {
+                                Broodwar->drawLineMap(unit->getPosition(), orderPosition, Colors::Purple);
                             }, [unit](Game*) { return unit->exists(); }, Broodwar->getLatencyFrames());
                         }
                     }
