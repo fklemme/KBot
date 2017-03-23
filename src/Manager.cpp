@@ -34,7 +34,7 @@ namespace KBot {
             createBase(natural);
 
         // Transfer workers
-        for (int i = 0; i < (int)m_bases.size() - 1; ++i) {
+        for (int i = 0; i < (int) m_bases.size() - 1; ++i) {
             auto &base = m_bases[i];
             const auto targetMineralWorkers = std::size_t(std::ceil(mineralWorkerRatio * base.m_minerals.size()));
             const auto targetGasWorkers = std::size_t(std::ceil(gasWorkerRatio * base.m_gas.size()));

@@ -83,8 +83,7 @@ namespace KBot {
                     else if (resource) {
                         const bool r = unit->gather(resource);
                         assert(r);
-                    }
-                    else {
+                    } else {
                         // Easy workaround for now: Use BWEM to find the next minerals.
                         const auto &minerals = m_kBot.map().Minerals();
                         using MineralsPtr = decltype(*minerals.begin());
@@ -104,14 +103,12 @@ namespace KBot {
                         }, 1000);
                     }
                 }
-            }
-            else if (unit->getType() == UnitTypes::Terran_Barracks) {
+            } else if (unit->getType() == UnitTypes::Terran_Barracks) {
                 if (unit->isIdle()) {
                     // Spam marines! :D
                     unit->train(UnitTypes::Terran_Marine);
                 }
-            }
-            else if (unit->getType().isResourceDepot()) {
+            } else if (unit->getType().isResourceDepot()) {
                 // Limit amount of workers to produce.
                 if (m_mineralWorkers.size() < targetMineralWorkers /*|| m_gasWorkers.size() < targetGasWorkers*/) {
                     // Order the depot to construct more workers! But only when it is idle.
@@ -130,8 +127,7 @@ namespace KBot {
             if (Broodwar->getUnitsOnTile(m_position, Filter::IsResourceDepot).empty()) {
                 if (me.minerals() >= UnitTypes::Terran_Command_Center.mineralPrice())
                     toBeBuild = UnitTypes::Terran_Command_Center;
-            }
-            else if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice())
+            } else if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice())
                 toBeBuild = UnitTypes::Terran_Supply_Depot;
             else if (me.minerals() >= (1 + 0.5
                 * Broodwar->getUnitsInRadius(Position(m_position), 1000, Filter::GetType == UnitTypes::Terran_Barracks && Filter::IsOwned).size())

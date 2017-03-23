@@ -59,8 +59,7 @@ namespace KBot {
         if (!m_enemyPositions.empty()) {
             const auto enemyPosition = m_enemyPositions.front();
             Broodwar->drawTextScreen(2, 20, "Next enemy position: (%d, %d)", enemyPosition.x, enemyPosition.y);
-        }
-        else
+        } else
             Broodwar->drawTextScreen(2, 20, "Next enemy position: Unknown");
 
         Broodwar->drawTextScreen(200, 0, "Under construction:");
