@@ -111,6 +111,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Base.h" />
+    <ClInclude Include="src\BuildTask.h" />
     <ClInclude Include="src\General.h" />
     <ClInclude Include="src\KBot.h" />
     <ClInclude Include="src\Manager.h" />
@@ -119,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Base.cpp" />
+    <ClCompile Include="src\BuildTask.cpp" />
     <ClCompile Include="src\DllMain.cpp" />
     <ClCompile Include="src\General.cpp" />
     <ClCompile Include="src\KBot.cpp" />

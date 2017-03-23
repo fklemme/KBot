@@ -2,6 +2,7 @@
 
 #include <BWAPI.h>
 #include "Base.h"
+#include "BuildTask.h"
 
 namespace KBot {
 
@@ -30,6 +31,7 @@ namespace KBot {
     private:
         KBot &m_kBot;
         std::vector<Base> m_bases;
+        std::vector<BuildTask> m_buildQueue;
     };
 
 } // namespace

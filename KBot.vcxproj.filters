@@ -45,6 +45,9 @@
     <ClCompile Include="src\Squad.cpp">
       <Filter>Source Files\Army</Filter>
     </ClCompile>
+    <ClCompile Include="src\BuildTask.cpp">
+      <Filter>Source Files\Economy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\KBot.h">
@@ -64,6 +67,9 @@
     </ClInclude>
     <ClInclude Include="src\utils.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BuildTask.h">
+      <Filter>Header Files\Economy</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -7,7 +7,7 @@ namespace KBot {
     class KBot;
 
     class Base {
-        friend class Manager;
+        friend class Manager; // TODO: Can this be removed?
 
     public:
         Base(KBot &kBot, const BWAPI::TilePosition &position);

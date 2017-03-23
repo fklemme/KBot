@@ -124,12 +124,12 @@ namespace KBot {
                                 else
                                     lastNode = Position(unitPath.back()->Center());
 
-                                if (getPosition().getApproxDistance(lastNode) <= 380)
+                                if (getPosition().getApproxDistance(lastNode) <= 350)
                                     orderPosition = lastNode;
                                 else {
                                     // Move further to the middle to prevent edge-sticky behavior.
                                     const Point<double> vector = lastNode - getPosition();
-                                    orderPosition = getPosition() + vector * 380 / vector.getLength();
+                                    orderPosition = getPosition() + vector * 350 / vector.getLength();
                                 }
                                 unit->attack(orderPosition);
 
