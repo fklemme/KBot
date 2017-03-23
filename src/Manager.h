@@ -11,6 +11,12 @@ namespace KBot {
     public:
         Manager(KBot &kBot);
 
+        // Forbit copy & move
+        Manager(const Manager&) = delete;
+        Manager(Manager&&) = delete;
+        Manager &operator=(const Manager&) = delete;
+        Manager &operator=(Manager&&) = delete;
+
         // Is called every KBot::onFrame().
         void update();
 

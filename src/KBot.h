@@ -12,6 +12,12 @@ namespace KBot {
     public:
         KBot();
 
+        // Forbit copy & move
+        KBot(const KBot&) = delete;
+        KBot(KBot&&) = delete;
+        KBot &operator=(const KBot&) = delete;
+        KBot &operator=(KBot&&) = delete;
+
         virtual void onStart();
         virtual void onEnd(bool isWinner);
         virtual void onFrame();

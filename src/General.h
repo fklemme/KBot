@@ -11,6 +11,12 @@ namespace KBot {
     public:
         General(KBot &kBot);
 
+        // Forbit copy & move
+        General(const General&) = delete;
+        General(General&&) = delete;
+        General &operator=(const General&) = delete;
+        General &operator=(General&&) = delete;
+
         // Is called every KBot::onFrame().
         void update();
 
