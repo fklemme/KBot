@@ -1,6 +1,7 @@
 #include "General.h"
 
 #include "KBot.h"
+#include "Squad.h"
 #include "utils.h"
 
 namespace KBot {

@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <random>
+#include "Squad.h"
 #include "utils.h"
 
 namespace KBot {
