@@ -12,7 +12,7 @@ namespace KBot {
 
     // Called only once at the beginning of a game.
     void KBot::onStart() {
-        if (Broodwar->isReplay())
+        if (Broodwar->isReplay() || !Broodwar->self())
             return;
 
         // This bot is written for Terran, so make sure we are indeed Terran!
@@ -36,6 +36,9 @@ namespace KBot {
         const bool r = m_map.FindBasesForStartingLocations();
         assert(r);
 
+        // Test BuildTask, TODO: (re)move
+        m_manager.addBuildTask({m_manager, UnitTypes::Terran_Barracks});
+
         // Ready to go. Good luck, have fun!
         Broodwar->sendText("gl hf");
     }
@@ -58,18 +61,6 @@ namespace KBot {
             Broodwar->drawTextScreen(2, 20, "Next enemy position: (%d, %d)", enemyPosition.x, enemyPosition.y);
         } else
             Broodwar->drawTextScreen(2, 20, "Next enemy position: Unknown");
-
-        Broodwar->drawTextScreen(200, 0, "Under construction:");
-        for (std::size_t i = 0; i < m_underConstruction.size(); ++i) {
-            if (!m_underConstruction[i]->exists()) {
-                // TODO: Might need a change if this is used somewhere else as well.
-                m_underConstruction.erase(m_underConstruction.begin() + i--);
-                continue;
-            }
-            const auto type = m_underConstruction[i]->getType();
-            const int progress = 100 - (100 * m_underConstruction[i]->getRemainingBuildTime() / type.buildTime());
-            Broodwar->drawTextScreen(200, 10 * (i + 1), " - %s (%d %%)", type.getName().substr(7).c_str(), progress);
-        }
 
 #ifndef _DEBUG
         // Draw map (to slow for debug mode)

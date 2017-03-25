@@ -14,4 +14,9 @@ namespace KBot {
         // TODO
     }
 
+    std::string BuildTask::toString() const {
+        // TODO
+        return m_toBuild.toString();
+    }
+
 } // namespace

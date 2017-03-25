@@ -4,13 +4,11 @@
 
 namespace KBot {
 
-    class KBot;
+    class Manager;
 
     class Base {
-        friend class Manager; // TODO: Can this be removed?
-
     public:
-        Base(KBot &kBot, const BWAPI::TilePosition &position);
+        Base(Manager &manager, const BWAPI::TilePosition &position);
 
         // Is called every KBot::onFrame().
         void update();
@@ -22,7 +20,7 @@ namespace KBot {
         void onUnitDestroy(const BWAPI::Unit &unit);
 
     private:
-        KBot &m_kBot;
+        Manager *m_manager;
         BWAPI::TilePosition m_position;
         BWAPI::Unitset m_units;
 

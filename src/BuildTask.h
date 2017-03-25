@@ -21,6 +21,8 @@ namespace KBot {
         // Is called every KBot::onFrame().
         void update();
 
+        std::string toString() const;
+
     private:
         Manager *m_manager;
         BWAPI::UnitType m_toBuild;

@@ -7,11 +7,23 @@ namespace KBot {
 
     using namespace BWAPI;
 
-    Manager::Manager(KBot &kBot) : m_kBot(kBot) {}
+    Manager::Manager(KBot &kBot) : m_kBot(kBot) {
+        // Create initial base
+        m_bases.emplace_back(*this, Broodwar->self()->getStartLocation());
+    }
 
     void Manager::update() {
         // Display debug information
         Broodwar->drawTextScreen(2, 50, "Manager: -");
+
+        // Display build tasks
+        Broodwar->drawTextScreen(200, 0, "Build queue:");
+        for (std::size_t i = 0; i < m_buildQueue.size(); ++i)
+            Broodwar->drawTextScreen(200, (i + 1) * 10, "%s", m_buildQueue[i].toString().c_str());
+
+        // Display available resources
+        Broodwar->drawTextScreen(450, 15, "(%d)", getAvailableMinerals());
+        Broodwar->drawTextScreen(518, 15, "(%d)", getAvailableGas());
 
         // Update bases
         for (auto &base : m_bases)
@@ -43,23 +55,6 @@ namespace KBot {
             base.onUnitDestroy(unit);
     }
 
-    //TilePosition KBot::getNextBasePosition() const {
-    //    std::vector<TilePosition> positions;
-    //    for (const auto &area : m_map.Areas()) {
-    //        for (const auto &base : area.Bases())
-    //            if (std::all_of(m_manager.getBases().begin(), m_manager.getBases().end(),
-    //                [&base](const Base &b) { return b.getPosition() != base.Location(); }))
-    //                positions.push_back(base.Location());
-    //    }
-
-    //    // Order position by and distance to own starting base.
-    //    std::sort(positions.begin(), positions.end(), [this](TilePosition a, TilePosition b) {
-    //        const auto startPosition = manager().getBases().front().getPosition();
-    //        return distance(startPosition, a) < distance(startPosition, b);
-    //    });
-
-    //    return positions.front();
-    //}
 
     void Manager::addBuildTask(const BuildTask &buildTask) {
         m_buildQueue.push_back(buildTask);
@@ -70,5 +65,15 @@ namespace KBot {
     void Manager::onBuildTaskDestroyed(const Unit &unit) {}
 
     void Manager::onBuildTaskCompleted(const Unit &unit) {}
+
+    void Manager::aquireResources(const int minerals, const int gas) {
+        m_reservedMinerals += minerals;
+        m_reservedGas += gas;
+    }
+
+    void Manager::releaseResources(const int minerals, const int gas) {
+        m_reservedMinerals -= minerals;
+        m_reservedGas -= gas;
+    }
 
 } // namespace
