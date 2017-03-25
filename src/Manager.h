@@ -32,8 +32,10 @@ namespace KBot {
 
         int getAvailableMinerals() const { return BWAPI::Broodwar->self()->minerals() - m_reservedMinerals; }
         int getAvailableGas() const { return BWAPI::Broodwar->self()->gas() - m_reservedGas; }
-        void aquireResources(const int minerals, const int gas);
+        bool acquireResources(const int minerals, const int gas);
         void releaseResources(const int minerals, const int gas);
+        BWAPI::Unit acquireWorker(const BWAPI::UnitType &workerType, const BWAPI::Position &position);
+        void releaseWorker(const BWAPI::Unit &worker);
 
     private:
         KBot &m_kBot;
@@ -41,6 +43,7 @@ namespace KBot {
         std::vector<BuildTask> m_buildQueue;
         int m_reservedMinerals = 0;
         int m_reservedGas = 0;
+        std::vector<BWAPI::Unit> m_worker;
     };
 
 } // namespace

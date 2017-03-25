@@ -60,20 +60,49 @@ namespace KBot {
         m_buildQueue.push_back(buildTask);
     }
 
-    void Manager::onBuildTaskCreated(const Unit &unit) {}
+    void Manager::onBuildTaskCreated(const Unit &unit) {
+        for (auto &buildTask : m_buildQueue) {
+            if (buildTask.onUnitCreated(unit))
+                return;
+        }
+    }
 
     void Manager::onBuildTaskDestroyed(const Unit &unit) {}
 
     void Manager::onBuildTaskCompleted(const Unit &unit) {}
 
-    void Manager::aquireResources(const int minerals, const int gas) {
-        m_reservedMinerals += minerals;
-        m_reservedGas += gas;
+    bool Manager::acquireResources(const int minerals, const int gas) {
+        auto &me = *Broodwar->self();
+        if (me.minerals() >= minerals && me.gas() >= gas) {
+            m_reservedMinerals += minerals;
+            m_reservedGas += gas;
+            return true;
+        }
+        return false;
     }
 
     void Manager::releaseResources(const int minerals, const int gas) {
         m_reservedMinerals -= minerals;
         m_reservedGas -= gas;
+    }
+
+    Unit Manager::acquireWorker(const UnitType &workerType, const Position &position) {
+        Unit worker = Broodwar->getClosestUnit(position,
+            Filter::GetType == workerType && Filter::IsOwned
+            && (Filter::IsIdle || Filter::IsGatheringMinerals));
+
+        if (worker) {
+            if (std::find(m_worker.begin(), m_worker.end(), worker) != m_worker.end())
+                worker = nullptr; // worker already acquired
+            else
+                m_worker.push_back(worker);
+        }
+
+        return worker;
+    }
+
+    void Manager::releaseWorker(const Unit &worker) {
+        m_worker.erase(std::remove(m_worker.begin(), m_worker.end(), worker), m_worker.end());
     }
 
 } // namespace
