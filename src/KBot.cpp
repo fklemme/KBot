@@ -1,7 +1,5 @@
 #include "KBot.h"
 
-#include <cassert>
-#include <iostream>
 #include <random>
 #include "Squad.h"
 #include "utils.h"
@@ -14,7 +12,8 @@ namespace KBot {
 
     // Called only once at the beginning of a game.
     void KBot::onStart() {
-        if (Broodwar->isReplay()) return;
+        if (Broodwar->isReplay())
+            return;
 
         // This bot is written for Terran, so make sure we are indeed Terran!
         if (Broodwar->self()->getRace() != Races::Terran) {
@@ -36,9 +35,6 @@ namespace KBot {
         m_map.EnableAutomaticPathAnalysis();
         const bool r = m_map.FindBasesForStartingLocations();
         assert(r);
-
-        // Create initial base
-        m_manager.createBase(Broodwar->self()->getStartLocation());
 
         // Ready to go. Good luck, have fun!
         Broodwar->sendText("gl hf");
@@ -109,46 +105,63 @@ namespace KBot {
     void KBot::onNukeDetect(BWAPI::Position target) {}
 
     // Called when a Unit becomes accessible.
-    void KBot::onUnitDiscover(BWAPI::Unit unit) {}
+    void KBot::onUnitDiscover(BWAPI::Unit unit) {
+        assert(unit->exists());
+    }
 
     // Called when a Unit becomes inaccessible.
-    void KBot::onUnitEvade(BWAPI::Unit unit) {}
+    void KBot::onUnitEvade(BWAPI::Unit unit) {
+        assert(!unit->exists());
+    }
 
     // Called when a previously invisible unit becomes visible.
     void KBot::onUnitShow(BWAPI::Unit unit) {
+        assert(unit->exists());
+
         // Update enemy positions
         if (Broodwar->self()->isEnemy(unit->getPlayer()) && unit->getType().isBuilding()) {
             const auto myPosition = Broodwar->self()->getStartLocation();
-            TilePosition position(unit->getPosition());
+            const TilePosition position(unit->getPosition());
             if (std::find(m_enemyPositions.begin(), m_enemyPositions.end(), position) == m_enemyPositions.end()) {
                 const auto it = std::lower_bound(m_enemyPositions.begin(), m_enemyPositions.end(), position,
-                    [&](TilePosition a, TilePosition b) { return distance(myPosition, a) < distance(myPosition, b); });
+                    [&](const TilePosition &a, const TilePosition &b) { return distance(myPosition, a) < distance(myPosition, b); });
                 m_enemyPositions.insert(it, position);
             }
         }
     }
 
     // Called just as a visible unit is becoming invisible.
-    void KBot::onUnitHide(BWAPI::Unit unit) {}
+    void KBot::onUnitHide(BWAPI::Unit unit) {
+        //assert(!unit->exists()); ???
+    }
 
     // Called when any unit is created.
     void KBot::onUnitCreate(BWAPI::Unit unit) {
         assert(unit->exists());
 
-        if (unit->getPlayer() == Broodwar->self())
-            m_underConstruction.push_back(unit);
+        // My unit
+        if (unit->getPlayer() == Broodwar->self()) {
+            // Notify build tasks
+            m_manager.onBuildTaskCreated(unit);
+        }
+
     }
 
     // Called when a unit is removed from the game either through death or other means.
     void KBot::onUnitDestroy(BWAPI::Unit unit) {
         assert(!unit->exists());
 
-        if (unit->getPlayer() == Broodwar->self())
+        // My unit
+        if (unit->getPlayer() == Broodwar->self()) {
+            // Notify build tasks
+            m_manager.onBuildTaskDestroyed(unit);
+
             // Dispatch
             if (unit->getType().isBuilding() || unit->getType().isWorker())
                 m_manager.onUnitDestroy(unit);
             else
                 m_general.onUnitDestroy(unit);
+        }
 
         // Update BWEM information
         if (unit->getType().isMineralField())
@@ -176,35 +189,17 @@ namespace KBot {
     void KBot::onUnitComplete(BWAPI::Unit unit) {
         assert(unit->exists());
 
+        // My unit
         if (unit->getPlayer() == Broodwar->self()) {
-            const auto it = std::find(m_underConstruction.begin(), m_underConstruction.end(), unit);
-            assert(it != m_underConstruction.end());
-            m_underConstruction.erase(it);
+            // Notify build tasks
+            m_manager.onBuildTaskCompleted(unit);
 
-            // Dispatch
+            // Dispatch ownership
             if (unit->getType().isBuilding() || unit->getType().isWorker())
                 m_manager.transferOwnership(unit);
             else
                 m_general.transferOwnership(unit);
         }
-    }
-
-    TilePosition KBot::getNextBasePosition() const {
-        std::vector<TilePosition> positions;
-        for (const auto &area : m_map.Areas()) {
-            for (const auto &base : area.Bases())
-                if (std::all_of(m_manager.getBases().begin(), m_manager.getBases().end(),
-                    [&base](const Base &b) { return b.getPosition() != base.Location(); }))
-                    positions.push_back(base.Location());
-        }
-
-        // Order position by and distance to own starting base.
-        std::sort(positions.begin(), positions.end(), [this](TilePosition a, TilePosition b) {
-            const auto startPosition = manager().getBases().front().getPosition();
-            return distance(startPosition, a) < distance(startPosition, b);
-        });
-
-        return positions.front();
     }
 
     TilePosition KBot::getNextEnemyPosition() const {

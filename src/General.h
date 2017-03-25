@@ -1,11 +1,11 @@
 #pragma once
 
 #include <BWAPI.h>
+#include "Squad.h"
 
 namespace KBot {
 
     class KBot;
-    class Squad;
 
     class General {
     public:

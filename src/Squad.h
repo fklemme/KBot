@@ -1,9 +1,10 @@
 #pragma once
 
 #include <BWAPI.h>
-#include "KBot.h"
 
 namespace KBot {
+
+    class KBot;
 
     enum class SquadState { scout, attack, defend };
 
@@ -17,7 +18,7 @@ namespace KBot {
         SquadState getState() const { return m_state; }
 
     private:
-        std::reference_wrapper<KBot> m_kBot;
+        KBot *m_kBot;
         SquadState m_state;
     };
 

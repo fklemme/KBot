@@ -10,10 +10,6 @@ namespace KBot {
     Manager::Manager(KBot &kBot) : m_kBot(kBot) {}
 
     void Manager::update() {
-        // TODO: redundant in Manager and Base!
-        const auto mineralWorkerRatio = 2;
-        const auto gasWorkerRatio = 3;
-
         // Display debug information
         Broodwar->drawTextScreen(2, 50, "Manager: -");
 
@@ -21,36 +17,14 @@ namespace KBot {
         for (auto &base : m_bases)
             base.update();
 
+        // Update build tasks
+        for (auto &buildTask : m_buildQueue)
+            buildTask.update();
+
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
-
-        // TODO: When and how to expand? Just a expand test so far...
-        TilePosition max(Broodwar->mapWidth(), Broodwar->mapHeight());
-        const auto scv_count = Broodwar->getUnitsInRectangle(Position(0, 0), Position(max), Filter::IsWorker).size();
-        const auto natural = m_kBot.getNextBasePosition();
-        if (m_bases.size() == 1 && scv_count >= 20)
-            createBase(natural);
-
-        // Transfer workers
-        for (int i = 0; i < (int) m_bases.size() - 1; ++i) {
-            auto &base = m_bases[i];
-            const auto targetMineralWorkers = std::size_t(std::ceil(mineralWorkerRatio * base.m_minerals.size()));
-            const auto targetGasWorkers = std::size_t(std::ceil(gasWorkerRatio * base.m_gas.size()));
-
-            // TODO: Gas stuff...
-            if (base.m_mineralWorkers.size() > targetMineralWorkers) {
-                auto unit = *base.m_mineralWorkers.begin();
-                base.m_units.erase(unit);
-                unit->stop();
-                m_bases.back().transferOwnership(unit);
-            }
-        }
-    }
-
-    void Manager::createBase(const TilePosition &position) {
-        m_bases.emplace_back(m_kBot, position);
     }
 
     void Manager::transferOwnership(const Unit &unit) {
@@ -68,5 +42,33 @@ namespace KBot {
         for (auto &base : m_bases)
             base.onUnitDestroy(unit);
     }
+
+    //TilePosition KBot::getNextBasePosition() const {
+    //    std::vector<TilePosition> positions;
+    //    for (const auto &area : m_map.Areas()) {
+    //        for (const auto &base : area.Bases())
+    //            if (std::all_of(m_manager.getBases().begin(), m_manager.getBases().end(),
+    //                [&base](const Base &b) { return b.getPosition() != base.Location(); }))
+    //                positions.push_back(base.Location());
+    //    }
+
+    //    // Order position by and distance to own starting base.
+    //    std::sort(positions.begin(), positions.end(), [this](TilePosition a, TilePosition b) {
+    //        const auto startPosition = manager().getBases().front().getPosition();
+    //        return distance(startPosition, a) < distance(startPosition, b);
+    //    });
+
+    //    return positions.front();
+    //}
+
+    void Manager::addBuildTask(const BuildTask &buildTask) {
+        m_buildQueue.push_back(buildTask);
+    }
+
+    void Manager::onBuildTaskCreated(const Unit &unit) {}
+
+    void Manager::onBuildTaskDestroyed(const Unit &unit) {}
+
+    void Manager::onBuildTaskCompleted(const Unit &unit) {}
 
 } // namespace

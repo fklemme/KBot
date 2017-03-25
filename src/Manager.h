@@ -21,12 +21,14 @@ namespace KBot {
         // Is called every KBot::onFrame().
         void update();
 
-        const std::vector<Base> &getBases() const { return m_bases; }
-        void createBase(const BWAPI::TilePosition &position);
-
         // Transfer ownership of a unit to manager.
         void transferOwnership(const BWAPI::Unit &unit);
         void onUnitDestroy(const BWAPI::Unit &unit);
+
+        void addBuildTask(const BuildTask &buildTask);
+        void onBuildTaskCreated(const BWAPI::Unit &unit);
+        void onBuildTaskDestroyed(const BWAPI::Unit &unit);
+        void onBuildTaskCompleted(const BWAPI::Unit &unit);
 
     private:
         KBot &m_kBot;
