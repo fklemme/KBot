@@ -8,12 +8,19 @@ namespace KBot {
 
     using namespace BWAPI;
 
-    KBot::KBot() : m_map(BWEM::Map::Instance()), m_manager(*this), m_general(*this) {}
+    // Bot and version information
+    const std::string KBot::botname = "KBot";
+    const std::string KBot::version = "1.1 beta";
+
+    KBot::KBot() : m_manager(*this), m_general(*this) {}
 
     // Called only once at the beginning of a game.
     void KBot::onStart() {
         if (Broodwar->isReplay() || !Broodwar->self())
             return;
+
+        // Print bot and version information
+        Broodwar << botname << " version " << version << std::endl;
 
         // This bot is written for Terran, so make sure we are indeed Terran!
         if (Broodwar->self()->getRace() != Races::Terran) {

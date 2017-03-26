@@ -9,6 +9,9 @@
 namespace KBot {
 
     class KBot : public BWAPI::AIModule {
+        // Bot and version information
+        static const std::string botname, version;
+
     public:
         KBot();
 
@@ -45,14 +48,13 @@ namespace KBot {
         General &general() { return m_general; }
         const General &general() const { return m_general; }
 
-        BWAPI::TilePosition getNextBasePosition() const;
         BWAPI::TilePosition getNextEnemyPosition() const;
         std::size_t getEnemyPositionCount() const { return m_enemyPositions.size(); }
 
     private:
-        BWEM::Map &m_map;
         Manager m_manager;
         General m_general;
+        BWEM::Map &m_map = BWEM::Map::Instance();
 
         std::vector<BWAPI::TilePosition> m_enemyPositions;
         std::vector<BWAPI::Unit> m_underConstruction;
