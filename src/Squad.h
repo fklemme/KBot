@@ -6,20 +6,21 @@ namespace KBot {
 
     class KBot;
 
-    enum class SquadState { scout, attack, defend };
-
-    std::string to_string(SquadState state);
-
     class Squad : public BWAPI::Unitset {
+    public:
+        enum class State { scout, attack, defend };
+
     public:
         Squad(KBot &kBot);
 
         void update();
-        SquadState getState() const { return m_state; }
+        State getState() const { return m_state; }
 
     private:
         KBot *m_kBot;
-        SquadState m_state;
+        State m_state;
     };
+
+    std::string to_string(Squad::State state);
 
 } // namespace

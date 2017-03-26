@@ -133,7 +133,7 @@ namespace KBot {
         // My unit
         if (unit->getPlayer() == Broodwar->self()) {
             // Notify build tasks
-            m_manager.onBuildTaskCreated(unit);
+            m_manager.buildTaskOnUnitCreated(unit);
         }
 
     }
@@ -145,7 +145,7 @@ namespace KBot {
         // My unit
         if (unit->getPlayer() == Broodwar->self()) {
             // Notify build tasks
-            m_manager.onBuildTaskDestroyed(unit);
+            m_manager.buildTaskOnUnitDestroyed(unit);
 
             // Dispatch
             if (unit->getType().isBuilding() || unit->getType().isWorker())
@@ -183,7 +183,7 @@ namespace KBot {
         // My unit
         if (unit->getPlayer() == Broodwar->self()) {
             // Notify build tasks
-            m_manager.onBuildTaskCompleted(unit);
+            m_manager.buildTaskOnUnitCompleted(unit);
 
             // Dispatch ownership
             if (unit->getType().isBuilding() || unit->getType().isWorker())

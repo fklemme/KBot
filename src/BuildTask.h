@@ -6,14 +6,8 @@ namespace KBot {
 
     class Manager;
 
-    enum class BuildPriority : int {
-        low = -100,
-        normal = 0,
-        high = 100,
-        buildorder = 200
-    };
-
     class BuildTask {
+    public:
         enum class State {
             initialize,
             acquireResources,
@@ -25,22 +19,30 @@ namespace KBot {
             finalize
         };
 
+        enum class Priority : int {
+            low = -100,
+            normal = 0,
+            high = 100,
+            buildorder = 200
+        };
+
     public:
-        BuildTask(Manager &manager, const BWAPI::UnitType &toBuild, const BuildPriority priority = BuildPriority::normal,
+        BuildTask(Manager &manager, const BWAPI::UnitType &toBuild, const Priority priority = Priority::normal,
             const BWAPI::TilePosition &position = BWAPI::Broodwar->self()->getStartLocation(), const bool exactPosition = false);
 
         // Is called every KBot::onFrame().
         void update();
 
         bool onUnitCreated(const BWAPI::Unit &unit);
-        void onUnitDestroyed(const BWAPI::Unit &unit);
+        bool onUnitDestroyed(const BWAPI::Unit &unit);
 
+        State getState() const { return m_state; }
         std::string toString() const;
 
     private:
         Manager *m_manager;
         BWAPI::UnitType m_toBuild;
-        BuildPriority m_priority;
+        Priority m_priority;
         BWAPI::TilePosition m_position;
         bool m_exactPosition;
 

@@ -37,6 +37,13 @@ namespace KBot {
         // Latency frames are the number of frames before commands are processed.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
+
+        // Cleanup finished build tasks.
+        for (auto it = m_buildQueue.begin(); it != m_buildQueue.end();) {
+            if (it->getState() == BuildTask::State::finalize)
+                it = m_buildQueue.erase(it);
+            else ++it;
+        }
     }
 
     void Manager::transferOwnership(const Unit &unit) {
@@ -60,16 +67,25 @@ namespace KBot {
         m_buildQueue.push_back(buildTask);
     }
 
-    void Manager::onBuildTaskCreated(const Unit &unit) {
+    void Manager::buildTaskOnUnitCreated(const Unit &unit) {
+        // Return as soon as the first build task can identify the created unit.
         for (auto &buildTask : m_buildQueue) {
             if (buildTask.onUnitCreated(unit))
                 return;
         }
     }
 
-    void Manager::onBuildTaskDestroyed(const Unit &unit) {}
+    void Manager::buildTaskOnUnitDestroyed(const Unit &unit) {
+        // Return as soon as the first build task can identify the destroyed unit.
+        for (auto &buildTask : m_buildQueue) {
+            if (buildTask.onUnitDestroyed(unit))
+                return;
+        }
+    }
 
-    void Manager::onBuildTaskCompleted(const Unit &unit) {}
+    void Manager::buildTaskOnUnitCompleted(const Unit &unit) {
+        // TODO
+    }
 
     bool Manager::acquireResources(const int minerals, const int gas) {
         auto &me = *Broodwar->self();
@@ -92,17 +108,17 @@ namespace KBot {
             && (Filter::IsIdle || Filter::IsGatheringMinerals));
 
         if (worker) {
-            if (std::find(m_worker.begin(), m_worker.end(), worker) != m_worker.end())
+            if (std::find(m_workers.begin(), m_workers.end(), worker) != m_workers.end())
                 worker = nullptr; // worker already acquired
             else
-                m_worker.push_back(worker);
+                m_workers.push_back(worker);
         }
 
         return worker;
     }
 
     void Manager::releaseWorker(const Unit &worker) {
-        m_worker.erase(std::remove(m_worker.begin(), m_worker.end(), worker), m_worker.end());
+        m_workers.erase(std::remove(m_workers.begin(), m_workers.end(), worker), m_workers.end());
     }
 
 } // namespace

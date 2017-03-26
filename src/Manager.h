@@ -26,9 +26,9 @@ namespace KBot {
         void onUnitDestroy(const BWAPI::Unit &unit);
 
         void addBuildTask(const BuildTask &buildTask);
-        void onBuildTaskCreated(const BWAPI::Unit &unit);
-        void onBuildTaskDestroyed(const BWAPI::Unit &unit);
-        void onBuildTaskCompleted(const BWAPI::Unit &unit);
+        void buildTaskOnUnitCreated(const BWAPI::Unit &unit);
+        void buildTaskOnUnitDestroyed(const BWAPI::Unit &unit);
+        void buildTaskOnUnitCompleted(const BWAPI::Unit &unit);
 
         int getAvailableMinerals() const { return BWAPI::Broodwar->self()->minerals() - m_reservedMinerals; }
         int getAvailableGas() const { return BWAPI::Broodwar->self()->gas() - m_reservedGas; }
@@ -43,7 +43,7 @@ namespace KBot {
         std::vector<BuildTask> m_buildQueue;
         int m_reservedMinerals = 0;
         int m_reservedGas = 0;
-        std::vector<BWAPI::Unit> m_worker;
+        std::vector<BWAPI::Unit> m_workers;
     };
 
 } // namespace

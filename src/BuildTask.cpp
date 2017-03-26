@@ -8,13 +8,18 @@ namespace KBot {
     using namespace BWAPI;
 
     BuildTask::BuildTask(Manager &manager,
-        const UnitType &toBuild, const BuildPriority priority,
+        const UnitType &toBuild, const Priority priority,
         const TilePosition &position, const bool exactPosition)
         : m_manager(&manager), m_toBuild(toBuild), m_priority(priority),
         m_position(position), m_exactPosition(exactPosition) {
     }
 
     void BuildTask::update() {
+        // Prevent spamming by only running our onFrame once every number of latency frames.
+        // Latency frames are the number of frames before commands are processed.
+        if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
+            return;
+
         switch (m_state) {
             case State::initialize:
                 // TODO: Make checks and stuff...
@@ -63,9 +68,15 @@ namespace KBot {
                     m_manager->releaseResources(m_toBuild.mineralPrice(), m_toBuild.gasPrice());
                     m_state = State::building; // go to next state
                 }
+                break;
             case State::building:
+                if (m_buildingUnit->isCompleted()) {
+                    m_manager->releaseWorker(m_worker);
+                    m_state = State::finalize; // go to next state
+                }
+                break;
             case State::finalize:
-                // TODO...
+                // At this state, this build task can be removed from the queue.
                 break;
             default:
                 throw std::logic_error("Unknown BuildTask::State!");
@@ -80,8 +91,15 @@ namespace KBot {
         return false;
     }
 
-    void BuildTask::onUnitDestroyed(const Unit &unit) {
-        // TODO
+    bool BuildTask::onUnitDestroyed(const Unit &unit) {
+        if (unit == m_worker) {
+            // FIXME!
+            return true;
+        } else if (unit == m_buildingUnit) {
+            // FIXME!
+            return true;
+        }
+        return false;
     }
 
     std::string BuildTask::toString() const {

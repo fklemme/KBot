@@ -44,7 +44,7 @@ namespace KBot {
                 auto hit = std::find_if(it + 1, m_squads.end(), [it](const Squad &squad) {
                     return (distance(it->getPosition(), squad.getPosition()) < 200)
                         || (distance(it->getPosition(), squad.getPosition()) < 500
-                            && it->getState() == SquadState::defend && squad.getState() == SquadState::defend);
+                            && it->getState() == Squad::State::defend && squad.getState() == Squad::State::defend);
                 });
 
                 if (hit != m_squads.end()) {

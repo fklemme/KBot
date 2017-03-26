@@ -7,20 +7,7 @@ namespace KBot {
 
     using namespace BWAPI;
 
-    std::string to_string(SquadState state) {
-        switch (state) {
-            case SquadState::scout:
-                return "Scout";
-            case SquadState::attack:
-                return "Attack";
-            case SquadState::defend:
-                return "Defend";
-            default:
-                throw std::logic_error("Unknown SquadState!");
-        }
-    }
-
-    Squad::Squad(KBot &kBot) : m_kBot(&kBot), m_state(SquadState::scout) {}
+    Squad::Squad(KBot &kBot) : m_kBot(&kBot), m_state(State::scout) {}
 
     void Squad::update() {
         if (!empty()) {
@@ -57,34 +44,34 @@ namespace KBot {
         // Update squad state
         const auto oldState = m_state;
         switch (m_state) {
-            case SquadState::scout:
+            case State::scout:
                 if (!enemiesNearBase.empty())
-                    m_state = SquadState::defend;
+                    m_state = State::defend;
                 else if (m_kBot->getEnemyPositionCount() > 0) {
                     if (size() >= 20)
-                        m_state = SquadState::attack;
+                        m_state = State::attack;
                     else
-                        m_state = SquadState::defend;
+                        m_state = State::defend;
                 }
                 break;
-            case SquadState::attack:
+            case State::attack:
                 if (!enemiesNearBase.empty())
-                    m_state = SquadState::defend;
+                    m_state = State::defend;
                 else if (m_kBot->getEnemyPositionCount() == 0)
-                    m_state = SquadState::scout;
+                    m_state = State::scout;
                 else if (size() < 10)
-                    m_state = SquadState::defend;
+                    m_state = State::defend;
                 break;
-            case SquadState::defend:
+            case State::defend:
                 if (enemiesNearBase.empty()) {
                     if (m_kBot->getEnemyPositionCount() == 0)
-                        m_state = SquadState::scout;
+                        m_state = State::scout;
                     if (size() >= 20)
-                        m_state = SquadState::attack;
+                        m_state = State::attack;
                 }
                 break;
             default:
-                throw std::logic_error("Unknown SquadState!");
+                throw std::logic_error("Unknown Squad::State!");
         }
         // Reassign orders on state change
         if (m_state != oldState)
@@ -107,12 +94,12 @@ namespace KBot {
                 BWEM::CPPath unitPath;
 
                 switch (m_state) {
-                    case SquadState::scout:
+                    case State::scout:
                         if (unit->isIdle())
                             // Scout!
                             unit->attack(Position(m_kBot->getNextEnemyPosition()));
                         break;
-                    case SquadState::attack:
+                    case State::attack:
                         unitPath = m_kBot->map().GetPath(unit->getPosition(), getPosition(), &unitPathLength);
                         if (unitPathLength > 400 && !unit->isUnderAttack()) {
                             // Regroup!
@@ -142,7 +129,7 @@ namespace KBot {
                             // Attack!
                             unit->attack(Position(m_kBot->getNextEnemyPosition()));
                         break;
-                    case SquadState::defend:
+                    case State::defend:
                         if (distance(unit->getPosition(), Broodwar->self()->getStartLocation()) > 1000) {
                             // Retreat!
                             // Prevent spamming, check if order is already set.
@@ -153,9 +140,22 @@ namespace KBot {
                             unit->attack(unit->getClosestUnit(Filter::IsEnemy)->getPosition());
                         break;
                     default:
-                        throw std::logic_error("Unknown SquadState!");
+                        throw std::logic_error("Unknown Squad::State!");
                 }
             }
+        }
+    }
+
+    std::string to_string(Squad::State state) {
+        switch (state) {
+            case Squad::State::scout:
+                return "Scout";
+            case Squad::State::attack:
+                return "Attack";
+            case Squad::State::defend:
+                return "Defend";
+            default:
+                throw std::logic_error("Unknown Squad::State!");
         }
     }
 
