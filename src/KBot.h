@@ -9,9 +9,6 @@
 namespace KBot {
 
     class KBot : public BWAPI::AIModule {
-        // Bot and version information
-        static const std::string botname, version;
-
     public:
         KBot();
 

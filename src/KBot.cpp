@@ -4,13 +4,12 @@
 #include "Squad.h"
 #include "utils.h"
 
+#define MACROSTR(S) #S
+#define STRINGER(X) MACROSTR(X)
+
 namespace KBot {
 
     using namespace BWAPI;
-
-    // Bot and version information
-    const std::string KBot::botname = "KBot";
-    const std::string KBot::version = "1.1 beta";
 
     KBot::KBot() : m_manager(*this), m_general(*this) {}
 
@@ -19,8 +18,8 @@ namespace KBot {
         if (Broodwar->isReplay() || !Broodwar->self())
             return;
 
-        // Print bot and version information
-        Broodwar << botname << " version " << version << std::endl;
+        // Print build information
+        Broodwar << "KBot build " STRINGER(BUILDNUMBER) << std::endl;
 
         // This bot is written for Terran, so make sure we are indeed Terran!
         if (Broodwar->self()->getRace() != Races::Terran) {
