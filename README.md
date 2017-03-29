@@ -1,6 +1,7 @@
 # KBot
-![Build status](https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/1/badge)
 Starcraft Bot (using BWAPI)
+
+Build status on master branch: [![Build status](https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/1/badge)](https://kruecke.visualstudio.com/KBot)
 
 # Build
 - Change the path in `StarcraftPath.props` to match your installation of Starcraft Broodwar.
