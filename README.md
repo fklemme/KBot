@@ -1,9 +1,18 @@
 # KBot
-[![Build status](https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/1/badge)](https://kruecke.visualstudio.com/KBot)
-
 Starcraft Bot (using BWAPI)
 
-# Build
+# Build status
+
+| Branch      | Status                                         |
+| ----------- | ---------------------------------------------- |
+| master      | [![Build status][master badge]][vs build]      |
+| development | [![Build status][development badge]][vs build] |
+
+[vs build]: https://kruecke.visualstudio.com/KBot
+[master badge]: https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/1/badge
+[development badge]: https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/2/badge
+
+# Build in Visual Studio
 - Change the path in `StarcraftPath.props` to match your installation of Starcraft Broodwar.
 - The solution file is for Visual Studio 2017, but you need the Visual Studio 2013 Platform Toolset (v120) for building.
 
