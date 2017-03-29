@@ -4,8 +4,11 @@
 #include "Squad.h"
 #include "utils.h"
 
-#define MACROSTR(S) #S
+// Some ugly macro magic to get BUILDNUMBER as a string.
+#pragma warning (disable: 4003)
+#define MACROSTR(S) #S ""
 #define STRINGER(X) MACROSTR(X)
+static const std::string buildNumber = STRINGER(BUILDNUMBER);
 
 namespace KBot {
 
@@ -19,7 +22,7 @@ namespace KBot {
             return;
 
         // Print build information
-        Broodwar << "KBot build " STRINGER(BUILDNUMBER) << std::endl;
+        Broodwar << "KBot build " << (buildNumber.size() ? buildNumber : "local") << std::endl;
 
         // This bot is written for Terran, so make sure we are indeed Terran!
         if (Broodwar->self()->getRace() != Races::Terran) {
