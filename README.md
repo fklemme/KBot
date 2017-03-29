@@ -1,4 +1,6 @@
 # KBot
+[![Build status](https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/1/badge)](https://kruecke.visualstudio.com/KBot)
+
 Starcraft Bot (using BWAPI)
 
 # Build
