@@ -71,12 +71,12 @@ public:
 	Cell &						GetCell(const BWAPI::TilePosition & t, check_t checkMode = check_t::check)		{ bwem_assert((checkMode == check_t::no_check) || m_pMap->Valid(t)); utils::unused(checkMode); return GetCell(t.x/N, t.y/N, check_t::no_check); }
 
 	// Returns the coordinates of the Cell thats contains the Tile t
-	std::pair<int, int>			GetCellCoords(const BWAPI::TilePosition & t, check_t checkMode = check_t::check) const	{ bwem_assert((checkMode == check_t::no_check) || m_pMap->Valid(t)); utils::unused(checkMode); return make_pair(t.x/N, t.y/N); }
+	std::pair<int, int>			GetCellCoords(const BWAPI::TilePosition & t, check_t checkMode = check_t::check) const	{ bwem_assert((checkMode == check_t::no_check) || m_pMap->Valid(t)); utils::unused(checkMode); return std::make_pair(t.x/N, t.y/N); }
 
 	// Returns specific tiles of a Cell, given its coordinates.
 	BWAPI::TilePosition			GetTopLeft(int i, int j, check_t checkMode = check_t::check) const				{ bwem_assert((checkMode == check_t::no_check) || ValidCoords(i, j)); utils::unused(checkMode); return BWAPI::TilePosition(i*N, j*N); }
-	BWAPI::TilePosition			GetBottomRight(int i, int j, check_t checkMode = check_t::check) const			{ bwem_assert((checkMode == check_t::no_check) || ValidCoords(i, j)); utils::unused(checkMode); return BWAPI::TilePosition((i+1)*N, (j+1)*N) - 1; }
-	BWAPI::TilePosition			GetCenter(int i, int j, check_t checkMode = check_t::check) const					{ bwem_assert((checkMode == check_t::no_check) || ValidCoords(i, j)); utils::unused(checkMode); return BWAPI::TilePosition(i*N, j*N) + N/2; }
+	BWAPI::TilePosition			GetBottomRight(int i, int j, check_t checkMode = check_t::check) const			{ bwem_assert((checkMode == check_t::no_check) || ValidCoords(i, j)); utils::unused(checkMode); using namespace BWAPI_ext; return BWAPI::TilePosition((i+1)*N, (j+1)*N) - 1; }
+	BWAPI::TilePosition			GetCenter(int i, int j, check_t checkMode = check_t::check) const					{ bwem_assert((checkMode == check_t::no_check) || ValidCoords(i, j)); utils::unused(checkMode); using namespace BWAPI_ext; return BWAPI::TilePosition(i*N, j*N) + N/2; }
 
 	// Provides access to the internal array of Cells.
 	const std::vector<Cell> &	Cells() const						{ return m_Cells; }
@@ -102,7 +102,7 @@ GridMap<T, N>::GridMap(const Map * pMap)
 {
 	static_assert(N > 0, "GridMap::cell_width_in_tiles must be > 0");
 	bwem_assert_throw(pMap->Initialized());
-	bwem_assert_throw(N <= min(pMap->Size().x, pMap->Size().y));
+	bwem_assert_throw(N <= std::min(pMap->Size().x, pMap->Size().y));
 	bwem_assert_throw(pMap->Size().x % N == 0);
 	bwem_assert_throw(pMap->Size().y % N == 0);
 
