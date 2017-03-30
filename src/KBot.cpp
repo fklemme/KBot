@@ -47,8 +47,19 @@ namespace KBot {
         const bool r = m_map.FindBasesForStartingLocations();
         assert(r);
 
-        // Test BuildTask, TODO: (re)move
-        m_manager.addBuildTask({m_manager, UnitTypes::Terran_Barracks});
+        // Test BuildTask, TODO: Replace hardcoded build order
+        using namespace UnitTypes;
+        const auto buildorder = {
+            Terran_SCV, Terran_SCV, Terran_SCV, // build SCVs...
+            Terran_SCV, Terran_SCV, Terran_Supply_Depot, // @ 9/10 supply
+            Terran_SCV, Terran_SCV, Terran_Barracks, // @ 11/18 supply
+            Terran_SCV, Terran_SCV, Terran_Barracks, // @ 13/18 supply
+            Terran_SCV, Terran_Supply_Depot // @ 14/18 supply
+        };
+
+        int priority = (int) BuildTask::Priority::buildorder;
+        for (const auto &unit : buildorder)
+            m_manager.addBuildTask({m_manager, unit, (BuildTask::Priority) priority--});
 
         // Ready to go. Good luck, have fun!
         Broodwar->sendText("gl hf");

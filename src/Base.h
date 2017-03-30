@@ -25,7 +25,7 @@ namespace KBot {
         BWAPI::Unitset      m_units;
 
         BWAPI::Unitset m_minerals, m_mineralWorkers;
-        BWAPI::Unitset m_gas,      m_gasWorkers;
+        BWAPI::Unitset m_gas, m_gasWorkers;
     };
 
 } // namespace

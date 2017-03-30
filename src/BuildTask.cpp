@@ -11,8 +11,7 @@ namespace KBot {
         const UnitType &toBuild, const Priority priority,
         const TilePosition &position, const bool exactPosition)
         : m_manager(&manager), m_toBuild(toBuild), m_priority(priority),
-        m_position(position), m_exactPosition(exactPosition) {
-    }
+        m_position(position), m_exactPosition(exactPosition) {}
 
     void BuildTask::update() {
         // Prevent spamming by only running our onFrame once every number of latency frames.
@@ -54,13 +53,19 @@ namespace KBot {
                 break;
             }
             case State::startBuild:
-                // FIXME: Non-Buildings...
-                if (Broodwar->canBuildHere(m_buildPosition, m_toBuild, m_worker)) {
-                    if (m_worker->build(m_toBuild, m_buildPosition))
-                        m_state = State::waitForUnit; // go to next state
+                if (m_toBuild.isBuilding()) {
+                    // Construct building
+                    if (Broodwar->canBuildHere(m_buildPosition, m_toBuild, m_worker)) {
+                        if (m_worker->build(m_toBuild, m_buildPosition))
+                            m_state = State::waitForUnit; // go to next state
+                    } else {
+                        m_allocatedBuildPosition = false;
+                        m_state = State::moveToPosition; // go back and try again
+                    }
                 } else {
-                    m_allocatedBuildPosition = false;
-                    m_state = State::moveToPosition; // go back and try again
+                    // Train unit
+                    if (m_worker->train(m_toBuild))
+                        m_state = State::waitForUnit; // go to next state
                 }
                 break;
             case State::waitForUnit:
@@ -84,7 +89,7 @@ namespace KBot {
     }
 
     bool BuildTask::onUnitCreated(const Unit &unit) {
-        if (unit->getType() == m_toBuild) {
+        if (m_buildingUnit == nullptr && unit->getType() == m_toBuild) {
             m_buildingUnit = unit;
             return true;
         }

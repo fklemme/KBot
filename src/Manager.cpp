@@ -95,7 +95,7 @@ namespace KBot {
         }
 
         // Allocate resources if available.
-        if (Broodwar->self()->minerals() >= minerals && Broodwar->self()->gas() >= gas) {
+        if (getAvailableMinerals() >= minerals && getAvailableGas() >= gas) {
             m_reservedMinerals += minerals;
             m_reservedGas += gas;
             return true;
@@ -112,7 +112,8 @@ namespace KBot {
 
     Unit Manager::acquireWorker(const UnitType &workerType, const Position &position) {
         Unit worker = Broodwar->getClosestUnit(position,
-            Filter::GetType == workerType && Filter::IsOwned
+            Filter::GetType == workerType
+            && Filter::IsOwned && Filter::IsCompleted
             && (Filter::IsIdle || Filter::IsGatheringMinerals));
 
         if (worker) {
