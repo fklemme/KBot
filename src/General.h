@@ -25,7 +25,7 @@ namespace KBot {
         void onUnitDestroy(const BWAPI::Unit &unit);
 
     private:
-        KBot &m_kBot;
+        KBot              &m_kBot;
         std::vector<Squad> m_squads;
     };
 

@@ -5,10 +5,12 @@
 #include "utils.h"
 
 // Some ugly macro magic to get BUILDNUMBER as a string.
-#pragma warning (disable: 4003)
+#pragma warning(push)
+#pragma warning(disable: 4003) // there is some silly warning in VS2017
 #define MACROSTR(S) #S ""
 #define STRINGER(X) MACROSTR(X)
 static const std::string buildNumber = STRINGER(BUILDNUMBER);
+#pragma warning(pop)
 
 namespace KBot {
 
@@ -70,11 +72,6 @@ namespace KBot {
             Broodwar->drawTextScreen(2, 20, "Next enemy position: (%d, %d)", enemyPosition.x, enemyPosition.y);
         } else
             Broodwar->drawTextScreen(2, 20, "Next enemy position: Unknown");
-
-#ifndef _DEBUG
-        // Draw map (to slow for debug mode)
-        //BWEM::utils::drawMap(m_map);
-#endif // !_DEBUG
 
         // Update enemy positions
         while (!m_enemyPositions.empty() && Broodwar->isVisible(m_enemyPositions.front()) && Broodwar->getUnitsOnTile(m_enemyPositions.front(), Filter::IsEnemy).empty())

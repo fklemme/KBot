@@ -26,7 +26,7 @@ namespace KBot {
                 m_state = State::acquireResources; // go to next state
                 break;
             case State::acquireResources:
-                if (m_manager->acquireResources(m_toBuild.mineralPrice(), m_toBuild.gasPrice()))
+                if (m_manager->acquireResources(m_toBuild.mineralPrice(), m_toBuild.gasPrice(), m_priority))
                     m_state = State::acquireWorker; // go to next state
                 break;
             case State::acquireWorker:

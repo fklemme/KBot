@@ -49,12 +49,11 @@ namespace KBot {
         std::size_t getEnemyPositionCount() const { return m_enemyPositions.size(); }
 
     private:
-        Manager m_manager;
-        General m_general;
+        Manager    m_manager;
+        General    m_general;
         BWEM::Map &m_map = BWEM::Map::Instance();
 
         std::vector<BWAPI::TilePosition> m_enemyPositions;
-        std::vector<BWAPI::Unit> m_underConstruction;
     };
 
 } // namespace

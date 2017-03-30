@@ -87,9 +87,15 @@ namespace KBot {
         // TODO
     }
 
-    bool Manager::acquireResources(const int minerals, const int gas) {
-        auto &me = *Broodwar->self();
-        if (me.minerals() >= minerals && me.gas() >= gas) {
+    bool Manager::acquireResources(const int minerals, const int gas, const BuildTask::Priority priority) {
+        // All higher tasks have to have their resources allocated, otherwise fail!
+        for (auto it = m_buildQueue.begin(); it != m_buildQueue.end() && it->getPriority() > priority; ++it) {
+            if (it->getState() <= BuildTask::State::acquireResources)
+                return false;
+        }
+
+        // Allocate resources if available.
+        if (Broodwar->self()->minerals() >= minerals && Broodwar->self()->gas() >= gas) {
             m_reservedMinerals += minerals;
             m_reservedGas += gas;
             return true;
@@ -100,6 +106,8 @@ namespace KBot {
     void Manager::releaseResources(const int minerals, const int gas) {
         m_reservedMinerals -= minerals;
         m_reservedGas -= gas;
+        assert(m_reservedMinerals >= 0);
+        assert(m_reservedGas >= 0);
     }
 
     Unit Manager::acquireWorker(const UnitType &workerType, const Position &position) {

@@ -20,12 +20,12 @@ namespace KBot {
         void onUnitDestroy(const BWAPI::Unit &unit);
 
     private:
-        Manager *m_manager;
+        Manager            *m_manager;
         BWAPI::TilePosition m_position;
-        BWAPI::Unitset m_units;
+        BWAPI::Unitset      m_units;
 
         BWAPI::Unitset m_minerals, m_mineralWorkers;
-        BWAPI::Unitset m_gas, m_gasWorkers;
+        BWAPI::Unitset m_gas,      m_gasWorkers;
     };
 
 } // namespace
