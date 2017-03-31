@@ -17,9 +17,12 @@ namespace KBot {
         Broodwar->drawTextScreen(2, 50, "Manager: -");
 
         // Display build tasks
+        const std::size_t maxBuildDisplay = 10;
         Broodwar->drawTextScreen(200, 0, "Build queue:");
-        for (std::size_t i = 0; i < m_buildQueue.size(); ++i)
+        for (std::size_t i = 0; i < m_buildQueue.size() && i < maxBuildDisplay; ++i)
             Broodwar->drawTextScreen(200, (i + 1) * 10, "%s", m_buildQueue[i].toString().c_str());
+        if (m_buildQueue.size() > maxBuildDisplay)
+            Broodwar->drawTextScreen(200, (maxBuildDisplay + 1) * 10, "and %d more...", m_buildQueue.size() - maxBuildDisplay);
 
         // Display available resources
         Broodwar->drawTextScreen(450, 15, "(%d)", getAvailableMinerals());

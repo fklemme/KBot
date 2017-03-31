@@ -75,6 +75,7 @@ namespace KBot {
                 }
                 break;
             case State::building:
+                assert(m_buildingUnit);
                 if (m_buildingUnit->isCompleted()) {
                     m_manager->releaseWorker(m_worker);
                     m_state = State::finalize; // go to next state
@@ -89,10 +90,16 @@ namespace KBot {
     }
 
     bool BuildTask::onUnitCreated(const Unit &unit) {
+        // Accept new unit if we are waiting for one.
+        if (m_state != State::waitForUnit)
+            return false;
+
+        // Make sure we don't already have a unit and it's the right type.
         if (m_buildingUnit == nullptr && unit->getType() == m_toBuild) {
             m_buildingUnit = unit;
             return true;
         }
+
         return false;
     }
 
