@@ -34,8 +34,8 @@ namespace KBot {
     void Base::update() {
         const auto mineralWorkerRatio = 2;
         const auto gasWorkerRatio = 3;
-        const auto targetMineralWorkers = std::size_t(std::ceil(mineralWorkerRatio * m_minerals.size()));
-        const auto targetGasWorkers = std::size_t(std::ceil(gasWorkerRatio * m_gas.size()));
+        const auto targetMineralWorkers = std::size_t(std::ceil(mineralWorkerRatio * m_mineralPatches.size()));
+        const auto targetGasWorkers = std::size_t(std::ceil(gasWorkerRatio * m_gasGeysirs.size()));
 
         // Display debug information
         const auto center = Position(m_position) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
@@ -48,7 +48,7 @@ namespace KBot {
 
         // Print resource information
         Broodwar->drawTextMap(center, "Minerals: %d / %d", m_mineralWorkers.size(), targetMineralWorkers);
-        Broodwar->drawTextMap(m_gas.getPosition(), "Gas: %d / %d", m_gasWorkers.size(), targetGasWorkers);
+        Broodwar->drawTextMap(m_gasGeysirs.getPosition(), "Gas: %d / %d", m_gasWorkers.size(), targetGasWorkers);
 
         // Prevent spamming by only running our onFrame once every number of latency frames.
         // Latency frames are the number of frames before commands are processed.
@@ -56,9 +56,9 @@ namespace KBot {
             return;
 
         // Update base resources
-        m_minerals = Broodwar->getUnitsInRadius(center, 400, Filter::IsMineralField); // TODO: Use BWEM instead?
+        m_mineralPatches = Broodwar->getUnitsInRadius(center, 400, Filter::IsMineralField); // TODO: Use BWEM instead?
         m_mineralWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsWorker && Filter::IsGatheringMinerals && Filter::IsOwned);
-        m_gas = Broodwar->getUnitsInRadius(center, 400, Filter::GetType == UnitTypes::Resource_Vespene_Geyser || (Filter::IsRefinery && Filter::IsOwned));
+        m_gasGeysirs = Broodwar->getUnitsInRadius(center, 400, Filter::GetType == UnitTypes::Resource_Vespene_Geyser || (Filter::IsRefinery && Filter::IsOwned));
         m_gasWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsWorker && Filter::IsGatheringGas && Filter::IsOwned);
 
         for (const auto &unit : m_units) {

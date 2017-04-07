@@ -11,7 +11,7 @@ namespace KBot {
     public:
         General(KBot &kBot);
 
-        // Forbit copy & move
+        // Prohibit copy & move. There is only one general.
         General(const General&) = delete;
         General(General&&) = delete;
         General &operator=(const General&) = delete;

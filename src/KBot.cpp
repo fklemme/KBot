@@ -76,7 +76,7 @@ namespace KBot {
 
         // Display some debug information
         Broodwar->drawTextScreen(2, 0, "FPS: %d, APM: %d", Broodwar->getFPS(), Broodwar->getAPM());
-        Broodwar->drawTextScreen(2, 10, "Enemy position count: %d", m_enemyPositions.size());
+        Broodwar->drawTextScreen(2, 10, "Scouted enemy positions: %d", m_enemyPositions.size());
 
         if (!m_enemyPositions.empty()) {
             const auto enemyPosition = m_enemyPositions.front();

@@ -87,7 +87,7 @@ namespace KBot {
     }
 
     void Manager::buildTaskOnUnitCompleted(const Unit &unit) {
-        // TODO
+        // Since BuildTasks are busy waiting for completion right now, this is unused.
     }
 
     bool Manager::acquireResources(const int minerals, const int gas, const BuildTask::Priority priority) {

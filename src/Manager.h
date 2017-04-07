@@ -12,7 +12,7 @@ namespace KBot {
     public:
         Manager(KBot &kBot);
 
-        // Forbit copy & move
+        // Prohibit copy & move. There is only one manager.
         Manager(const Manager&) = delete;
         Manager(Manager&&) = delete;
         Manager &operator=(const Manager&) = delete;

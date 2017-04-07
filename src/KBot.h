@@ -12,12 +12,13 @@ namespace KBot {
     public:
         KBot();
 
-        // Forbit copy & move
+        // Prohibit copy & move.
         KBot(const KBot&) = delete;
         KBot(KBot&&) = delete;
         KBot &operator=(const KBot&) = delete;
         KBot &operator=(KBot&&) = delete;
 
+        // Implement BWAPI interface.
         virtual void onStart();
         virtual void onEnd(bool isWinner);
         virtual void onFrame();
@@ -36,12 +37,11 @@ namespace KBot {
         virtual void onSaveGame(std::string gameName);
         virtual void onUnitComplete(BWAPI::Unit unit);
 
+        // Getter for map, manager and general.
         BWEM::Map &map() { return m_map; };
         const BWEM::Map &map() const { return m_map; };
-
         Manager &manager() { return m_manager; }
         const Manager &manager() const { return m_manager; }
-
         General &general() { return m_general; }
         const General &general() const { return m_general; }
 

@@ -24,8 +24,8 @@ namespace KBot {
         BWAPI::TilePosition m_position;
         BWAPI::Unitset      m_units;
 
-        BWAPI::Unitset m_minerals, m_mineralWorkers;
-        BWAPI::Unitset m_gas, m_gasWorkers;
+        BWAPI::Unitset m_mineralPatches, m_gasGeysirs;
+        BWAPI::Unitset m_mineralWorkers, m_gasWorkers;
     };
 
 } // namespace

@@ -59,7 +59,7 @@ namespace KBot {
                     break;
                 }
             }
-            // No squads to merge left.
+            // No more squads to merge.
             merge = false;
         }
     }
