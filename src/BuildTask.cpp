@@ -45,10 +45,18 @@ namespace KBot {
                     m_allocatedBuildPosition = true;
                 }
                 assert(m_worker);
-                const Position position(m_buildPosition);
-                if (m_worker->getOrder() != Orders::Move || m_worker->getOrderTargetPosition() != position)
-                    m_worker->move(position);
-                if (m_worker->getDistance(position) < 20)
+                const Position movePosition = Position(m_buildPosition) + Position(m_toBuild.tileSize()) / 2;
+
+                // debug
+                const auto worker = m_worker; // no C++14 :(
+                Broodwar->registerEvent([worker, movePosition](Game*) {
+                    Broodwar->drawLineMap(worker->getPosition(), movePosition, Colors::Purple);
+                    Broodwar->drawTextMap(worker->getPosition(), "Distance: %d", worker->getDistance(movePosition));
+                }, nullptr, Broodwar->getLatencyFrames());
+
+                if (m_worker->getOrder() != Orders::Move || m_worker->getOrderTargetPosition() != movePosition)
+                    m_worker->move(movePosition);
+                if (m_worker->getDistance(movePosition) < 50)
                     m_state = State::startBuild; // go to next state
                 break;
             }
