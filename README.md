@@ -12,9 +12,9 @@ Starcraft Bot (using BWAPI)
 [master badge]: https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/1/badge
 [development badge]: https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/2/badge
 
-# Build in Visual Studio
+# Build with Visual Studio
 - Change the path in `StarcraftPath.props` to match your installation of Starcraft Broodwar.
-- The solution file is for Visual Studio 2017, but you need the Visual Studio 2013 Platform Toolset (v120) for building.
+- Run `build.sh` from VS 2017 Command Prompt to build BWAPI and KBot for release. Only `BWAPILIB` will be build from the script. You can use Visual Studio directly if you need the full BWAPI installation.
 
 # SSCAIT
 KBot is running on SSCAIT as well. [Vote](http://sscaitournament.com/index.php?action=voteForPlayers&botId=384) for it to see it play on [Stream](https://www.twitch.tv/sscait). :)
