@@ -51,14 +51,13 @@ namespace KBot {
         // http://wiki.teamliquid.net/starcraft/2_Rax_FE_(vs._Zerg)
         using namespace UnitTypes;
         const auto buildorder = {
-            Terran_SCV, Terran_SCV, Terran_SCV, // build SCVs...
-            Terran_SCV, Terran_SCV, Terran_Supply_Depot, // @ 9/10 supply
+            Terran_SCV, Terran_SCV, Terran_SCV, Terran_SCV, Terran_SCV, Terran_Supply_Depot, // @ 9/10 supply
             Terran_SCV, Terran_SCV, Terran_Barracks, // @ 11/18 supply
             Terran_SCV, Terran_SCV, Terran_Barracks, // @ 13/18 supply
             Terran_SCV, Terran_Supply_Depot, // @ 14/18 supply
             Terran_SCV, Terran_Marine, Terran_SCV, Terran_Marine, Terran_Refinery, // @ 18/26 supply
-            Terran_SCV, Terran_Marine, Terran_SCV, Terran_Marine, Terran_Academy, // @ 22/26 supply
-            Terran_SCV, Terran_Marine, Terran_Supply_Depot // @ 24/26 supply
+            Terran_SCV, Terran_Marine, Terran_SCV, Terran_Marine, Terran_Academy // @ 22/26 supply
+            //Terran_SCV, Terran_Marine, Terran_Supply_Depot // @ 24/26 supply
         };
 
         int priority = (int) BuildTask::Priority::buildorder;
@@ -98,8 +97,8 @@ namespace KBot {
         // Update general
         m_general.update();
 
-        // Prevent spamming by only running our onFrame once every number of latency frames.
-        // Latency frames are the number of frames before commands are processed.
+        // ----- Prevent spamming -----------------------------------------------
+        // Everything below is executed only occasionally and not on every frame.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
     }

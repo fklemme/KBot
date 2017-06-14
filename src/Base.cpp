@@ -50,8 +50,8 @@ namespace KBot {
         Broodwar->drawTextMap(center, "Minerals: %d / %d", m_mineralWorkers.size(), targetMineralWorkers);
         Broodwar->drawTextMap(m_gasGeysirs.getPosition(), "Gas: %d / %d", m_gasWorkers.size(), targetGasWorkers);
 
-        // Prevent spamming by only running our onFrame once every number of latency frames.
-        // Latency frames are the number of frames before commands are processed.
+        // ----- Prevent spamming -----------------------------------------------
+        // Everything below is executed only occasionally and not on every frame.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
 

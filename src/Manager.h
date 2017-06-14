@@ -26,6 +26,8 @@ namespace KBot {
         void onUnitDestroy(const BWAPI::Unit &unit);
 
         void addBuildTask(const BuildTask &buildTask);
+        //const auto &getBuildQueue() const { return m_buildQueue; }
+
         void buildTaskOnUnitCreated(const BWAPI::Unit &unit);
         void buildTaskOnUnitDestroyed(const BWAPI::Unit &unit);
         void buildTaskOnUnitCompleted(const BWAPI::Unit &unit);

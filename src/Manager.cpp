@@ -36,8 +36,8 @@ namespace KBot {
         for (auto &buildTask : m_buildQueue)
             buildTask.update();
 
-        // Prevent spamming by only running our onFrame once every number of latency frames.
-        // Latency frames are the number of frames before commands are processed.
+        // ----- Prevent spamming -----------------------------------------------
+        // Everything below is executed only occasionally and not on every frame.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
 
