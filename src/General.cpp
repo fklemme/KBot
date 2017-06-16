@@ -1,7 +1,6 @@
 #include "General.h"
 
 #include "KBot.h"
-#include "Squad.h"
 #include "utils.h"
 
 namespace KBot {
@@ -28,8 +27,8 @@ namespace KBot {
         for (auto &squad : m_squads)
             squad.update();
 
-        // Prevent spamming by only running our onFrame once every number of latency frames.
-        // Latency frames are the number of frames before commands are processed.
+        // ----- Prevent spamming -----------------------------------------------
+        // Everything below is executed only occasionally and not on every frame.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
 
@@ -45,7 +44,7 @@ namespace KBot {
                 auto hit = std::find_if(it + 1, m_squads.end(), [it](const Squad &squad) {
                     return (distance(it->getPosition(), squad.getPosition()) < 200)
                         || (distance(it->getPosition(), squad.getPosition()) < 500
-                            && it->getState() == SquadState::defend && squad.getState() == SquadState::defend);
+                            && it->getState() == Squad::State::defend && squad.getState() == Squad::State::defend);
                 });
 
                 if (hit != m_squads.end()) {
@@ -60,7 +59,7 @@ namespace KBot {
                     break;
                 }
             }
-            // No squads to merge left.
+            // No more squads to merge.
             merge = false;
         }
     }

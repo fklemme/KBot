@@ -1,24 +1,26 @@
 #pragma once
 
 #include <BWAPI.h>
-#include "KBot.h"
 
 namespace KBot {
 
-    enum class SquadState { scout, attack, defend };
-
-    std::string to_string(SquadState state);
+    class KBot;
 
     class Squad : public BWAPI::Unitset {
+    public:
+        enum class State { scout, attack, defend };
+
     public:
         Squad(KBot &kBot);
 
         void update();
-        SquadState getState() const { return m_state; }
+        State getState() const { return m_state; }
 
     private:
-        std::reference_wrapper<KBot> m_kBot;
-        SquadState m_state;
+        KBot *m_kBot;
+        State m_state;
     };
+
+    std::string to_string(Squad::State state);
 
 } // namespace

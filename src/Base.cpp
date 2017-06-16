@@ -29,13 +29,13 @@ namespace KBot {
         }
     }
 
-    Base::Base(KBot &kBot, const TilePosition &position) : m_kBot(kBot), m_position(position) {}
+    Base::Base(Manager &manager, const TilePosition &position) : m_manager(&manager), m_position(position) {}
 
     void Base::update() {
         const auto mineralWorkerRatio = 2;
         const auto gasWorkerRatio = 3;
-        const auto targetMineralWorkers = std::size_t(std::ceil(mineralWorkerRatio * m_minerals.size()));
-        const auto targetGasWorkers = std::size_t(std::ceil(gasWorkerRatio * m_gas.size()));
+        const auto targetMineralWorkers = std::size_t(std::ceil(mineralWorkerRatio * m_mineralPatches.size()));
+        const auto targetGasWorkers = std::size_t(std::ceil(gasWorkerRatio * m_gasGeysirs.size()));
 
         // Display debug information
         const auto center = Position(m_position) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
@@ -48,17 +48,17 @@ namespace KBot {
 
         // Print resource information
         Broodwar->drawTextMap(center, "Minerals: %d / %d", m_mineralWorkers.size(), targetMineralWorkers);
-        Broodwar->drawTextMap(m_gas.getPosition(), "Gas: %d / %d", m_gasWorkers.size(), targetGasWorkers);
+        Broodwar->drawTextMap(m_gasGeysirs.getPosition(), "Gas: %d / %d", m_gasWorkers.size(), targetGasWorkers);
 
-        // Prevent spamming by only running our onFrame once every number of latency frames.
-        // Latency frames are the number of frames before commands are processed.
+        // ----- Prevent spamming -----------------------------------------------
+        // Everything below is executed only occasionally and not on every frame.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
 
         // Update base resources
-        m_minerals = Broodwar->getUnitsInRadius(center, 400, Filter::IsMineralField); // TODO: Use BWEM instead?
+        m_mineralPatches = Broodwar->getUnitsInRadius(center, 400, Filter::IsMineralField); // TODO: Use BWEM instead?
         m_mineralWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsWorker && Filter::IsGatheringMinerals && Filter::IsOwned);
-        m_gas = Broodwar->getUnitsInRadius(center, 400, Filter::GetType == UnitTypes::Resource_Vespene_Geyser || (Filter::IsRefinery && Filter::IsOwned));
+        m_gasGeysirs = Broodwar->getUnitsInRadius(center, 400, Filter::GetType == UnitTypes::Resource_Vespene_Geyser || (Filter::IsRefinery && Filter::IsOwned));
         m_gasWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsWorker && Filter::IsGatheringGas && Filter::IsOwned);
 
         for (const auto &unit : m_units) {
@@ -85,7 +85,7 @@ namespace KBot {
                         assert(r);
                     } else {
                         // Easy workaround for now: Use BWEM to find the next minerals.
-                        const auto &minerals = m_kBot.map().Minerals();
+                        const auto &minerals = BWEM::Map::Instance().Minerals();
                         using MineralsPtr = decltype(*minerals.begin());
                         const auto it = std::min_element(minerals.begin(), minerals.end(), [&unit](MineralsPtr a, MineralsPtr b) {
                             return distance(unit->getPosition(), a->Pos()) < distance(unit->getPosition(), b->Pos());
@@ -103,52 +103,6 @@ namespace KBot {
                         }, 1000);
                     }
                 }
-            } else if (unit->getType() == UnitTypes::Terran_Barracks) {
-                if (unit->isIdle()) {
-                    // Spam marines! :D
-                    unit->train(UnitTypes::Terran_Marine);
-                }
-            } else if (unit->getType().isResourceDepot()) {
-                // Limit amount of workers to produce.
-                if (m_mineralWorkers.size() < targetMineralWorkers /*|| m_gasWorkers.size() < targetGasWorkers*/) {
-                    // Order the depot to construct more workers! But only when it is idle.
-                    if (unit->isIdle())
-                        unit->train(UnitTypes::Terran_SCV);
-                }
-            }
-        }
-
-        // Build all the structures!
-        static int delay = 0;
-        if (Broodwar->getFrameCount() > delay + 250) {
-            const auto &me = *Broodwar->self();
-            UnitType toBeBuild = UnitTypes::None;
-
-            if (Broodwar->getUnitsOnTile(m_position, Filter::IsResourceDepot).empty()) {
-                if (me.minerals() >= UnitTypes::Terran_Command_Center.mineralPrice())
-                    toBeBuild = UnitTypes::Terran_Command_Center;
-            } else if (me.supplyUsed() >= me.supplyTotal() - 4 && me.minerals() >= UnitTypes::Terran_Supply_Depot.mineralPrice())
-                toBeBuild = UnitTypes::Terran_Supply_Depot;
-            else if (me.minerals() >= (1 + 0.5
-                * Broodwar->getUnitsInRadius(Position(m_position), 1000, Filter::GetType == UnitTypes::Terran_Barracks && Filter::IsOwned).size())
-                * UnitTypes::Terran_Barracks.mineralPrice())
-                toBeBuild = UnitTypes::Terran_Barracks;
-
-            if (toBeBuild != UnitTypes::None) {
-                if (!buildAtOrNearPosition(toBeBuild, m_position)) {
-                    // Position might not be fully explored yet. Send SCV.
-                    auto builder = Broodwar->getClosestUnit(Position(m_position),
-                        Filter::GetType == UnitTypes::Terran_SCV &&
-                        (Filter::IsIdle || Filter::IsGatheringMinerals) &&
-                        Filter::IsOwned);
-
-                    if (builder) {
-                        auto buildPosition = Broodwar->getBuildLocation(toBeBuild, m_position);
-                        if (buildPosition /*&& Broodwar->isExplored(...)*/)
-                            builder->move(Position(buildPosition));
-                    }
-                }
-                delay = Broodwar->getFrameCount();
             }
         }
     }

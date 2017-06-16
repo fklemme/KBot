@@ -1,17 +1,17 @@
 #pragma once
 
 #include <BWAPI.h>
+#include "Squad.h"
 
 namespace KBot {
 
     class KBot;
-    class Squad;
 
     class General {
     public:
         General(KBot &kBot);
 
-        // Forbit copy & move
+        // Prohibit copy & move. There is only one general.
         General(const General&) = delete;
         General(General&&) = delete;
         General &operator=(const General&) = delete;
@@ -25,7 +25,7 @@ namespace KBot {
         void onUnitDestroy(const BWAPI::Unit &unit);
 
     private:
-        KBot &m_kBot;
+        KBot              &m_kBot;
         std::vector<Squad> m_squads;
     };
 

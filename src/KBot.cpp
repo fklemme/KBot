@@ -1,20 +1,30 @@
 #include "KBot.h"
 
-#include <cassert>
-#include <iostream>
 #include <random>
 #include "Squad.h"
 #include "utils.h"
+
+// Some ugly macro magic to get BUILDNUMBER as a string.
+#pragma warning(push)
+#pragma warning(disable: 4003) // there is some silly warning in VS2017
+#define MACROSTR(S) #S ""
+#define STRINGER(X) MACROSTR(X)
+static const std::string buildNumber = STRINGER(BUILDNUMBER);
+#pragma warning(pop)
 
 namespace KBot {
 
     using namespace BWAPI;
 
-    KBot::KBot() : m_map(BWEM::Map::Instance()), m_manager(*this), m_general(*this) {}
+    KBot::KBot() : m_manager(*this), m_general(*this) {}
 
     // Called only once at the beginning of a game.
     void KBot::onStart() {
-        if (Broodwar->isReplay()) return;
+        if (Broodwar->isReplay() || !Broodwar->self())
+            return;
+
+        // Print build information
+        Broodwar << "KBot build " << (buildNumber.size() ? buildNumber : "local") << std::endl;
 
         // This bot is written for Terran, so make sure we are indeed Terran!
         if (Broodwar->self()->getRace() != Races::Terran) {
@@ -37,8 +47,22 @@ namespace KBot {
         const bool r = m_map.FindBasesForStartingLocations();
         assert(r);
 
-        // Create initial base
-        m_manager.createBase(Broodwar->self()->getStartLocation());
+        // Test BuildTask, TODO: Replace hardcoded build order
+        // http://wiki.teamliquid.net/starcraft/2_Rax_FE_(vs._Zerg)
+        using namespace UnitTypes;
+        const auto buildorder = {
+            Terran_SCV, Terran_SCV, Terran_SCV, Terran_SCV, Terran_SCV, Terran_Supply_Depot, // @ 9/10 supply
+            Terran_SCV, Terran_SCV, Terran_Barracks, // @ 11/18 supply
+            Terran_SCV, Terran_SCV, Terran_Barracks, // @ 13/18 supply
+            Terran_SCV, Terran_Supply_Depot, // @ 14/18 supply
+            Terran_SCV, Terran_Marine, Terran_SCV, Terran_Marine, Terran_Refinery, // @ 18/26 supply
+            Terran_SCV, Terran_Marine, Terran_SCV, Terran_Marine, Terran_Academy // @ 22/26 supply
+            //Terran_SCV, Terran_Marine, Terran_Supply_Depot // @ 24/26 supply
+        };
+
+        int priority = (int) BuildTask::Priority::buildorder;
+        for (const auto &unit : buildorder)
+            m_manager.addBuildTask({m_manager, unit, (BuildTask::Priority) priority--});
 
         // Ready to go. Good luck, have fun!
         Broodwar->sendText("gl hf");
@@ -55,30 +79,13 @@ namespace KBot {
 
         // Display some debug information
         Broodwar->drawTextScreen(2, 0, "FPS: %d, APM: %d", Broodwar->getFPS(), Broodwar->getAPM());
-        Broodwar->drawTextScreen(2, 10, "Enemy position count: %d", m_enemyPositions.size());
+        Broodwar->drawTextScreen(2, 10, "Scouted enemy positions: %d", m_enemyPositions.size());
 
         if (!m_enemyPositions.empty()) {
             const auto enemyPosition = m_enemyPositions.front();
             Broodwar->drawTextScreen(2, 20, "Next enemy position: (%d, %d)", enemyPosition.x, enemyPosition.y);
         } else
             Broodwar->drawTextScreen(2, 20, "Next enemy position: Unknown");
-
-        Broodwar->drawTextScreen(200, 0, "Under construction:");
-        for (std::size_t i = 0; i < m_underConstruction.size(); ++i) {
-            if (!m_underConstruction[i]->exists()) {
-                // TODO: Might need a change if this is used somewhere else as well.
-                m_underConstruction.erase(m_underConstruction.begin() + i--);
-                continue;
-            }
-            const auto type = m_underConstruction[i]->getType();
-            const int progress = 100 - (100 * m_underConstruction[i]->getRemainingBuildTime() / type.buildTime());
-            Broodwar->drawTextScreen(200, 10 * (i + 1), " - %s (%d %%)", type.getName().substr(7).c_str(), progress);
-        }
-
-#ifndef _DEBUG
-        // Draw map (to slow for debug mode)
-        //BWEM::utils::drawMap(m_map);
-#endif // !_DEBUG
 
         // Update enemy positions
         while (!m_enemyPositions.empty() && Broodwar->isVisible(m_enemyPositions.front()) && Broodwar->getUnitsOnTile(m_enemyPositions.front(), Filter::IsEnemy).empty())
@@ -90,8 +97,8 @@ namespace KBot {
         // Update general
         m_general.update();
 
-        // Prevent spamming by only running our onFrame once every number of latency frames.
-        // Latency frames are the number of frames before commands are processed.
+        // ----- Prevent spamming -----------------------------------------------
+        // Everything below is executed only occasionally and not on every frame.
         if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0)
             return;
     }
@@ -109,46 +116,63 @@ namespace KBot {
     void KBot::onNukeDetect(BWAPI::Position target) {}
 
     // Called when a Unit becomes accessible.
-    void KBot::onUnitDiscover(BWAPI::Unit unit) {}
+    void KBot::onUnitDiscover(BWAPI::Unit unit) {
+        assert(unit->exists());
+    }
 
     // Called when a Unit becomes inaccessible.
-    void KBot::onUnitEvade(BWAPI::Unit unit) {}
+    void KBot::onUnitEvade(BWAPI::Unit unit) {
+        assert(!unit->exists());
+    }
 
     // Called when a previously invisible unit becomes visible.
     void KBot::onUnitShow(BWAPI::Unit unit) {
+        assert(unit->exists());
+
         // Update enemy positions
         if (Broodwar->self()->isEnemy(unit->getPlayer()) && unit->getType().isBuilding()) {
             const auto myPosition = Broodwar->self()->getStartLocation();
-            TilePosition position(unit->getPosition());
+            const TilePosition position(unit->getPosition());
             if (std::find(m_enemyPositions.begin(), m_enemyPositions.end(), position) == m_enemyPositions.end()) {
                 const auto it = std::lower_bound(m_enemyPositions.begin(), m_enemyPositions.end(), position,
-                    [&](TilePosition a, TilePosition b) { return distance(myPosition, a) < distance(myPosition, b); });
+                    [&](const TilePosition &a, const TilePosition &b) { return distance(myPosition, a) < distance(myPosition, b); });
                 m_enemyPositions.insert(it, position);
             }
         }
     }
 
     // Called just as a visible unit is becoming invisible.
-    void KBot::onUnitHide(BWAPI::Unit unit) {}
+    void KBot::onUnitHide(BWAPI::Unit unit) {
+        //assert(!unit->exists()); ???
+    }
 
     // Called when any unit is created.
     void KBot::onUnitCreate(BWAPI::Unit unit) {
         assert(unit->exists());
 
-        if (unit->getPlayer() == Broodwar->self())
-            m_underConstruction.push_back(unit);
+        // My unit
+        if (unit->getPlayer() == Broodwar->self()) {
+            // Notify build tasks
+            m_manager.buildTaskOnUnitCreated(unit);
+        }
+
     }
 
     // Called when a unit is removed from the game either through death or other means.
     void KBot::onUnitDestroy(BWAPI::Unit unit) {
         assert(!unit->exists());
 
-        if (unit->getPlayer() == Broodwar->self())
+        // My unit
+        if (unit->getPlayer() == Broodwar->self()) {
+            // Notify build tasks
+            m_manager.buildTaskOnUnitDestroyed(unit);
+
             // Dispatch
             if (unit->getType().isBuilding() || unit->getType().isWorker())
                 m_manager.onUnitDestroy(unit);
             else
                 m_general.onUnitDestroy(unit);
+        }
 
         // Update BWEM information
         if (unit->getType().isMineralField())
@@ -160,6 +184,13 @@ namespace KBot {
     // Called when a unit changes its UnitType.
     void KBot::onUnitMorph(BWAPI::Unit unit) {
         // For example, when a Drone transforms into a Hatchery, a Siege Tank uses Siege Mode, or a Vespene Geyser receives a Refinery.
+        assert(unit->exists());
+
+        // My unit
+        if (unit->getPlayer() == Broodwar->self()) {
+            // Notify build tasks
+            m_manager.buildTaskOnUnitCreated(unit);
+        }
     }
 
     // Called when a unit changes ownership.
@@ -176,35 +207,17 @@ namespace KBot {
     void KBot::onUnitComplete(BWAPI::Unit unit) {
         assert(unit->exists());
 
+        // My unit
         if (unit->getPlayer() == Broodwar->self()) {
-            const auto it = std::find(m_underConstruction.begin(), m_underConstruction.end(), unit);
-            assert(it != m_underConstruction.end());
-            m_underConstruction.erase(it);
+            // Notify build tasks
+            m_manager.buildTaskOnUnitCompleted(unit);
 
-            // Dispatch
+            // Dispatch ownership
             if (unit->getType().isBuilding() || unit->getType().isWorker())
                 m_manager.transferOwnership(unit);
             else
                 m_general.transferOwnership(unit);
         }
-    }
-
-    TilePosition KBot::getNextBasePosition() const {
-        std::vector<TilePosition> positions;
-        for (const auto &area : m_map.Areas()) {
-            for (const auto &base : area.Bases())
-                if (std::all_of(m_manager.getBases().begin(), m_manager.getBases().end(),
-                    [&base](const Base &b) { return b.getPosition() != base.Location(); }))
-                    positions.push_back(base.Location());
-        }
-
-        // Order position by and distance to own starting base.
-        std::sort(positions.begin(), positions.end(), [this](TilePosition a, TilePosition b) {
-            const auto startPosition = manager().getBases().front().getPosition();
-            return distance(startPosition, a) < distance(startPosition, b);
-        });
-
-        return positions.front();
     }
 
     TilePosition KBot::getNextEnemyPosition() const {
