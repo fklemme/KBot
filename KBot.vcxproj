@@ -51,14 +51,14 @@
     <LibraryPath>$(SolutionDir)bwapi\bwapi\lib;$(SolutionDir)BWEM\lib;$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)d</TargetName>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
-    <OutDir>$(SolutionDir)bin\</OutDir>
+    <OutDir>$(SolutionDir)lib\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)bwapi\bwapi\include;$(SolutionDir)BWEM\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bwapi\bwapi\lib;$(SolutionDir)BWEM\lib;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
-    <OutDir>$(SolutionDir)bin\</OutDir>
+    <OutDir>$(SolutionDir)lib\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
