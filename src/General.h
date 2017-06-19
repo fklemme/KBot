@@ -17,7 +17,7 @@ namespace KBot {
         General &operator=(const General&) = delete;
         General &operator=(General&&) = delete;
 
-        // Is called every KBot::onFrame().
+        // Called every KBot::onFrame().
         void update();
 
         // Transfer ownership of a unit to general.

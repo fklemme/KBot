@@ -56,8 +56,8 @@ namespace KBot {
             Terran_SCV, Terran_SCV, Terran_Barracks, // @ 13/18 supply
             Terran_SCV, Terran_Supply_Depot, // @ 14/18 supply
             Terran_SCV, Terran_Marine, Terran_SCV, Terran_Marine, Terran_Refinery, // @ 18/26 supply
-            Terran_SCV, Terran_Marine, Terran_SCV, Terran_Marine, Terran_Academy // @ 22/26 supply
-            //Terran_SCV, Terran_Marine, Terran_Supply_Depot // @ 24/26 supply
+            Terran_SCV, Terran_Marine, Terran_SCV, Terran_Marine, Terran_Academy, // @ 22/26 supply
+            Terran_SCV, Terran_Marine, Terran_Supply_Depot // @ 24/26 supply
         };
 
         int priority = (int) BuildTask::Priority::buildorder;
@@ -88,6 +88,7 @@ namespace KBot {
             Broodwar->drawTextScreen(2, 20, "Next enemy position: Unknown");
 
         // Update enemy positions
+        // TODO: Works for now, but can surely be improved.
         while (!m_enemyPositions.empty() && Broodwar->isVisible(m_enemyPositions.front()) && Broodwar->getUnitsOnTile(m_enemyPositions.front(), Filter::IsEnemy).empty())
             m_enemyPositions.erase(m_enemyPositions.begin());
 

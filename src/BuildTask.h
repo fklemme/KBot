@@ -33,7 +33,7 @@ namespace KBot {
         BuildTask(Manager &manager, const BWAPI::UnitType &toBuild, const Priority priority = Priority::normal,
             const BWAPI::TilePosition &position = BWAPI::Broodwar->self()->getStartLocation(), const bool exactPosition = false);
 
-        // Is called every KBot::onFrame().
+        // Called every KBot::onFrame().
         void update();
 
         bool onUnitCreated(const BWAPI::Unit &unit);

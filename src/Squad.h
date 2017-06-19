@@ -13,6 +13,7 @@ namespace KBot {
     public:
         Squad(KBot &kBot);
 
+        // Called every KBot::onFrame().
         void update();
         State getState() const { return m_state; }
 

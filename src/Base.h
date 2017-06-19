@@ -10,7 +10,7 @@ namespace KBot {
     public:
         Base(Manager &manager, const BWAPI::TilePosition &position);
 
-        // Is called every KBot::onFrame().
+        // Called every KBot::onFrame().
         void update();
 
         const BWAPI::TilePosition &getPosition() const { return m_position; }

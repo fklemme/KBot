@@ -18,7 +18,7 @@ namespace KBot {
         Manager &operator=(const Manager&) = delete;
         Manager &operator=(Manager&&) = delete;
 
-        // Is called every KBot::onFrame().
+        // Called every KBot::onFrame().
         void update();
 
         // Transfer ownership of a unit to manager.
