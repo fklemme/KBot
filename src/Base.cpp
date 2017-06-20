@@ -10,11 +10,6 @@ namespace KBot {
     Base::Base(Manager &manager, const TilePosition &position) : m_manager(&manager), m_position(position) {}
 
     void Base::update() {
-        const auto mineralWorkerRatio = 2;
-        const auto gasWorkerRatio = 3;
-        const auto targetMineralWorkers = std::size_t(std::ceil(mineralWorkerRatio * m_mineralPatches.size()));
-        const auto targetGasWorkers = std::size_t(std::ceil(gasWorkerRatio * m_gasGeysirs.size()));
-
         // Display debug information
         const auto center = Position(m_position) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
         Broodwar->drawCircleMap(center, 400, Colors::Green);
@@ -25,8 +20,12 @@ namespace KBot {
             Broodwar->drawLineMap(center, unit->getPosition(), Colors::Grey);
 
         // Print resource information
-        Broodwar->drawTextMap(center, "Minerals: %d / %d", m_mineralWorkers.size(), targetMineralWorkers);
-        Broodwar->drawTextMap(m_gasGeysirs.getPosition(), "Gas: %d / %d", m_gasWorkers.size(), targetGasWorkers);
+        Broodwar->drawTextMap(center, "Minerals: %d / %d", m_mineralWorkers.size(), targetMineralWorkers());
+        Broodwar->drawTextMap(center + Position(0, 10), "Worker neede: %d", workersLeftToBuild());
+        for (const auto &gw : m_gasWorkers)
+            Broodwar->drawTextMap(gw.first->getPosition(), "Gas: %d / %d", gw.second.size(), (int) gasWorkerRatio);
+        for (const auto &geyser : m_vespeneGeysers)
+            Broodwar->drawTextMap(geyser->getPosition(), "Unbuilt vespene geyser");
 
         // ----- Prevent spamming -----------------------------------------------
         // Everything below is executed only occasionally and not on every frame.
@@ -34,9 +33,11 @@ namespace KBot {
             return;
 
         // Update base resources
+        // FIXME TODO: This whole part has to be change. Go away from rebuilding everthing all the time and start to keep track of units...
         m_mineralPatches = Broodwar->getUnitsInRadius(center, 400, Filter::IsMineralField); // TODO: Use BWEM instead?
         m_mineralWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsWorker && Filter::IsGatheringMinerals && Filter::IsOwned);
-        m_gasGeysirs = Broodwar->getUnitsInRadius(center, 400, Filter::GetType == UnitTypes::Resource_Vespene_Geyser || (Filter::IsRefinery && Filter::IsOwned));
+        m_vespeneGeysers = Broodwar->getUnitsInRadius(center, 400, Filter::GetType == UnitTypes::Resource_Vespene_Geyser);
+        m_gasWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsRefinery && Filter::IsOwned);
         m_gasWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsWorker && Filter::IsGatheringGas && Filter::IsOwned);
 
         for (const auto &unit : m_units) {
@@ -54,7 +55,11 @@ namespace KBot {
             if (unit->getType().isWorker()) {
                 // if our worker is idle
                 if (unit->isIdle()) {
-                    const auto resource = Broodwar->getClosestUnit(center, Filter::IsMineralField /*|| Filter::IsRefinery*/, 400);
+                    Unit resource = Broodwar->getClosestUnit(center, Filter::IsMineralField, 400);
+                    if (m_gasWorkers.size() < targetGasWorkers()) {
+                        for (const auto &refinery : m_refineries)
+                    }
+                    const auto resource = Broodwar->getClosestUnit(center, Filter::IsMineralField || (Filter::IsRefinery && Filter::IsOwned), 400);
                     // Order workers carrying a resource to return them to the center
                     if (unit->isCarryingGas() || unit->isCarryingMinerals())
                         unit->returnCargo();
@@ -91,6 +96,7 @@ namespace KBot {
 
     void Base::onUnitDestroy(const Unit &unit) {
         m_units.erase(unit);
+        // TODO: Other containers!
     }
 
 } // namespace
