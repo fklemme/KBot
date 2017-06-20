@@ -144,7 +144,7 @@ namespace KBot {
 
     // Called just as a visible unit is becoming invisible.
     void KBot::onUnitHide(BWAPI::Unit unit) {
-        //assert(!unit->exists()); ???
+        assert(!unit->exists()); // ???
     }
 
     // Called when any unit is created.
