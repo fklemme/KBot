@@ -1,7 +1,7 @@
 # This is just to test weather the code compiles when developing under Linux.
 
 CXXFLAGS += -std=c++11 \
-            -IBWAPI/include \
+            -Ibwapi/bwapi/include \
             -IBWEM/include
 
 SOURCES := $(filter-out src/DllMain.cpp,$(wildcard src/*.cpp))
