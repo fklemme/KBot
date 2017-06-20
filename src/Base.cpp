@@ -7,28 +7,6 @@ namespace KBot {
 
     using namespace BWAPI;
 
-    namespace {
-        // Helper for easy building placement.
-        bool buildAtOrNearPosition(UnitType unit, TilePosition position) {
-            auto builder = Broodwar->getClosestUnit(Position(position),
-                Filter::GetType == UnitTypes::Terran_SCV &&
-                (Filter::IsIdle || Filter::IsGatheringMinerals) &&
-                Filter::IsOwned);
-
-            if (builder) {
-                auto buildPosition = Broodwar->canBuildHere(position, unit, builder) ? position : Broodwar->getBuildLocation(unit, position);
-                if (buildPosition) {
-                    Broodwar->registerEvent([unit, buildPosition](Game*) {
-                        Broodwar->drawBoxMap(Position(buildPosition), Position(buildPosition + unit.tileSize()), Colors::Blue);
-                    }, nullptr, 1000);
-
-                    return builder->build(unit, buildPosition);
-                }
-            }
-            return false;
-        }
-    }
-
     Base::Base(Manager &manager, const TilePosition &position) : m_manager(&manager), m_position(position) {}
 
     void Base::update() {
