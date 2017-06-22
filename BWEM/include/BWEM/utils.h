@@ -247,8 +247,8 @@ public:
 	void				SetPtr(void * p) const			{ m_ptr = p; }
 
 	// Free use.
-	void *				Ext() const						{ return m_ptr; }
-	void				SetExt(void * p) const			{ m_ptr = p; }
+	void *				Ext() const						{ return m_ext; }
+	void				SetExt(void * p) const			{ m_ext = p; }
 
 protected:
 						UserData() = default;
@@ -256,7 +256,7 @@ protected:
 
 private:
 	mutable void *		m_ptr = nullptr;
-//	mutable void *		m_ext = nullptr; // FIXME: unused?
+	mutable void *		m_ext = nullptr;
 	mutable int			m_data = 0;
 };
 
