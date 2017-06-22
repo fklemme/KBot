@@ -2,6 +2,7 @@
 
 #include <BWAPI.h>
 #include "Squad.h"
+#include <vector>
 
 namespace KBot {
 
