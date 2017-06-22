@@ -256,7 +256,7 @@ protected:
 
 private:
 	mutable void *		m_ptr = nullptr;
-	mutable void *		m_ext = nullptr;
+//	mutable void *		m_ext = nullptr; // FIXME: unused?
 	mutable int			m_data = 0;
 };
 

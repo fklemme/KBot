@@ -1,8 +1,10 @@
 # This is just to test weather the code compiles when developing under Linux.
 
-CXXFLAGS += -std=c++11 \
+CXXFLAGS += -std=c++14 \
             -Ibwapi/bwapi/include \
-            -IBWEM/include
+            -IBWEM/include \
+            -Wall \
+            -Wno-unknown-pragmas
 
 SOURCES := $(filter-out src/DllMain.cpp,$(wildcard src/*.cpp))
 OBJECTS := $(addprefix obj/,$(notdir $(SOURCES:.cpp=.o)))

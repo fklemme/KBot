@@ -29,7 +29,7 @@ namespace KBot {
                     m_state = State::acquireWorker; // go to next state
                 break;
             case State::acquireWorker:
-                if (m_worker = m_manager->acquireWorker(m_toBuild.whatBuilds().first, Position(m_position))) {
+                if ((m_worker = m_manager->acquireWorker(m_toBuild.whatBuilds().first, Position(m_position)))) {
                     // Go to next state
                     if (m_toBuild.isBuilding())
                         m_state = State::moveToPosition;

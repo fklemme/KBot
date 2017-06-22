@@ -172,7 +172,7 @@ public:
 	void				SetGroundHeight(int h)			{ bwem_assert((0 <= h) && (h <= 2)); m_bits.groundHeight = h; }
 	void				SetDoodad()						{ m_bits.doodad = 1; }
 	void				AddNeutral(Neutral * pNeutral)	{ bwem_assert(!m_pNeutral && pNeutral); m_pNeutral = pNeutral; }
-	void				SetAreaId(Area::id id)			{ bwem_assert((id == -1) || !m_areaId && id); m_areaId = id; }
+	void				SetAreaId(Area::id id)			{ bwem_assert((id == -1) || (!m_areaId && id)); m_areaId = id; }
 	void				ResetAreaId()					{ m_areaId = 0; }
 	void				SetMinAltitude(altitude_t a)	{ bwem_assert(a >= 0); m_minAltitude = a; }
 	void				RemoveNeutral(Neutral * pNeutral){ bwem_assert(pNeutral && (m_pNeutral == pNeutral)); utils::unused(pNeutral); m_pNeutral = nullptr; }
