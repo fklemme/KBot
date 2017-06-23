@@ -247,8 +247,8 @@ public:
 	void				SetPtr(void * p) const			{ m_ptr = p; }
 
 	// Free use.
-	void *				Ext() const						{ return m_ptr; }
-	void				SetExt(void * p) const			{ m_ptr = p; }
+	void *				Ext() const						{ return m_ext; }
+	void				SetExt(void * p) const			{ m_ext = p; }
 
 protected:
 						UserData() = default;

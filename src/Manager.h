@@ -3,6 +3,7 @@
 #include <BWAPI.h>
 #include "Base.h"
 #include "BuildTask.h"
+#include <vector>
 
 namespace KBot {
 

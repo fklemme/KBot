@@ -3,14 +3,17 @@ Starcraft Bot (using BWAPI)
 
 # Build status
 
-| Branch      | Status                                         |
-| ----------- | ---------------------------------------------- |
-| master      | [![Build status][master badge]][vs build]      |
-| development | [![Build status][development badge]][vs build] |
+| Branch      | Visual Studio                           | GCC & Clang                                     |
+| ----------- | --------------------------------------- | ----------------------------------------------- |
+| master      | [![Build status][vs master]][vs build]  | [![Build Status][travis master]][travis build]  |
+| development | [![Build status][vs develop]][vs build] | [![Build Status][travis develop]][travis build] |
 
 [vs build]: https://kruecke.visualstudio.com/KBot
-[master badge]: https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/3/badge
-[development badge]: https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/2/badge
+[vs master]: https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/3/badge
+[vs develop]: https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/2/badge
+[travis build]: https://travis-ci.org/Kruecke/KBot
+[travis master]: https://travis-ci.org/Kruecke/KBot.svg?branch=master
+[travis develop]: https://travis-ci.org/Kruecke/KBot.svg?branch=development
 
 # Build with Visual Studio
 - Change the path in `StarcraftPath.props` to match your installation of Starcraft Broodwar.
