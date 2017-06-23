@@ -1,0 +1,19 @@
+language: c++
+
+dist: trusty
+
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty
+        packages:
+            - g++-6
+            - clang-3.8
+
+env:
+    - CC="gcc-6" CXX="g++-6"
+    - CC="clang" CXX="clang++"
+
+script:
+    - make
