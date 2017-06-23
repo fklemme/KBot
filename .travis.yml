@@ -6,14 +6,19 @@ addons:
     apt:
         sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty
+          # - llvm-toolchain-trusty
         packages:
             - g++-6
             - clang-3.8
 
-env:
-    - CC="gcc-6" CXX="g++-6"
-    - CC="clang" CXX="clang++"
+compiler:
+    - gcc
+    - clang
+
+install:
+    # Prepare compiler
+    - if [ "$CXX" = "g++" ];     then export CXX="g++-6"       CC="gcc-6";     fi
+    - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.8" CC="clang-3.8"; fi
 
 script:
     - make
