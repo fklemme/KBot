@@ -7,7 +7,12 @@ namespace KBot {
 
     using namespace BWAPI;
 
-    Base::Base(Manager &manager, const TilePosition &position) : m_manager(&manager), m_position(position) {}
+    Base::Base(Manager &manager, const TilePosition &position) : m_manager(&manager), m_position(position) {
+        const auto center = Position(position) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
+        m_mineralPatches = Broodwar->getUnitsInRadius(center, 400, Filter::IsMineralField); // TODO: Use BWEM instead?
+        m_vespeneGeysers = Broodwar->getUnitsInRadius(center, 400, Filter::GetType == UnitTypes::Resource_Vespene_Geyser);
+        // TODO: Handling of enemy refineries nearby.
+    }
 
     void Base::update() {
         // Display debug information
@@ -16,8 +21,20 @@ namespace KBot {
         Broodwar->drawBoxMap(Position(m_position), Position(m_position + UnitTypes::Terran_Command_Center.tileSize()), Colors::Green);
 
         // Show membership
-        for (const auto &unit : m_units)
-            Broodwar->drawLineMap(center, unit->getPosition(), Colors::Grey);
+        // TODO: Too much work! Remove/change this.
+        auto unassignedUnits = m_units; // copy
+        for (const auto &mineralWorker : m_mineralWorkers) {
+            Broodwar->drawLineMap(center, mineralWorker->getPosition(), Colors::Cyan);
+            unassignedUnits.erase(mineralWorker);
+        }
+        for (const auto &geyser : m_gasWorkers) {
+            for (const auto &gasWorker : geyser.second) {
+                Broodwar->drawLineMap(center, gasWorker->getPosition(), Colors::Green);
+                unassignedUnits.erase(gasWorker);
+            }
+        }
+        for (const auto &unit : unassignedUnits)
+            Broodwar->drawLineMap(center, unit->getPosition(), Colors::Red); // buildings as well
 
         // Print resource information
         Broodwar->drawTextMap(center, "Minerals: %d / %d", m_mineralWorkers.size(), targetMineralWorkers());
@@ -34,11 +51,11 @@ namespace KBot {
 
         // Update base resources
         // FIXME TODO: This whole part has to be change. Go away from rebuilding everthing all the time and start to keep track of units...
-        m_mineralPatches = Broodwar->getUnitsInRadius(center, 400, Filter::IsMineralField); // TODO: Use BWEM instead?
-        m_mineralWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsWorker && Filter::IsGatheringMinerals && Filter::IsOwned);
-        m_vespeneGeysers = Broodwar->getUnitsInRadius(center, 400, Filter::GetType == UnitTypes::Resource_Vespene_Geyser);
-        m_gasWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsRefinery && Filter::IsOwned);
-        m_gasWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsWorker && Filter::IsGatheringGas && Filter::IsOwned);
+        //m_mineralPatches = Broodwar->getUnitsInRadius(center, 400, Filter::IsMineralField); // TODO: Use BWEM instead?
+        //m_mineralWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsWorker && Filter::IsGatheringMinerals && Filter::IsOwned);
+        //m_vespeneGeysers = Broodwar->getUnitsInRadius(center, 400, Filter::GetType == UnitTypes::Resource_Vespene_Geyser);
+        //m_gasWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsRefinery && Filter::IsOwned);
+        //m_gasWorkers = Broodwar->getUnitsInRadius(center, 400, Filter::IsWorker && Filter::IsGatheringGas && Filter::IsOwned);
 
         for (const auto &unit : m_units) {
             assert(unit->exists());
@@ -55,11 +72,7 @@ namespace KBot {
             if (unit->getType().isWorker()) {
                 // if our worker is idle
                 if (unit->isIdle()) {
-                    Unit resource = Broodwar->getClosestUnit(center, Filter::IsMineralField, 400);
-                    if (m_gasWorkers.size() < targetGasWorkers()) {
-                        for (const auto &refinery : m_refineries)
-                    }
-                    const auto resource = Broodwar->getClosestUnit(center, Filter::IsMineralField || (Filter::IsRefinery && Filter::IsOwned), 400);
+                    const auto resource = Broodwar->getClosestUnit(center, Filter::IsMineralField, 400);
                     // Order workers carrying a resource to return them to the center
                     if (unit->isCarryingGas() || unit->isCarryingMinerals())
                         unit->returnCargo();

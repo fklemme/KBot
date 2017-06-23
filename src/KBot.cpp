@@ -170,9 +170,9 @@ namespace KBot {
 
             // Dispatch
             if (unit->getType().isBuilding() || unit->getType().isWorker())
-                m_manager.onUnitDestroy(unit);
+                m_manager.takeOwnership(unit);
             else
-                m_general.onUnitDestroy(unit);
+                m_general.takeOwnership(unit);
         }
 
         // Update BWEM information
@@ -215,9 +215,9 @@ namespace KBot {
 
             // Dispatch ownership
             if (unit->getType().isBuilding() || unit->getType().isWorker())
-                m_manager.transferOwnership(unit);
+                m_manager.giveOwnership(unit);
             else
-                m_general.transferOwnership(unit);
+                m_general.giveOwnership(unit);
         }
     }
 
