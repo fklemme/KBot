@@ -22,8 +22,8 @@ namespace KBot {
         void update();
 
         // Transfer ownership of a unit to manager.
-        void transferOwnership(const BWAPI::Unit &unit);
-        void onUnitDestroy(const BWAPI::Unit &unit);
+        void giveOwnership(const BWAPI::Unit &unit);
+        void takeOwnership(const BWAPI::Unit &unit);
 
         void addBuildTask(const BuildTask &buildTask);
         //const auto &getBuildQueue() const { return m_buildQueue; }

@@ -64,7 +64,7 @@ namespace KBot {
         }
     }
 
-    void General::transferOwnership(const Unit &unit) {
+    void General::giveOwnership(const Unit &unit) {
         Broodwar->registerEvent([unit](Game*) {
             Broodwar->drawTextMap(Position(unit->getPosition()), "General: %s", unit->getType().c_str());
         }, [unit](Game*) { return unit->exists(); }, 250);
@@ -83,7 +83,7 @@ namespace KBot {
         m_squads.push_back(squad);
     }
 
-    void General::onUnitDestroy(const Unit &unit) {
+    void General::takeOwnership(const Unit &unit) {
         for (auto &squad : m_squads)
             squad.erase(unit);
     }

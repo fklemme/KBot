@@ -49,20 +49,20 @@ namespace KBot {
         }
     }
 
-    void Manager::transferOwnership(const Unit &unit) {
+    void Manager::giveOwnership(const Unit &unit) {
         // Assign unit to nearest base.
         const auto it = std::min_element(m_bases.begin(), m_bases.end(), [&unit](const Base &a, const Base &b) {
             return distance(unit->getPosition(), a.getPosition())
                 < distance(unit->getPosition(), b.getPosition());
         });
         assert(it != m_bases.end());
-        it->transferOwnership(unit);
+        it->giveOwnership(unit);
     }
 
-    void Manager::onUnitDestroy(const Unit &unit) {
+    void Manager::takeOwnership(const Unit &unit) {
         // Just let every base know...
         for (auto &base : m_bases)
-            base.onUnitDestroy(unit);
+            base.takeOwnership(unit);
     }
 
 

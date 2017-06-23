@@ -90,11 +90,11 @@ namespace KBot {
         }
     }
 
-    void Base::transferOwnership(const Unit &unit) {
+    void Base::giveOwnership(const Unit &unit) {
         m_units.insert(unit);
     }
 
-    void Base::onUnitDestroy(const Unit &unit) {
+    void Base::takeOwnership(const Unit &unit) {
         m_units.erase(unit);
         // TODO: Other containers!
     }

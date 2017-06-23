@@ -21,8 +21,8 @@ namespace KBot {
         const BWAPI::TilePosition &getPosition() const { return m_position; }
 
         // Transfer ownership of a unit to base.
-        void transferOwnership(const BWAPI::Unit &unit);
-        void onUnitDestroy(const BWAPI::Unit &unit);
+        void giveOwnership(const BWAPI::Unit &unit);
+        void takeOwnership(const BWAPI::Unit &unit);
 
     private:
         Manager            *m_manager;
