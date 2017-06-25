@@ -144,7 +144,7 @@ namespace KBot {
         // My unit
         if (unit->getPlayer() == Broodwar->self()) {
             // Notify build tasks
-            m_manager.buildTaskOnUnitCreated(unit);
+            m_manager.buildTaskOnUnitCreatedOrMorphed(unit);
         }
 
     }
@@ -183,7 +183,7 @@ namespace KBot {
         // My unit
         if (unit->getPlayer() == Broodwar->self()) {
             // Notify build tasks
-            m_manager.buildTaskOnUnitCreated(unit);
+            m_manager.buildTaskOnUnitCreatedOrMorphed(unit);
         }
     }
 

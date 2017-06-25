@@ -36,7 +36,7 @@ namespace KBot {
         // Called every KBot::onFrame().
         void update();
 
-        bool onUnitCreated(const BWAPI::Unit &unit);
+        bool onUnitCreatedOrMorphed(const BWAPI::Unit &unit);
         bool onUnitDestroyed(const BWAPI::Unit &unit);
 
         State getState() const { return m_state; }

@@ -23,6 +23,8 @@ namespace KBot {
 
         // Transfer ownership of a unit to general.
         void giveOwnership(const BWAPI::Unit &unit);
+
+        // Take ownership of a unit from general (forcibly).
         void takeOwnership(const BWAPI::Unit &unit);
 
     private:

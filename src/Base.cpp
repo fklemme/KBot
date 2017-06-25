@@ -33,8 +33,8 @@ namespace KBot {
                 Broodwar->drawLineMap(center, worker->getPosition(), Colors::Green);
             }
         }
-        for (const auto &unit : m_units)
-            Broodwar->drawLineMap(center, unit->getPosition(), Colors::Grey); // buildings and unassigned workers
+        for (const auto &unit : m_otherUnits)// buildings and unassigned workers
+            Broodwar->drawLineMap(center, unit->getPosition(), Colors::Grey);
 
         // Print resource information
         Broodwar->drawTextMap(center, "Minerals: %d / %d", m_mineralWorkers.size(), targetMineralWorkers());
@@ -70,7 +70,7 @@ namespace KBot {
                 assert(!m_mineralWorkers.empty());
                 const auto pulled = std::find_if(m_mineralWorkers.begin(), m_mineralWorkers.end(), readyToAcceptOrders);
                 if (pulled != m_mineralWorkers.end()) {
-                    m_units.insert(*pulled);
+                    m_otherUnits.insert(*pulled);
                     (*pulled)->stop();
                     m_mineralWorkers.erase(pulled);
                 }
@@ -80,25 +80,25 @@ namespace KBot {
                 auto &group = gasWithMostWorkers->second;
                 const auto pulled = std::find_if(group.begin(), group.end(), readyToAcceptOrders);
                 if (pulled != group.end()) {
-                    m_units.insert(*pulled);
+                    m_otherUnits.insert(*pulled);
                     (*pulled)->stop();
                     group.erase(pulled);
                 }
             }
 
             // If there is an unassigned worker, saturate minerals and gas.
-            const auto unassignedWorker = std::find_if(m_units.begin(), m_units.end(),
+            const auto unassignedWorker = std::find_if(m_otherUnits.begin(), m_otherUnits.end(),
                 [](const Unit &unit) { return unit->getType().isWorker() && unit->isIdle(); });
 
-            if (unassignedWorker != m_units.end()) {
+            if (unassignedWorker != m_otherUnits.end()) {
                 // Fill gas first
                 if (gasWorkers < targetGasW) {
                     assert(gasWithFewestWorkers != m_gasWorkers.end());
                     gasWithFewestWorkers->second.insert(*unassignedWorker);
-                    m_units.erase(unassignedWorker);
+                    m_otherUnits.erase(unassignedWorker);
                 } else if (minWorkers < targetMinW) {
                     m_mineralWorkers.insert(*unassignedWorker);
-                    m_units.erase(unassignedWorker);
+                    m_otherUnits.erase(unassignedWorker);
                 } else {
                     // TODO!
                 }
@@ -130,15 +130,52 @@ namespace KBot {
     }
 
     void Base::giveOwnership(const Unit &unit) {
-        m_units.insert(unit);
+        m_otherUnits.insert(unit);
     }
 
     void Base::takeOwnership(const Unit &unit) {
         m_mineralWorkers.erase(unit);
         for (auto &gas : m_gasWorkers)
             gas.second.erase(unit);
-        m_units.erase(unit);
+        m_otherUnits.erase(unit);
+    }
 
+    // A merged version of std::find_if and std::min_element.
+    template<typename ForwardIt, typename UnaryPredicate, typename Compare>
+    ForwardIt min_element_if(ForwardIt first, ForwardIt last, UnaryPredicate p, Compare comp) {
+        while (first != last && !p(*first)) ++first;
+        if (first == last) return last;
+
+        ForwardIt smallest = first;
+        ++first;
+        for (; first != last; ++first) {
+            if (p(*first) && comp(*first, *smallest)) {
+                smallest = first;
+            }
+        }
+        return smallest;
+    }
+
+    Unit Base::findWorker(const UnitType &workerType, const Position &nearPosition) const {
+        auto pred = [&workerType](const Unit &u) { return u->getType() == workerType; };
+        auto comp = [&nearPosition](const Unit &a, const Unit &b) {
+            return distance(nearPosition, a->getPosition())
+                < distance(nearPosition, b->getPosition());
+        };
+
+        // Prefer "other units" over mineral workers over gas workers.
+        std::vector<const Unitset*> unitsets = {&m_otherUnits, &m_mineralWorkers};
+        for (const auto gas : m_gasWorkers)
+            unitsets.push_back(&gas.second);
+
+        for (const auto set : unitsets) {
+            const auto worker = min_element_if(set->begin(), set->end(), pred, comp);
+            if (worker != m_otherUnits.end())
+                return *worker;
+        }
+
+        // None found :(
+        return nullptr;
     }
 
     int Base::targetMineralWorkers() const {

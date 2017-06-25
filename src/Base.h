@@ -23,7 +23,13 @@ namespace KBot {
 
         // Transfer ownership of a unit to base.
         void giveOwnership(const BWAPI::Unit &unit);
+
+        // Take ownership of a unit from base (forcibly).
         void takeOwnership(const BWAPI::Unit &unit);
+
+        // Returns the closest matching unit in this base or nullptr, if none has been found.
+        // This method does not transfer the unit's ownership so takeOwnership() has to be called explicitly.
+        BWAPI::Unit findWorker(const BWAPI::UnitType &workerType, const BWAPI::Position &nearPosition) const;
 
     private:
         // Returns the total amount of workers this base should have to mine minerals.
@@ -37,12 +43,12 @@ namespace KBot {
 
         Manager            *m_manager;
         BWAPI::TilePosition m_position;
-        BWAPI::Unitset      m_units; // all units associated with this base
 
-        // Units around this base
+        // Units owned by this base.
         BWAPI::Unitset m_mineralPatches;
         BWAPI::Unitset m_mineralWorkers;
         std::map<BWAPI::Unit, BWAPI::Unitset> m_gasWorkers; // refineries and assigned workers
+        BWAPI::Unitset m_otherUnits; // buildings and unassigned workers
     };
 
 } // namespace

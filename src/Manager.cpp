@@ -51,7 +51,8 @@ namespace KBot {
 
     void Manager::giveOwnership(const Unit &unit) {
         // Assign unit to nearest base.
-        const auto it = std::min_element(m_bases.begin(), m_bases.end(), [&unit](const Base &a, const Base &b) {
+        const auto it = std::min_element(m_bases.begin(), m_bases.end(),
+            [&unit](const Base &a, const Base &b) {
             return distance(unit->getPosition(), a.getPosition())
                 < distance(unit->getPosition(), b.getPosition());
         });
@@ -60,7 +61,10 @@ namespace KBot {
     }
 
     void Manager::takeOwnership(const Unit &unit) {
-        // Just let every base know...
+        // Remove unit from workers
+        m_workers.erase(std::remove(m_workers.begin(), m_workers.end(), unit), m_workers.end());
+
+        // And pass on to bases...
         for (auto &base : m_bases)
             base.takeOwnership(unit);
     }
@@ -70,10 +74,10 @@ namespace KBot {
         m_buildQueue.push_back(buildTask);
     }
 
-    void Manager::buildTaskOnUnitCreated(const Unit &unit) {
+    void Manager::buildTaskOnUnitCreatedOrMorphed(const Unit &unit) {
         // Return as soon as the first build task can identify the created unit.
         for (auto &buildTask : m_buildQueue) {
-            if (buildTask.onUnitCreated(unit))
+            if (buildTask.onUnitCreatedOrMorphed(unit))
                 return;
         }
     }
@@ -113,24 +117,38 @@ namespace KBot {
         assert(m_reservedGas >= 0);
     }
 
-    Unit Manager::acquireWorker(const UnitType &workerType, const Position &position) {
-        Unit worker = Broodwar->getClosestUnit(position,
-            Filter::GetType == workerType
-            && Filter::IsOwned && Filter::IsCompleted
-            && (Filter::IsIdle || Filter::IsGatheringMinerals));
-
-        if (worker) {
-            if (std::find(m_workers.begin(), m_workers.end(), worker) != m_workers.end())
-                worker = nullptr; // worker already acquired
-            else
-                m_workers.push_back(worker);
+    Unit Manager::acquireWorker(const UnitType &workerType, const Position &nearPosition) {
+        // Search for matching workers and remember their bases.
+        std::vector<std::pair<Unit, Base*>> workers;
+        for (auto &base : m_bases) {
+            const auto worker = base.findWorker(workerType, nearPosition);
+            if (worker)
+                workers.emplace_back(worker, &base);
         }
 
-        return worker;
+        if (workers.empty()) {
+            // None found :(
+            return nullptr;
+        }
+
+        // Pick best candidate...
+        const auto closestWorker = std::min_element(workers.begin(), workers.end(),
+            [&nearPosition](const auto &a, const auto &b) {
+            return distance(nearPosition, a.first->getPosition())
+                < distance(nearPosition, b.first->getPosition());
+        });
+
+        // ...and take ownership explicitly!
+        closestWorker->second->takeOwnership(closestWorker->first);
+        m_workers.push_back(closestWorker->first);
+        return closestWorker->first;
     }
 
     void Manager::releaseWorker(const Unit &worker) {
         m_workers.erase(std::remove(m_workers.begin(), m_workers.end(), worker), m_workers.end());
+
+        // Pass ownership back to bases
+        giveOwnership(worker);
     }
 
 } // namespace

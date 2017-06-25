@@ -47,7 +47,7 @@ namespace KBot {
                 assert(m_worker);
                 const Position movePosition = Position(m_buildPosition) + Position(m_toBuild.tileSize()) / 2;
 
-                // debug
+                // DEBUG
                 Broodwar->registerEvent([worker = m_worker, movePosition](Game*) {
                     Broodwar->drawLineMap(worker->getPosition(), movePosition, Colors::Purple);
                     Broodwar->drawTextMap(worker->getPosition(), "Distance: %d", worker->getDistance(movePosition));
@@ -96,7 +96,7 @@ namespace KBot {
         }
     }
 
-    bool BuildTask::onUnitCreated(const Unit &unit) {
+    bool BuildTask::onUnitCreatedOrMorphed(const Unit &unit) {
         // Accept new unit if we are waiting for one.
         if (m_state != State::waitForUnit)
             return false;
