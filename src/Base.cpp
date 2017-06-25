@@ -13,7 +13,7 @@ namespace KBot {
         m_mineralPatches = Broodwar->getUnitsInRadius(center, catchmentArea, Filter::IsMineralField); // TODO: Use BWEM instead?
 
         const auto gases = Broodwar->getUnitsInRadius(center, catchmentArea, Filter::GetType == UnitTypes::Resource_Vespene_Geyser || Filter::IsRefinery);
-        for (const auto gas : gases)
+        for (const auto &gas : gases)
             m_gasesAndWorkers.emplace_back(gas, Unitset());
         // TODO: Handling of enemy refineries?
     }
@@ -118,9 +118,9 @@ namespace KBot {
             }
         }
 
-        for (const auto gasAndWorkers : m_gasesAndWorkers) {
+        for (const auto &gasAndWorkers : m_gasesAndWorkers) {
             if (gasAvailable(gasAndWorkers.first)) {
-                for (const auto worker : gasAndWorkers.second) {
+                for (const auto &worker : gasAndWorkers.second) {
                     if (worker->isIdle()) {
                         const bool r = worker->gather(gasAndWorkers.first);
                         assert(r);
@@ -168,21 +168,16 @@ namespace KBot {
 
         // Prefer "other units" over mineral workers over gas workers.
         std::vector<const Unitset*> unitsets = {&m_otherUnits, &m_mineralWorkers};
-        for (const auto gasAndWorkers : m_gasesAndWorkers)
+        for (const auto &gasAndWorkers : m_gasesAndWorkers)
             unitsets.push_back(&gasAndWorkers.second);
 
-        for (const auto set : unitsets) {
-            // Sanity check
-            // Something is wrong here :(
-            assert(set->empty()
-                ? (set->begin() == set->end())
-                : (set->begin() != set->end()));
+        for (const auto &set : unitsets) {
             const auto worker = min_element_if(set->begin(), set->end(), pred, comp);
             if (worker != set->end())
                 return *worker;
         }
 
-        // None found :(
+        // No worker found.
         return nullptr;
     }
 

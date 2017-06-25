@@ -127,7 +127,7 @@ namespace KBot {
         }
 
         if (workers.empty()) {
-            // None found :(
+            // No worker found.
             return nullptr;
         }
 
