@@ -4,6 +4,7 @@
 
 #include <BWAPI.h>
 #include <BWEM/bwem.h>
+#include <limits>
 
 namespace KBot {
 
