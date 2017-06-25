@@ -47,7 +47,7 @@ namespace KBot {
         // Units owned by this base.
         BWAPI::Unitset m_mineralPatches;
         BWAPI::Unitset m_mineralWorkers;
-        std::map<BWAPI::Unit, BWAPI::Unitset> m_gasWorkers; // refineries and assigned workers
+        std::vector<std::pair<BWAPI::Unit, BWAPI::Unitset>> m_gasesAndWorkers; // refineries and assigned workers
         BWAPI::Unitset m_otherUnits; // buildings and unassigned workers
     };
 

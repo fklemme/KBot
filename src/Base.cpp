@@ -14,7 +14,7 @@ namespace KBot {
 
         const auto gases = Broodwar->getUnitsInRadius(center, catchmentArea, Filter::GetType == UnitTypes::Resource_Vespene_Geyser || Filter::IsRefinery);
         for (const auto gas : gases)
-            m_gasWorkers.emplace(gas, Unitset());
+            m_gasesAndWorkers.emplace_back(gas, Unitset());
         // TODO: Handling of enemy refineries?
     }
 
@@ -28,8 +28,8 @@ namespace KBot {
         for (const auto &worker : m_mineralWorkers) {
             Broodwar->drawLineMap(center, worker->getPosition(), Colors::Cyan);
         }
-        for (const auto &gas : m_gasWorkers) {
-            for (const auto &worker : gas.second) {
+        for (const auto &gasAndWorkers : m_gasesAndWorkers) {
+            for (const auto &worker : gasAndWorkers.second) {
                 Broodwar->drawLineMap(center, worker->getPosition(), Colors::Green);
             }
         }
@@ -39,11 +39,12 @@ namespace KBot {
         // Print resource information
         Broodwar->drawTextMap(center, "Minerals: %d / %d", m_mineralWorkers.size(), targetMineralWorkers());
         Broodwar->drawTextMap(center + Position(0, 10), "Workers needed: %d", workersLeftToBuild());
-        for (const auto &gas : m_gasWorkers) {
-            if (gasAvailable(gas.first))
-                Broodwar->drawTextMap(gas.first->getPosition(), "Gas: %d / %d", gas.second.size(), (int) gasWorkerRatio);
+        for (const auto &gasAndWorkers : m_gasesAndWorkers) {
+            if (gasAvailable(gasAndWorkers.first))
+                Broodwar->drawTextMap(gasAndWorkers.first->getPosition(), "Gas: %d / %d",
+                    gasAndWorkers.second.size(), (int) gasWorkerRatio);
             else
-                Broodwar->drawTextMap(gas.first->getPosition(), "Unavailable Gas");
+                Broodwar->drawTextMap(gasAndWorkers.first->getPosition(), "Unavailable Gas");
         }
 
         // ----- Prevent spamming -----------------------------------------------
@@ -55,13 +56,13 @@ namespace KBot {
         {
             const int minWorkers = m_mineralWorkers.size();
             const int targetMinW = targetMineralWorkers();
-            const int gasWorkers = std::accumulate(m_gasWorkers.begin(), m_gasWorkers.end(), 0,
+            const int gasWorkers = std::accumulate(m_gasesAndWorkers.begin(), m_gasesAndWorkers.end(), 0,
                 [](int sum, const auto &p) { return sum + p.second.size(); });
             const int targetGasW = targetGasWorkers();
 
-            const auto gasWithFewestWorkers = std::min_element(m_gasWorkers.begin(), m_gasWorkers.end(),
+            const auto gasWithFewestWorkers = std::min_element(m_gasesAndWorkers.begin(), m_gasesAndWorkers.end(),
                 [](const auto &p1, const auto &p2) { return p1.second.size() < p2.second.size(); });
-            const auto gasWithMostWorkers = std::max_element(m_gasWorkers.begin(), m_gasWorkers.end(),
+            const auto gasWithMostWorkers = std::max_element(m_gasesAndWorkers.begin(), m_gasesAndWorkers.end(),
                 [](const auto &p1, const auto &p2) { return p1.second.size() < p2.second.size(); });
 
             // If minerals or gas are over-saturated, pull workers.
@@ -76,7 +77,7 @@ namespace KBot {
                 }
             }
             if (gasWorkers > targetGasW) {
-                assert(gasWithMostWorkers != m_gasWorkers.end());
+                assert(gasWithMostWorkers != m_gasesAndWorkers.end());
                 auto &group = gasWithMostWorkers->second;
                 const auto pulled = std::find_if(group.begin(), group.end(), readyToAcceptOrders);
                 if (pulled != group.end()) {
@@ -93,7 +94,7 @@ namespace KBot {
             if (unassignedWorker != m_otherUnits.end()) {
                 // Fill gas first
                 if (gasWorkers < targetGasW) {
-                    assert(gasWithFewestWorkers != m_gasWorkers.end());
+                    assert(gasWithFewestWorkers != m_gasesAndWorkers.end());
                     gasWithFewestWorkers->second.insert(*unassignedWorker);
                     m_otherUnits.erase(unassignedWorker);
                 } else if (minWorkers < targetMinW) {
@@ -117,11 +118,11 @@ namespace KBot {
             }
         }
 
-        for (const auto gas : m_gasWorkers) {
-            if (gasAvailable(gas.first)) {
-                for (const auto worker : gas.second) {
+        for (const auto gasAndWorkers : m_gasesAndWorkers) {
+            if (gasAvailable(gasAndWorkers.first)) {
+                for (const auto worker : gasAndWorkers.second) {
                     if (worker->isIdle()) {
-                        const bool r = worker->gather(gas.first);
+                        const bool r = worker->gather(gasAndWorkers.first);
                         assert(r);
                     }
                 }
@@ -135,8 +136,10 @@ namespace KBot {
 
     void Base::takeOwnership(const Unit &unit) {
         m_mineralWorkers.erase(unit);
-        for (auto &gas : m_gasWorkers)
-            gas.second.erase(unit);
+
+        for (auto &gasAndWorkers : m_gasesAndWorkers)
+            gasAndWorkers.second.erase(unit);
+
         m_otherUnits.erase(unit);
     }
 
@@ -165,10 +168,15 @@ namespace KBot {
 
         // Prefer "other units" over mineral workers over gas workers.
         std::vector<const Unitset*> unitsets = {&m_otherUnits, &m_mineralWorkers};
-        for (const auto gas : m_gasWorkers)
-            unitsets.push_back(&gas.second);
+        for (const auto gasAndWorkers : m_gasesAndWorkers)
+            unitsets.push_back(&gasAndWorkers.second);
 
         for (const auto set : unitsets) {
+            // Sanity check
+            // Something is wrong here :(
+            assert(set->empty()
+                ? (set->begin() == set->end())
+                : (set->begin() != set->end()));
             const auto worker = min_element_if(set->begin(), set->end(), pred, comp);
             if (worker != set->end())
                 return *worker;
@@ -183,13 +191,13 @@ namespace KBot {
     }
 
     int Base::targetGasWorkers() const {
-        const auto refineries = std::count_if(m_gasWorkers.begin(), m_gasWorkers.end(),
+        const auto refineries = std::count_if(m_gasesAndWorkers.begin(), m_gasesAndWorkers.end(),
             [&](const auto &gas) { return gasAvailable(gas.first); });
         return (int) std::ceil(gasWorkerRatio * refineries);
     }
 
     int Base::workersLeftToBuild() const {
-        const auto gasWorkers = std::accumulate(m_gasWorkers.begin(), m_gasWorkers.end(), 0,
+        const auto gasWorkers = std::accumulate(m_gasesAndWorkers.begin(), m_gasesAndWorkers.end(), 0,
             [](int sum, const auto &p) { return sum + p.second.size(); });
         return targetMineralWorkers() - m_mineralWorkers.size() + targetGasWorkers() - gasWorkers;
     }
