@@ -27,16 +27,18 @@ KBot is developed with Visual Studio 2017 on Windows but build services ensure i
 KBot is built in a hierarchical manner that is reflected in its classes.
 
 ## Structure
-- KBot: Implements the BWAPI interface.
-  - Manager: Handles all economic units and tasks.
-    - Base: Abstraction of a base. (depot, minerals, workers...)
-    - BuildTask: Abstraction of a unit to be created.
-  - General: Handles all military units and tasks.
-    - Squad: A group of military units sharing a task.
-  - Enemy: Informational data base about the enemy.
+Looking at the following list, the higher level item usually holds the class instances of its subordinated items.
+
+- **KBot**: Implements the BWAPI interface.
+  - **Manager**: Handles all economic units and tasks.
+    - **Base**: Abstraction of a base. (depot, minerals, workers...)
+    - **BuildTask**: Abstraction of a unit to be created.
+  - **General**: Handles all military units and tasks.
+    - **Squad**: A group of military units sharing a task.
+  - **Enemy**: Informational data base about the enemy.
 
 ## Ownership
-> A few lines of handling units in KBot.
+> A few lines of unit ownership in KBot.
 
 # SSCAIT
 KBot is running on SSCAIT. [Vote](http://sscaitournament.com/index.php?action=voteForPlayers&botId=384) for it to see it play on [Stream](https://www.twitch.tv/sscait). :)
