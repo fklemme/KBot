@@ -55,7 +55,7 @@ namespace KBot {
 
                 if (m_worker->getOrder() != Orders::Move || m_worker->getOrderTargetPosition() != movePosition)
                     m_worker->move(movePosition);
-                if (m_worker->getDistance(movePosition) < 50)
+                if (m_worker->getDistance(movePosition) < 100) // TODO!
                     m_state = State::startBuild; // go to next state
                 break;
             }
