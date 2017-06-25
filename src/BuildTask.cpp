@@ -48,8 +48,7 @@ namespace KBot {
                 const Position movePosition = Position(m_buildPosition) + Position(m_toBuild.tileSize()) / 2;
 
                 // debug
-                const auto worker = m_worker; // no C++14 :(
-                Broodwar->registerEvent([worker, movePosition](Game*) {
+                Broodwar->registerEvent([worker = m_worker, movePosition](Game*) {
                     Broodwar->drawLineMap(worker->getPosition(), movePosition, Colors::Purple);
                     Broodwar->drawTextMap(worker->getPosition(), "Distance: %d", worker->getDistance(movePosition));
                 }, nullptr, Broodwar->getLatencyFrames());

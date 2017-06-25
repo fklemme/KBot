@@ -29,10 +29,12 @@ namespace KBot {
         void addBuildTask(const BuildTask &buildTask);
         //const auto &getBuildQueue() const { return m_buildQueue; }
 
+        // Notify BuildTasks
         void buildTaskOnUnitCreated(const BWAPI::Unit &unit);
         void buildTaskOnUnitDestroyed(const BWAPI::Unit &unit);
         void buildTaskOnUnitCompleted(const BWAPI::Unit &unit);
 
+        // Interface for BuildTask
         int getAvailableMinerals() const { return BWAPI::Broodwar->self()->minerals() - m_reservedMinerals; }
         int getAvailableGas() const { return BWAPI::Broodwar->self()->gas() - m_reservedGas; }
         bool acquireResources(const int minerals, const int gas, const BuildTask::Priority priority);
