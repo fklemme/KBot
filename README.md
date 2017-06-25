@@ -1,5 +1,5 @@
 # KBot
-Starcraft Bot (using BWAPI)
+A simple, built-from-scratch Starcraft bot using BWAPI and modern C++.
 
 # Build status
 
@@ -15,9 +15,28 @@ Starcraft Bot (using BWAPI)
 [travis master]: https://travis-ci.org/Kruecke/KBot.svg?branch=master
 [travis develop]: https://travis-ci.org/Kruecke/KBot.svg?branch=development
 
-# Build with Visual Studio
+KBot is developed with Visual Studio 2017 on Windows but build services ensure it can be compiled on Linux with GCC and clang as well.
+
+# Quick build and installation with Visual Studio
 - Change the path in `StarcraftPath.props` to match your installation of Starcraft Broodwar.
 - Run `build.sh` from VS 2017 Command Prompt to build BWAPI and KBot for debug and release.
 
+# Concepts and Structure of KBot
+> Incomplete but gotta start somewhere. ;-)
+
+KBot is built in a hierarchical manner that is reflected in its classes.
+
+## Structure
+- KBot: Implements the BWAPI interface.
+  - Manager: Handles all economic units and tasks.
+    - Base: Abstraction of a base. (depot, minerals, workers...)
+    - BuildTask: Abstraction of a unit to be created.
+  - General: Handles all military units and tasks.
+    - Squad: A group of military units sharing a task.
+  - Enemy: Informational data base about the enemy.
+
+## Ownership
+> A few lines of handling units in KBot.
+
 # SSCAIT
-KBot is running on SSCAIT as well. [Vote](http://sscaitournament.com/index.php?action=voteForPlayers&botId=384) for it to see it play on [Stream](https://www.twitch.tv/sscait). :)
+KBot is running on SSCAIT. [Vote](http://sscaitournament.com/index.php?action=voteForPlayers&botId=384) for it to see it play on [Stream](https://www.twitch.tv/sscait). :)
