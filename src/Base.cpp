@@ -170,7 +170,7 @@ namespace KBot {
 
         for (const auto set : unitsets) {
             const auto worker = min_element_if(set->begin(), set->end(), pred, comp);
-            if (worker != m_otherUnits.end())
+            if (worker != set->end())
                 return *worker;
         }
 
