@@ -1,7 +1,7 @@
 #include "BuildTask.h"
 
-#include "Manager.h"
 #include <cassert>
+#include "Manager.h"
 
 namespace KBot {
 

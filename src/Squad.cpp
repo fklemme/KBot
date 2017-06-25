@@ -20,8 +20,8 @@ namespace KBot {
                 Broodwar->drawLineMap(getPosition(), unit->getPosition(), Colors::Grey);
 
             // Draw path to enemy
-            if (m_kBot->getEnemyPositionCount() > 0) {
-                const auto enemyPosition = Position(m_kBot->getNextEnemyPosition());
+            if (m_kBot->enemy().getPositionCount() > 0) {
+                const auto enemyPosition = Position(m_kBot->enemy().getClosestPosition());
                 const auto path = m_kBot->map().GetPath(getPosition(), enemyPosition);
                 if (!path.empty()) {
                     Broodwar->drawLineMap(getPosition(), Position(path.front()->Center()), Colors::Red);
@@ -47,7 +47,7 @@ namespace KBot {
             case State::scout:
                 if (!enemiesNearBase.empty())
                     m_state = State::defend;
-                else if (m_kBot->getEnemyPositionCount() > 0) {
+                else if (m_kBot->enemy().getPositionCount() > 0) {
                     if (size() >= 20)
                         m_state = State::attack;
                     else
@@ -57,14 +57,14 @@ namespace KBot {
             case State::attack:
                 if (!enemiesNearBase.empty())
                     m_state = State::defend;
-                else if (m_kBot->getEnemyPositionCount() == 0)
+                else if (m_kBot->enemy().getPositionCount() == 0)
                     m_state = State::scout;
                 else if (size() < 10)
                     m_state = State::defend;
                 break;
             case State::defend:
                 if (enemiesNearBase.empty()) {
-                    if (m_kBot->getEnemyPositionCount() == 0)
+                    if (m_kBot->enemy().getPositionCount() == 0)
                         m_state = State::scout;
                     if (size() >= 20)
                         m_state = State::attack;
@@ -97,7 +97,7 @@ namespace KBot {
                     case State::scout:
                         if (unit->isIdle())
                             // Scout!
-                            unit->attack(Position(m_kBot->getNextEnemyPosition()));
+                            unit->attack(Position(m_kBot->enemy().getClosestPosition()));
                         break;
                     case State::attack:
                         unitPath = m_kBot->map().GetPath(unit->getPosition(), getPosition(), &unitPathLength);
@@ -127,7 +127,7 @@ namespace KBot {
                             }
                         } else if (unit->isIdle())
                             // Attack!
-                            unit->attack(Position(m_kBot->getNextEnemyPosition()));
+                            unit->attack(Position(m_kBot->enemy().getClosestPosition()));
                         break;
                     case State::defend:
                         if (distance(unit->getPosition(), Broodwar->self()->getStartLocation()) > 1000) {

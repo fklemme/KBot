@@ -1,6 +1,5 @@
 #include "KBot.h"
 
-#include <random>
 #include "Squad.h"
 #include "utils.h"
 
@@ -16,7 +15,7 @@ namespace KBot {
 
     using namespace BWAPI;
 
-    KBot::KBot() : m_manager(*this), m_general(*this) {}
+    KBot::KBot() : m_manager(*this), m_general(*this), m_enemy(*this) {}
 
     // Called only once at the beginning of a game.
     void KBot::onStart() {
@@ -79,24 +78,22 @@ namespace KBot {
 
         // Display some debug information
         Broodwar->drawTextScreen(2, 0, "FPS: %d, APM: %d", Broodwar->getFPS(), Broodwar->getAPM());
-        Broodwar->drawTextScreen(2, 10, "Scouted enemy positions: %d", m_enemyPositions.size());
+        Broodwar->drawTextScreen(2, 10, "Scouted enemy positions: %d", m_enemy.getPositionCount());
 
-        if (!m_enemyPositions.empty()) {
-            const auto enemyPosition = m_enemyPositions.front();
+        if (m_enemy.getPositionCount()) {
+            const auto enemyPosition = m_enemy.getClosestPosition();
             Broodwar->drawTextScreen(2, 20, "Next enemy position: (%d, %d)", enemyPosition.x, enemyPosition.y);
         } else
             Broodwar->drawTextScreen(2, 20, "Next enemy position: Unknown");
-
-        // Update enemy positions
-        // TODO: Works for now, but can surely be improved.
-        while (!m_enemyPositions.empty() && Broodwar->isVisible(m_enemyPositions.front()) && Broodwar->getUnitsOnTile(m_enemyPositions.front(), Filter::IsEnemy).empty())
-            m_enemyPositions.erase(m_enemyPositions.begin());
 
         // Update manager
         m_manager.update();
 
         // Update general
         m_general.update();
+
+        // Update enemy
+        m_enemy.update();
 
         // ----- Prevent spamming -----------------------------------------------
         // Everything below is executed only occasionally and not on every frame.
@@ -131,15 +128,8 @@ namespace KBot {
         assert(unit->exists());
 
         // Update enemy positions
-        if (Broodwar->self()->isEnemy(unit->getPlayer()) && unit->getType().isBuilding()) {
-            const auto myPosition = Broodwar->self()->getStartLocation();
-            const TilePosition position(unit->getPosition());
-            if (std::find(m_enemyPositions.begin(), m_enemyPositions.end(), position) == m_enemyPositions.end()) {
-                const auto it = std::lower_bound(m_enemyPositions.begin(), m_enemyPositions.end(), position,
-                    [&](const TilePosition &a, const TilePosition &b) { return distance(myPosition, a) < distance(myPosition, b); });
-                m_enemyPositions.insert(it, position);
-            }
-        }
+        if (Broodwar->self()->isEnemy(unit->getPlayer()) && unit->getType().isBuilding())
+            m_enemy.addPosition(TilePosition(unit->getPosition()));
     }
 
     // Called just as a visible unit is becoming invisible.
@@ -169,7 +159,7 @@ namespace KBot {
             m_manager.buildTaskOnUnitDestroyed(unit);
 
             // Dispatch
-            if (unit->getType().isBuilding() || unit->getType().isWorker())
+            if (unit->getType().isBuilding() || unit->getType().isWorker() || unit->getType().isMineralField())
                 m_manager.takeOwnership(unit);
             else
                 m_general.takeOwnership(unit);
@@ -187,6 +177,9 @@ namespace KBot {
         // For example, when a Drone transforms into a Hatchery, a Siege Tank uses Siege Mode, or a Vespene Geyser receives a Refinery.
         assert(unit->exists());
 
+        const auto type = unit->getType();
+        Broodwar << type << std::endl; // DEBUG!
+
         // My unit
         if (unit->getPlayer() == Broodwar->self()) {
             // Notify build tasks
@@ -197,6 +190,7 @@ namespace KBot {
     // Called when a unit changes ownership.
     void KBot::onUnitRenegade(BWAPI::Unit unit) {
         // This occurs when the Protoss ability Mind Control is used, or if a unit changes ownership in Use Map Settings.
+        // TODO!
     }
 
     // Called when the state of the Broodwar game is saved to file.
@@ -218,43 +212,6 @@ namespace KBot {
                 m_manager.giveOwnership(unit);
             else
                 m_general.giveOwnership(unit);
-        }
-    }
-
-    TilePosition KBot::getNextEnemyPosition() const {
-        if (!m_enemyPositions.empty())
-            return m_enemyPositions.front();
-        else {
-            // TODO: Update to multiple own bases concept?
-            // Positions to scout
-            auto positions = m_map.StartingLocations();
-            if (std::all_of(positions.begin(), positions.end(), [](const TilePosition &p) { return Broodwar->isExplored(p); })) {
-                positions.clear();
-                for (const auto &area : m_map.Areas())
-                    for (const auto &base : area.Bases())
-                        positions.push_back(base.Location());
-            }
-
-            // Always exclude our own base.
-            const auto myPosition = Broodwar->self()->getStartLocation();
-            const auto it = std::find(positions.begin(), positions.end(), myPosition);
-            assert(it != positions.end());
-            positions.erase(it);
-
-            // Order positions by isExplored and distance to own base.
-            std::sort(positions.begin(), positions.end(), [&](TilePosition a, TilePosition b) {
-                return distance(myPosition, a) < distance(myPosition, b);
-            });
-            std::stable_sort(positions.begin(), positions.end(), [](TilePosition a, TilePosition b) {
-                return Broodwar->isExplored(a) < Broodwar->isExplored(b);
-            });
-            if (!Broodwar->isExplored(positions.front()))
-                return positions.front();
-
-            // If all positions are already explored, return a random position.
-            static std::default_random_engine generator;
-            std::uniform_int_distribution<int> dist(0, positions.size() - 1);
-            return positions[dist(generator)];
         }
     }
 

@@ -1,5 +1,4 @@
 #include <BWAPI.h>
-
 #include "KBot.h"
 
 // Exclude rarely-used stuff from Windows headers

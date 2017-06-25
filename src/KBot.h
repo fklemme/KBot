@@ -5,6 +5,7 @@
 
 #include "Manager.h"
 #include "General.h"
+#include "Enemy.h"
 
 namespace KBot {
 
@@ -37,23 +38,24 @@ namespace KBot {
         virtual void onSaveGame(std::string gameName) override;
         virtual void onUnitComplete(BWAPI::Unit unit) override;
 
-        // Getter for map, manager and general.
-        BWEM::Map &map() { return m_map; };
-        const BWEM::Map &map() const { return m_map; };
+        // Getter for members.
         Manager &manager() { return m_manager; }
         const Manager &manager() const { return m_manager; }
+
         General &general() { return m_general; }
         const General &general() const { return m_general; }
 
-        BWAPI::TilePosition getNextEnemyPosition() const;
-        std::size_t getEnemyPositionCount() const { return m_enemyPositions.size(); }
+        Enemy &enemy() { return m_enemy; }
+        const Enemy &enemy() const { return m_enemy; }
+
+        BWEM::Map &map() { return m_map; };
+        const BWEM::Map &map() const { return m_map; };
 
     private:
         Manager    m_manager;
         General    m_general;
+        Enemy      m_enemy;
         BWEM::Map &m_map = BWEM::Map::Instance();
-
-        std::vector<BWAPI::TilePosition> m_enemyPositions;
     };
 
 } // namespace
