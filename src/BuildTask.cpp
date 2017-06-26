@@ -28,8 +28,8 @@ void BuildTask::update() {
             m_state = State::acquireWorker; // go to next state
         break;
     case State::acquireWorker:
-        if ((m_worker = m_manager->acquireWorker(m_toBuild.whatBuilds().first,
-                                                 Position(m_position))) != nullptr) {
+        m_worker = m_manager->acquireWorker(m_toBuild.whatBuilds().first, Position(m_position));
+        if (m_worker != nullptr) {
             // Go to next state
             if (m_toBuild.isBuilding())
                 m_state = State::moveToPosition;
@@ -43,7 +43,7 @@ void BuildTask::update() {
                 m_exactPosition ? m_position : Broodwar->getBuildLocation(m_toBuild, m_position);
             m_allocatedBuildPosition = true;
         }
-        assert(m_worker);
+        assert(m_worker != nullptr);
         const Position movePosition =
             Position(m_buildPosition) + Position(m_toBuild.tileSize()) / 2;
 
@@ -85,7 +85,7 @@ void BuildTask::update() {
         }
         break;
     case State::building:
-        assert(m_buildingUnit);
+        assert(m_buildingUnit != nullptr);
         if (m_buildingUnit->isCompleted()) {
             m_manager->releaseWorker(m_worker);
             m_state = State::finalize; // go to next state
