@@ -15,10 +15,10 @@ Base::Base(Manager &manager, TilePosition position)
     const auto center =
         Position(m_position) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
     m_mineralPatches = Broodwar->getUnitsInRadius(
-        center, catchmentArea, Filter::IsMineralField); // TODO: Use BWEM instead?
+        center, catchmentRadius, Filter::IsMineralField); // TODO: Use BWEM instead?
 
     const auto gases = Broodwar->getUnitsInRadius(
-        center, catchmentArea,
+        center, catchmentRadius,
         Filter::GetType == UnitTypes::Resource_Vespene_Geyser || Filter::IsRefinery);
     for (const auto &gas : gases)
         m_gasesAndWorkers.emplace_back(gas, Unitset());
@@ -29,7 +29,7 @@ void Base::update() {
     // Display debug information
     const auto center =
         Position(m_position) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
-    Broodwar->drawCircleMap(center, catchmentArea, Colors::Green);
+    Broodwar->drawCircleMap(center, catchmentRadius, Colors::Green);
     Broodwar->drawBoxMap(Position(m_position),
                          Position(m_position + UnitTypes::Terran_Command_Center.tileSize()),
                          Colors::Green);
@@ -119,7 +119,7 @@ void Base::update() {
                 m_mineralWorkers.insert(*unassignedWorker);
                 m_otherUnits.erase(unassignedWorker);
             } else {
-                // TODO!
+                // TODO: Transfer unit to another base?
             }
         }
     }

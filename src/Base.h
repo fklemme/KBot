@@ -8,7 +8,7 @@ namespace KBot {
 class Manager;
 
 class Base {
-    static const auto catchmentArea = 400;
+    static const auto catchmentRadius = 400;
     static const auto mineralWorkerRatio = 2;
     static const auto gasWorkerRatio = 3;
 
