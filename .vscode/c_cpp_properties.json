@@ -47,7 +47,7 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceRoot}/B WEM/include",
+                "${workspaceRoot}/BWEM/include",
                 "${workspaceRoot}/bwapi/bwapi/include",
                 "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include"
             ],
