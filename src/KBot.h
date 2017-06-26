@@ -39,15 +39,12 @@ class KBot : public BWAPI::AIModule {
     void onUnitComplete(BWAPI::Unit unit) override;
 
     // Getter for members.
-    Manager &      manager() { return m_manager; }
-    const Manager &manager() const { return m_manager; }
-
-    General &      general() { return m_general; }
-    const General &general() const { return m_general; }
-
-    Enemy &      enemy() { return m_enemy; }
-    const Enemy &enemy() const { return m_enemy; }
-
+    Manager &        manager() { return m_manager; }
+    const Manager &  manager() const { return m_manager; }
+    General &        general() { return m_general; }
+    const General &  general() const { return m_general; }
+    Enemy &          enemy() { return m_enemy; }
+    const Enemy &    enemy() const { return m_enemy; }
     BWEM::Map &      map() { return m_map; };
     const BWEM::Map &map() const { return m_map; };
 
