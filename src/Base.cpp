@@ -75,7 +75,7 @@ void Base::update() {
     for (const auto &gasAndWorkers : m_gasesAndWorkers) {
         if (gasAvailable(gasAndWorkers.first))
             Broodwar->drawTextMap(gasAndWorkers.first->getPosition(), "Gas: %d / %d",
-                                  gasAndWorkers.second.size(), (int)gasWorkerRatio);
+                                  gasAndWorkers.second.size(), (int) gasWorkerRatio);
         else
             Broodwar->drawTextMap(gasAndWorkers.first->getPosition(), "Unavailable Gas");
     }
@@ -101,9 +101,8 @@ void Base::update() {
             m_gasesAndWorkers.begin(), m_gasesAndWorkers.end(),
             [](const auto &p1, const auto &p2) { return p1.second.size() < p2.second.size(); });
 
-        // If minerals or gas are over-saturated, pull workers.
-        // Pull only workers that are ready to accept orders. Just to make sure the "stop" command
-        // is considered.
+        // If minerals or gas are over-saturated, pull workers. Pull only workers that are ready to
+        // accept orders. Just to make sure the "stop" command is considered.
         if (minWorkers > targetMinW) {
             assert(!m_mineralWorkers.empty());
             const auto pulled =
@@ -204,13 +203,13 @@ Unit Base::findWorker(const UnitType &workerType, const Position &nearPosition) 
 }
 
 int Base::targetMineralWorkers() const {
-    return (int)std::ceil(mineralWorkerRatio * m_mineralPatches.size());
+    return (int) std::ceil(mineralWorkerRatio * m_mineralPatches.size());
 }
 
 int Base::targetGasWorkers() const {
     const auto refineries = std::count_if(m_gasesAndWorkers.begin(), m_gasesAndWorkers.end(),
                                           [&](const auto &gas) { return gasAvailable(gas.first); });
-    return (int)std::ceil(gasWorkerRatio * refineries);
+    return (int) std::ceil(gasWorkerRatio * refineries);
 }
 
 int Base::workersLeftToBuild() const {

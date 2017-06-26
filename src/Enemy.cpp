@@ -61,7 +61,7 @@ TilePosition Enemy::getClosestPosition() const {
         return distance(myPosition, a) < distance(myPosition, b);
     });
     std::stable_sort(positions.begin(), positions.end(), [](TilePosition a, TilePosition b) {
-        return (int)Broodwar->isExplored(a) < (int)Broodwar->isExplored(b);
+        return (int) Broodwar->isExplored(a) < (int) Broodwar->isExplored(b);
     });
     if (!Broodwar->isExplored(positions.front()))
         return positions.front();

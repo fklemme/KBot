@@ -10,7 +10,7 @@
 namespace KBot {
 
 class KBot : public BWAPI::AIModule {
-  public:
+public:
     KBot();
 
     // Prohibit copy & move.
@@ -48,7 +48,7 @@ class KBot : public BWAPI::AIModule {
     BWEM::Map &      map() { return m_map; };
     const BWEM::Map &map() const { return m_map; };
 
-  private:
+private:
     Manager    m_manager;
     General    m_general;
     Enemy      m_enemy;

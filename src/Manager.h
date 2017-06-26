@@ -10,7 +10,7 @@ namespace KBot {
 class KBot;
 
 class Manager {
-  public:
+public:
     Manager(KBot &kBot);
 
     // Prohibit copy & move. There is only one manager.
@@ -45,7 +45,7 @@ class Manager {
                               const BWAPI::Position &nearPosition);
     void releaseWorker(const BWAPI::Unit &worker);
 
-  private:
+private:
     KBot &                   m_kBot;
     std::vector<Base>        m_bases;
     std::vector<BuildTask>   m_buildQueue;

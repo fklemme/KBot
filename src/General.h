@@ -9,7 +9,7 @@ namespace KBot {
 class KBot;
 
 class General {
-  public:
+public:
     General(KBot &kBot);
 
     // Prohibit copy & move. There is only one general.
@@ -27,7 +27,7 @@ class General {
     // Take ownership of a unit from general (forcibly).
     void takeOwnership(const BWAPI::Unit &unit);
 
-  private:
+private:
     KBot &             m_kBot;
     std::vector<Squad> m_squads;
 };

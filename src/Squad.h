@@ -7,17 +7,17 @@ namespace KBot {
 class KBot;
 
 class Squad : public BWAPI::Unitset {
-  public:
+public:
     enum class State { scout, attack, defend };
 
-  public:
+public:
     Squad(KBot &kBot);
 
     // Called every KBot::onFrame().
     void  update();
     State getState() const { return m_state; }
 
-  private:
+private:
     KBot *m_kBot;
     State m_state;
 };

@@ -48,7 +48,7 @@ void BuildTask::update() {
             Position(m_buildPosition) + Position(m_toBuild.tileSize()) / 2;
 
         // DEBUG
-        Broodwar->registerEvent([ worker = m_worker, movePosition ](Game *) {
+        Broodwar->registerEvent([worker = m_worker, movePosition](Game *) {
             Broodwar->drawLineMap(worker->getPosition(), movePosition, Colors::Purple);
             Broodwar->drawTextMap(worker->getPosition(), "Distance: %d",
                                   worker->getDistance(movePosition));

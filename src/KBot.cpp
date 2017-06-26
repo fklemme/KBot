@@ -62,9 +62,9 @@ void KBot::onStart() {
         Terran_SCV,    Terran_Marine,       Terran_Supply_Depot // @ 24/26 supply
     };
 
-    int priority = (int)BuildTask::Priority::buildorder;
+    int priority = (int) BuildTask::Priority::buildorder;
     for (const auto &unit : buildorder)
-        m_manager.addBuildTask({m_manager, unit, (BuildTask::Priority)priority--});
+        m_manager.addBuildTask({m_manager, unit, (BuildTask::Priority) priority--});
 
     // Ready to go. Good luck, have fun!
     Broodwar->sendText("gl hf");

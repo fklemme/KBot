@@ -7,7 +7,7 @@ namespace KBot {
 class Manager;
 
 class BuildTask {
-  public:
+public:
     enum class State {
         initialize,
         acquireResources,
@@ -19,14 +19,13 @@ class BuildTask {
         finalize
     };
 
-    // The main purpose of priority is to handle resource allocation of build tasks.
-    // The allocation of resources for tasks with the same priority is "greedy". If a task is able
-    // to allocate all its resources, it will do so.
-    // For tasks with different priorities, the lesser tasks will always have to wait for the higher
-    // tasks to allocate their resources.
+    // The main purpose of priority is to handle resource allocation of build tasks. The allocation
+    // of resources for tasks with the same priority is "greedy". If a task is able to allocate all
+    // its resources, it will do so. For tasks with different priorities, the lesser tasks will
+    // always have to wait for the higher tasks to allocate their resources.
     enum class Priority : int { low = -100, normal = 0, high = 100, buildorder = 200 };
 
-  public:
+public:
     BuildTask(Manager &manager, BWAPI::UnitType toBuild, Priority priority = Priority::normal,
               BWAPI::TilePosition position = BWAPI::Broodwar->self()->getStartLocation(),
               bool                exactPosition = false);
@@ -41,7 +40,7 @@ class BuildTask {
     Priority    getPriority() const { return m_priority; }
     std::string toString() const;
 
-  private:
+private:
     Manager *           m_manager;
     BWAPI::UnitType     m_toBuild;
     Priority            m_priority;

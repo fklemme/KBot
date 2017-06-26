@@ -12,7 +12,7 @@ class Base {
     static const auto mineralWorkerRatio = 2;
     static const auto gasWorkerRatio = 3;
 
-  public:
+public:
     Base(Manager &manager, BWAPI::TilePosition position);
 
     // Called every KBot::onFrame().
@@ -26,13 +26,12 @@ class Base {
     // Take ownership of a unit from base (forcibly).
     void takeOwnership(const BWAPI::Unit &unit);
 
-    // Returns the closest matching unit in this base or nullptr, if none has been found.
-    // This method does not transfer the unit's ownership so takeOwnership() has to be called
-    // explicitly.
+    // Returns the closest matching unit in this base or nullptr, if none has been found. This
+    // method does not transfer the unit's ownership so takeOwnership() has to be called explicitly.
     BWAPI::Unit findWorker(const BWAPI::UnitType &workerType,
                            const BWAPI::Position &nearPosition) const;
 
-  private:
+private:
     // Returns the total amount of workers this base should have to mine minerals.
     int targetMineralWorkers() const;
 
