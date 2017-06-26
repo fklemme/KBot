@@ -177,9 +177,6 @@ namespace KBot {
         // For example, when a Drone transforms into a Hatchery, a Siege Tank uses Siege Mode, or a Vespene Geyser receives a Refinery.
         assert(unit->exists());
 
-        const auto type = unit->getType();
-        Broodwar << type << std::endl; // DEBUG!
-
         // My unit
         if (unit->getPlayer() == Broodwar->self()) {
             // Notify build tasks
