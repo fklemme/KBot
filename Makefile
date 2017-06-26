@@ -6,6 +6,7 @@ CXXFLAGS += -std=c++14 \
             -Wall \
             -Wno-unknown-pragmas
 
+HEADERS := $(wildcard src/*.h)
 SOURCES := $(filter-out src/DllMain.cpp,$(wildcard src/*.cpp))
 OBJECTS := $(addprefix obj/,$(notdir $(SOURCES:.cpp=.o)))
 
@@ -18,7 +19,16 @@ obj:
 obj/%.o: src/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $^
 
-# Tidy - Removed some rules because...
+.PHONY: clean
+clean:
+	rm -rf obj
+
+# Clang Format - Settings in file .clang-format
+.PHONY: format
+format:
+	clang-format -i -style=file $(HEADERS) $(SOURCES)
+
+# Clang Tidy - Removed some rules because...
 #   - readability-braces-around-statements: I don't like that rule.
 #   - cppcoreguidelines-pro-bounds-array-to-pointer-decay: "assert" brings up a lot of these warnings.
 #   - cppcoreguidelines-pro-type-vararg: We have to use Broodwar->drawText...(). :/
@@ -26,7 +36,3 @@ obj/%.o: src/%.cpp
 tidy:
 	clang-tidy -checks=cppcoreguidelines-*,modernize-*,readability-*,-readability-braces-around-statements,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-type-vararg \
 	    -header-filter=src/ $(SOURCES) -- $(CXXFLAGS)
-
-.PHONY: clean
-clean:
-	rm -rf obj
