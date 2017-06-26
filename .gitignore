@@ -261,3 +261,6 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+# VS Code, do I need that file?
+.vscode/settings.json
