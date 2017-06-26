@@ -117,7 +117,8 @@ bool BuildTask::onUnitDestroyed(const Unit &unit) {
     if (unit == m_worker) {
         // FIXME!
         return true;
-    } else if (unit == m_buildingUnit) {
+    }
+    if (unit == m_buildingUnit) {
         // FIXME!
         return true;
     }
