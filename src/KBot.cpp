@@ -19,11 +19,11 @@ namespace KBot {
 
     // Called only once at the beginning of a game.
     void KBot::onStart() {
-        if (Broodwar->isReplay() || !Broodwar->self())
+        if (Broodwar->isReplay() || Broodwar->self() == nullptr)
             return;
 
         // Print build information
-        Broodwar << "KBot build " << (buildNumber.size() ? buildNumber : "local") << std::endl;
+        Broodwar << "KBot build " << (buildNumber.empty() ? "local" : buildNumber) << std::endl;
 
         // This bot is written for Terran, so make sure we are indeed Terran!
         if (Broodwar->self()->getRace() != Races::Terran) {
@@ -73,14 +73,14 @@ namespace KBot {
     // Called once for every execution of a logical frame in Broodwar.
     void KBot::onFrame() {
         // Return if the game is a replay or is paused
-        if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self())
+        if (Broodwar->isReplay() || Broodwar->isPaused() || Broodwar->self() == nullptr)
             return;
 
         // Display some debug information
         Broodwar->drawTextScreen(2, 0, "FPS: %d, APM: %d", Broodwar->getFPS(), Broodwar->getAPM());
         Broodwar->drawTextScreen(2, 10, "Scouted enemy positions: %d", m_enemy.getPositionCount());
 
-        if (m_enemy.getPositionCount()) {
+        if (m_enemy.getPositionCount() > 0) {
             const auto enemyPosition = m_enemy.getClosestPosition();
             Broodwar->drawTextScreen(2, 20, "Next enemy position: (%d, %d)", enemyPosition.x, enemyPosition.y);
         } else

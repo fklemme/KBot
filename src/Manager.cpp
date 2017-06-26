@@ -122,7 +122,7 @@ namespace KBot {
         std::vector<std::pair<Unit, Base*>> workers;
         for (auto &base : m_bases) {
             const auto worker = base.findWorker(workerType, nearPosition);
-            if (worker)
+            if (worker != nullptr)
                 workers.emplace_back(worker, &base);
         }
 

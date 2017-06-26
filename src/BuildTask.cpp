@@ -7,11 +7,10 @@ namespace KBot {
 
     using namespace BWAPI;
 
-    BuildTask::BuildTask(Manager &manager,
-        const UnitType &toBuild, const Priority priority,
-        const TilePosition &position, const bool exactPosition)
-        : m_manager(&manager), m_toBuild(toBuild), m_priority(priority),
-        m_position(position), m_exactPosition(exactPosition) {}
+    BuildTask::BuildTask(Manager &manager, UnitType toBuild, Priority priority,
+        TilePosition position, bool exactPosition)
+        : m_manager(&manager), m_toBuild(std::move(toBuild)), m_priority(priority),
+        m_position(std::move(position)), m_exactPosition(exactPosition) {}
 
     void BuildTask::update() {
         // ----- Prevent spamming -----------------------------------------------
@@ -29,7 +28,7 @@ namespace KBot {
                     m_state = State::acquireWorker; // go to next state
                 break;
             case State::acquireWorker:
-                if ((m_worker = m_manager->acquireWorker(m_toBuild.whatBuilds().first, Position(m_position)))) {
+                if ((m_worker = m_manager->acquireWorker(m_toBuild.whatBuilds().first, Position(m_position))) != nullptr) {
                     // Go to next state
                     if (m_toBuild.isBuilding())
                         m_state = State::moveToPosition;
@@ -76,7 +75,7 @@ namespace KBot {
                 }
                 break;
             case State::waitForUnit:
-                if (m_buildingUnit) {
+                if (m_buildingUnit != nullptr) {
                     m_manager->releaseResources(m_toBuild.mineralPrice(), m_toBuild.gasPrice());
                     m_state = State::building; // go to next state
                 }
