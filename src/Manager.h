@@ -41,8 +41,8 @@ class Manager {
         return BWAPI::Broodwar->self()->minerals() - m_reservedMinerals;
     }
     int  getAvailableGas() const { return BWAPI::Broodwar->self()->gas() - m_reservedGas; }
-    bool acquireResources(const int minerals, const int gas, const BuildTask::Priority priority);
-    void releaseResources(const int minerals, const int gas);
+    bool acquireResources(int minerals, int gas, BuildTask::Priority priority);
+    void releaseResources(int minerals, int gas);
     BWAPI::Unit acquireWorker(const BWAPI::UnitType &workerType,
                               const BWAPI::Position &nearPosition);
     void releaseWorker(const BWAPI::Unit &worker);

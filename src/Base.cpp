@@ -10,10 +10,10 @@ namespace KBot {
 
 using namespace BWAPI;
 
-Base::Base(Manager &manager, const TilePosition &position)
-    : m_manager(&manager), m_position(position) {
+Base::Base(Manager &manager, TilePosition position)
+    : m_manager(&manager), m_position(std::move(position)) {
     const auto center =
-        Position(position) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
+        Position(m_position) + Position(UnitTypes::Terran_Command_Center.tileSize()) / 2;
     m_mineralPatches = Broodwar->getUnitsInRadius(
         center, catchmentArea, Filter::IsMineralField); // TODO: Use BWEM instead?
 

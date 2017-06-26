@@ -93,8 +93,7 @@ void Manager::buildTaskOnUnitCompleted(const Unit &unit) {
     // Since BuildTasks are busy waiting for completion right now, this is unused.
 }
 
-bool Manager::acquireResources(const int minerals, const int gas,
-                               const BuildTask::Priority priority) {
+bool Manager::acquireResources(int minerals, int gas, BuildTask::Priority priority) {
     // All higher tasks have to have their resources allocated, otherwise fail!
     for (auto it = m_buildQueue.begin(); it != m_buildQueue.end() && it->getPriority() > priority;
          ++it) {
@@ -111,7 +110,7 @@ bool Manager::acquireResources(const int minerals, const int gas,
     return false;
 }
 
-void Manager::releaseResources(const int minerals, const int gas) {
+void Manager::releaseResources(int minerals, int gas) {
     m_reservedMinerals -= minerals;
     m_reservedGas -= gas;
     assert(m_reservedMinerals >= 0);

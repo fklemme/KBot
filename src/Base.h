@@ -13,7 +13,7 @@ class Base {
     static const auto gasWorkerRatio = 3;
 
   public:
-    Base(Manager &manager, const BWAPI::TilePosition &position);
+    Base(Manager &manager, BWAPI::TilePosition position);
 
     // Called every KBot::onFrame().
     void update();
