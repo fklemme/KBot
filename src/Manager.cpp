@@ -93,6 +93,12 @@ void Manager::buildTaskOnUnitCompleted(const Unit &unit) {
     // Since BuildTasks are busy waiting for completion right now, this is unused.
 }
 
+int Manager::getAvailableMinerals() const {
+    return BWAPI::Broodwar->self()->minerals() - m_reservedMinerals;
+}
+
+int Manager::getAvailableGas() const { return BWAPI::Broodwar->self()->gas() - m_reservedGas; }
+
 bool Manager::acquireResources(int minerals, int gas, BuildTask::Priority priority) {
     // All higher tasks have to have their resources allocated, otherwise fail!
     for (auto it = m_buildQueue.begin(); it != m_buildQueue.end() && it->getPriority() > priority;

@@ -6,6 +6,28 @@
 #include <numeric>
 #include <random>
 
+namespace {
+
+// A merged version of std::min_element and std::find_if.
+template <typename ForwardIt, typename UnaryPredicate, typename Compare>
+ForwardIt min_element_if(ForwardIt first, ForwardIt last, UnaryPredicate p, Compare comp) {
+    while (first != last && !p(*first))
+        ++first;
+    if (first == last)
+        return last;
+
+    ForwardIt smallest = first;
+    ++first;
+    for (; first != last; ++first) {
+        if (p(*first) && comp(*first, *smallest)) {
+            smallest = first;
+        }
+    }
+    return smallest;
+}
+
+} // namespace
+
 namespace KBot {
 
 using namespace BWAPI;
@@ -158,24 +180,6 @@ void Base::takeOwnership(const Unit &unit) {
         gasAndWorkers.second.erase(unit);
 
     m_otherUnits.erase(unit);
-}
-
-// A merged version of std::find_if and std::min_element.
-template <typename ForwardIt, typename UnaryPredicate, typename Compare>
-ForwardIt min_element_if(ForwardIt first, ForwardIt last, UnaryPredicate p, Compare comp) {
-    while (first != last && !p(*first))
-        ++first;
-    if (first == last)
-        return last;
-
-    ForwardIt smallest = first;
-    ++first;
-    for (; first != last; ++first) {
-        if (p(*first) && comp(*first, *smallest)) {
-            smallest = first;
-        }
-    }
-    return smallest;
 }
 
 Unit Base::findWorker(const UnitType &workerType, const Position &nearPosition) const {
