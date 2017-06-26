@@ -4,7 +4,7 @@ BasedOnStyle: LLVM
 #Standard:    Cpp11
 
 IndentWidth:  4
-ColumnLimit:  120
+ColumnLimit:  100
 
-#AlignConsecutiveDeclarations true
+AlignConsecutiveDeclarations: true
 ...
