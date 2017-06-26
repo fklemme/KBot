@@ -18,6 +18,11 @@ obj:
 obj/%.o: src/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $^
 
+.PHONY: tidy
+tidy:
+	clang-tidy -checks=cppcoreguidelines-*,modernize-*,readability-* \
+	    -header-filter=src/ $(SOURCES) -- $(CXXFLAGS)
+
 .PHONY: clean
 clean:
 	rm -rf obj

@@ -1,6 +1,8 @@
 #include "Base.h"
 
+#include <algorithm>
 #include "KBot.h"
+#include <numeric>
 #include <random>
 #include "utils.h"
 

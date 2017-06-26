@@ -1,8 +1,7 @@
 #pragma once
 
-#include <algorithm>
 #include <BWAPI.h>
-#include <numeric>
+#include <vector>
 
 namespace KBot {
 
