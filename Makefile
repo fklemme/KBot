@@ -18,9 +18,13 @@ obj:
 obj/%.o: src/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $^
 
+# Tidy - Removed some rules because...
+#   - readability-braces-around-statements: I don't like that rule.
+#   - cppcoreguidelines-pro-bounds-array-to-pointer-decay: "assert" brings up a lot of these warnings.
+#   - cppcoreguidelines-pro-type-vararg: We have to use Broodwar->drawText...(). :/
 .PHONY: tidy
 tidy:
-	clang-tidy -checks=cppcoreguidelines-*,modernize-*,readability-* \
+	clang-tidy -checks=cppcoreguidelines-*,modernize-*,readability-*,-readability-braces-around-statements,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-type-vararg \
 	    -header-filter=src/ $(SOURCES) -- $(CXXFLAGS)
 
 .PHONY: clean
