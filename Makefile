@@ -29,10 +29,10 @@ format:
 	clang-format -i -style=file $(HEADERS) $(SOURCES)
 
 # Clang Tidy - Removed some rules because...
-#   - readability-braces-around-statements: I don't like that rule.
 #   - cppcoreguidelines-pro-bounds-array-to-pointer-decay: "assert" brings up a lot of these warnings.
-#   - cppcoreguidelines-pro-type-vararg: We have to use Broodwar->drawText...(). :/
+#   - cppcoreguidelines-pro-type-vararg:                   We have to use Broodwar->drawText...(). :/
+#   - readability-braces-around-statements:                I don't like that rule. Let's ignore these.
 .PHONY: tidy
 tidy:
-	clang-tidy -checks=cppcoreguidelines-*,modernize-*,readability-*,-readability-braces-around-statements,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-type-vararg \
+	clang-tidy -checks=cppcoreguidelines-*,modernize-*,readability-*,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-type-vararg,-readability-braces-around-statements \
 	    -header-filter=src/ $(SOURCES) -- $(CXXFLAGS)
