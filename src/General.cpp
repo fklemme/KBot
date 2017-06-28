@@ -2,9 +2,9 @@
 
 #include "KBot.h"
 #include "utils.h"
+#include <algorithm>
 #include <iterator>
 #include <string>
-#include <algorithm>
 
 namespace KBot {
 

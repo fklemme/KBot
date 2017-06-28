@@ -2,8 +2,8 @@
 
 #include "KBot.h"
 #include "utils.h"
-#include <random>
 #include <algorithm>
+#include <random>
 
 namespace KBot {
 

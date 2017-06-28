@@ -30,9 +30,6 @@
     <ClCompile Include="src\KBot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\DllMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Base.cpp">
       <Filter>Source Files\Economy</Filter>
     </ClCompile>
@@ -49,6 +46,9 @@
       <Filter>Source Files\Economy</Filter>
     </ClCompile>
     <ClCompile Include="src\Enemy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
