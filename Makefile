@@ -7,8 +7,7 @@ CXXFLAGS += -std=c++14 \
             -Wno-unknown-pragmas
 
 HEADERS := $(wildcard src/*.h)
-DLLMAIN := src/DllMain.cpp
-SOURCES := $(filter-out $(DLLMAIN),$(wildcard src/*.cpp))
+SOURCES := $(wildcard src/*.cpp)
 OBJECTS := $(addprefix obj/,$(notdir $(SOURCES:.cpp=.o)))
 
 .PHONY: all
@@ -27,7 +26,7 @@ clean:
 # Clang Format - Settings in file .clang-format
 .PHONY: format
 format:
-	clang-format -i -style=file $(HEADERS) $(SOURCES) $(DLLMAIN)
+	clang-format -i -style=file $(HEADERS) $(SOURCES)
 
 # Clang Tidy - Removed some rules because...
 #   - cppcoreguidelines-pro-bounds-array-to-pointer-decay: "assert" brings up a lot of these warnings.

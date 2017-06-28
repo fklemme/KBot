@@ -19,13 +19,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -51,14 +51,14 @@
     <LibraryPath>$(SolutionDir)bwapi\bwapi\lib;$(SolutionDir)BWEM\lib;$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)d</TargetName>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
-    <OutDir>$(SolutionDir)lib\</OutDir>
+    <OutDir>$(SolutionDir)bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)bwapi\bwapi\include;$(SolutionDir)BWEM\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bwapi\bwapi\lib;$(SolutionDir)BWEM\lib;$(LibraryPath)</LibraryPath>
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
-    <OutDir>$(SolutionDir)lib\</OutDir>
+    <OutDir>$(SolutionDir)bin\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -72,8 +72,8 @@
       <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>BWAPId.lib;BWEMd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>BWAPId.lib;BWAPIClientd.lib;BWEMd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <CustomBuildStep>
@@ -96,10 +96,10 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>BWAPI.lib;BWEM.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>BWAPI.lib;BWAPIClient.lib;BWEM.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>copy /y "$(OutputPath)$(TargetFileName)" "$(StarcraftAIPath)$(TargetFileName)"</Command>
@@ -124,10 +124,10 @@
   <ItemGroup>
     <ClCompile Include="src\Base.cpp" />
     <ClCompile Include="src\BuildTask.cpp" />
-    <ClCompile Include="src\DllMain.cpp" />
     <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\General.cpp" />
     <ClCompile Include="src\KBot.cpp" />
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Manager.cpp" />
     <ClCompile Include="src\Squad.cpp" />
   </ItemGroup>
