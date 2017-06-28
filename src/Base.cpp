@@ -3,12 +3,12 @@
 #include "KBot.h"
 #include "utils.h"
 #include <algorithm>
+#include <cmath>
+#include <iterator>
 #include <numeric>
 #include <random>
 #include <type_traits>
-#include <iterator>
 #include <vector>
-#include <cmath>
 
 namespace {
 
