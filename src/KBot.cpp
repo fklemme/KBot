@@ -2,6 +2,7 @@
 
 #include "Squad.h"
 #include "utils.h"
+#include <string>
 
 // Some ugly macro magic to get BUILDNUMBER as a string.
 #pragma warning(push)

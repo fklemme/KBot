@@ -3,6 +3,7 @@
 #include "KBot.h"
 #include "utils.h"
 #include <random>
+#include <algorithm>
 
 namespace KBot {
 

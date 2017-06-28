@@ -2,6 +2,8 @@
 
 #include "Manager.h"
 #include <cassert>
+#include <type_traits>
+#include <stdexcept>
 
 namespace KBot {
 

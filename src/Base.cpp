@@ -5,6 +5,10 @@
 #include <algorithm>
 #include <numeric>
 #include <random>
+#include <type_traits>
+#include <iterator>
+#include <vector>
+#include <cmath>
 
 namespace {
 

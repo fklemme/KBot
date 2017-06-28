@@ -3,6 +3,8 @@
 #include "KBot.h"
 #include "utils.h"
 #include <iterator>
+#include <string>
+#include <algorithm>
 
 namespace KBot {
 

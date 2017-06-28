@@ -2,6 +2,7 @@
 
 #include "KBot.h"
 #include "utils.h"
+#include <stdexcept>
 
 namespace KBot {
 
