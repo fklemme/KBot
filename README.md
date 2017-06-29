@@ -17,9 +17,8 @@ A simple, built-from-scratch Starcraft bot using BWAPI and modern C++.
 
 KBot is developed with Visual Studio 2017 on Windows but build services ensure it can be compiled on Linux with GCC and clang as well.
 
-# Quick build and installation with Visual Studio
-- Change the path in `StarcraftPath.props` to match your installation of Starcraft Broodwar.
-- Run `build.sh` from VS 2017 Command Prompt to build BWAPI and KBot for debug and release.
+# Quick build with Visual Studio
+Run `build.sh` from VS 2017 Command Prompt to build BWAPI and KBot for debug and release.
 
 # Concepts and Structure of KBot
 > Incomplete but gotta start somewhere. ;-)

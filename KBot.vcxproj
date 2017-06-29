@@ -38,11 +38,9 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="StarcraftPath.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="StarcraftPath.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -50,14 +48,16 @@
     <IncludePath>$(SolutionDir)bwapi\bwapi\include;$(SolutionDir)BWEM\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bwapi\bwapi\lib;$(SolutionDir)BWEM\lib;$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)d</TargetName>
-    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
     <OutDir>$(SolutionDir)bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)bwapi\bwapi\include;$(SolutionDir)BWEM\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bwapi\bwapi\lib;$(SolutionDir)BWEM\lib;$(LibraryPath)</LibraryPath>
-    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
     <OutDir>$(SolutionDir)bin\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -77,15 +77,8 @@
       <AdditionalDependencies>BWAPId.lib;BWAPIClientd.lib;BWEMd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <CustomBuildStep>
-      <Command>copy /y "$(OutputPath)$(TargetFileName)" "$(StarcraftAIPath)$(TargetFileName)"</Command>
-    </CustomBuildStep>
-    <CustomBuildStep>
-      <Message>Copy Bot to Starcraft AI folder</Message>
-      <Outputs>$(StarcraftAIPath)$(TargetFileName)</Outputs>
-      <TreatOutputAsContent>true</TreatOutputAsContent>
-      <Inputs>$(OutputPath)$(TargetFileName)</Inputs>
-    </CustomBuildStep>
+    <CustomBuildStep />
+    <CustomBuildStep />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -103,15 +96,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>BWAPI.lib;BWAPIClient.lib;BWEM.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <CustomBuildStep>
-      <Command>copy /y "$(OutputPath)$(TargetFileName)" "$(StarcraftAIPath)$(TargetFileName)"</Command>
-    </CustomBuildStep>
-    <CustomBuildStep>
-      <Message>Copy Bot to Starcraft AI folder</Message>
-      <Outputs>$(StarcraftAIPath)$(TargetFileName)</Outputs>
-      <TreatOutputAsContent>true</TreatOutputAsContent>
-      <Inputs>$(OutputPath)$(TargetFileName)</Inputs>
-    </CustomBuildStep>
+    <CustomBuildStep />
+    <CustomBuildStep />
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Base.h" />
