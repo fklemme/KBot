@@ -6,6 +6,8 @@
 #include <thread>
 
 int main(int argc, const char **argv) {
+    int gameCounter = 0;
+
     std::cout << "Connecting to server..." << std::endl;
     while (!BWAPI::BWAPIClient.connect()) {
         std::this_thread::sleep_for(std::chrono::milliseconds{300});
@@ -21,9 +23,12 @@ int main(int argc, const char **argv) {
 
         // if (Broodwar->isReplay()) ... // TODO: Handle here?
 
-        std::cout << "Game ready!" << std::endl;
+        std::cout << ++gameCounter << ". game ready!" << std::endl;
+        // Initialize game objects
+        BWEM::Map::DestroyInstance(); // clear BWEM::Map before game
         KBot::KBot bot;
 
+        // Dispatch events
         while (BWAPI::BWAPIClient.isConnected() && BWAPI::Broodwar->isInGame()) {
             for (auto &e : BWAPI::Broodwar->getEvents()) {
                 switch (e.getType()) {
@@ -94,8 +99,6 @@ int main(int argc, const char **argv) {
     } // end while (BWAPI::BWAPIClient.isConnected())
     std::cout << "Connection closed!" << std::endl;
 
-    std::cout << '\n' << "Press ENTER to continue..." << std::endl;
-    std::cin.ignore();
-
+    std::this_thread::sleep_for(std::chrono::seconds{1});
     return 0;
 }
