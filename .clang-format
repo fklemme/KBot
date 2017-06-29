@@ -6,8 +6,9 @@ IndentWidth:            4
 AccessModifierOffset:  -4
 ColumnLimit:          100
 
-AlignConsecutiveDeclarations: true
-#FixNamespaceComments:        true
-SpaceAfterCStyleCast:         true
-SpacesInContainerLiterals:    false
+AlignConsecutiveDeclarations:    true
+AlwaysBreakTemplateDeclarations: true
+#FixNamespaceComments:           true
+SpaceAfterCStyleCast:            true
+SpacesInContainerLiterals:       false
 ...
