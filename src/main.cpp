@@ -17,14 +17,15 @@ int main(int argc, const char **argv) {
     while (BWAPI::BWAPIClient.isConnected()) {
         std::cout << "Waiting for a game to begin..." << std::endl;
         while (BWAPI::BWAPIClient.isConnected() && !BWAPI::Broodwar->isInGame())
-            BWAPI::BWAPIClient.update(); // push/pull server
+            BWAPI::BWAPIClient.update(); // update shared memory
 
-        if (!BWAPI::BWAPIClient.isConnected()) break;
+        if (!BWAPI::BWAPIClient.isConnected())
+            break;
 
         // if (Broodwar->isReplay()) ... // TODO: Handle here?
 
-        std::cout << ++gameCounter << ". game ready!" << std::endl;
         // Initialize game objects
+        std::cout << ++gameCounter << ". game ready!" << std::endl;
         BWEM::Map::DestroyInstance(); // clear BWEM::Map before game
         KBot::KBot bot;
 
@@ -42,7 +43,12 @@ int main(int argc, const char **argv) {
                     bot.onFrame();
                     break;
                 case BWAPI::EventType::MenuFrame:
-                    bot.onFrame(); // TODO: skip these?
+                    // Looking at the server implementation, it seems that this event is never fired
+                    // while being in-game. It looks like events are fired every frame, even when
+                    // we're not in a game. And while we're outside a game, this will be the event
+                    // fired each frame. So this case has no relevance while being in-game. It will
+                    // just never happen.
+                    assert(false);
                     break;
                 case BWAPI::EventType::SendText:
                     bot.onSendText(e.getText());
@@ -87,16 +93,16 @@ int main(int argc, const char **argv) {
                     bot.onUnitComplete(e.getUnit());
                     break;
                 default:
-                    // FIXME: This will never happen, right?
+                    // This will never happen.
                     assert(false);
                 }
             }
 
-            // Push/pull information to/from the server
+            // Trigger shared memory update. Blocks until next frame.
             BWAPI::BWAPIClient.update();
-        } // end while (BWAPI::BWAPIClient.isConnected() && BWAPI::Broodwar->isInGame())
+        }
         std::cout << "Game ended!" << std::endl;
-    } // end while (BWAPI::BWAPIClient.isConnected())
+    }
     std::cout << "Connection closed!" << std::endl;
 
     std::this_thread::sleep_for(std::chrono::seconds{1});
