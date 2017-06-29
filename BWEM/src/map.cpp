@@ -58,6 +58,12 @@ Map & Map::Instance()
 }
 
 
+void Map::DestroyInstance()
+{
+    if (m_gInstance) m_gInstance.reset();
+}
+
+
 Position Map::RandomPosition() const
 {
 	const auto PixelSize = Position(Size());

@@ -59,6 +59,10 @@ public:
 	// It is equal to use Map::Instance() each time, or to store the returned reference and use it instead.
 	static Map &						Instance();
 
+    // Deletes the unique instance (singleton).
+    // This is required if you implement your bot using BWAPI::BWAPIClient and if you play multiple games in a row.
+    // Call this function before you call BWEM::Map::Instance().Initialize() on the new map / next game.
+    static void                         DestroyInstance();
 
 	// This has to be called before any other function is called.
 	// A good place to do this is in ExampleAIModule::onStart()
