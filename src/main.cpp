@@ -6,24 +6,25 @@
 #include <thread>
 
 int main(int argc, const char **argv) {
-    // Connecting to server...
+    std::cout << "Connecting to server..." << std::endl;
     while (!BWAPI::BWAPIClient.connect()) {
         std::this_thread::sleep_for(std::chrono::milliseconds{300});
     }
 
     // Main loop
     while (BWAPI::BWAPIClient.isConnected()) {
-        // Waiting for a game to begin...
         std::cout << "Waiting for a game to begin..." << std::endl;
-        while (!BWAPI::Broodwar->isInGame())
+        while (BWAPI::BWAPIClient.isConnected() && !BWAPI::Broodwar->isInGame())
             BWAPI::BWAPIClient.update(); // push/pull server
+
+        if (!BWAPI::BWAPIClient.isConnected()) break;
 
         // if (Broodwar->isReplay()) ... // TODO: Handle here?
 
         std::cout << "Game ready!" << std::endl;
         KBot::KBot bot;
 
-        while (BWAPI::Broodwar->isInGame()) {
+        while (BWAPI::BWAPIClient.isConnected() && BWAPI::Broodwar->isInGame()) {
             for (auto &e : BWAPI::Broodwar->getEvents()) {
                 switch (e.getType()) {
                 case BWAPI::EventType::MatchStart:
@@ -88,10 +89,12 @@ int main(int argc, const char **argv) {
 
             // Push/pull information to/from the server
             BWAPI::BWAPIClient.update();
-        } // end while (BWAPI::Broodwar->isInGame())
+        } // end while (BWAPI::BWAPIClient.isConnected() && BWAPI::Broodwar->isInGame())
         std::cout << "Game ended!" << std::endl;
-    }
-    std::cout << "Press ENTER to continue..." << std::endl;
+    } // end while (BWAPI::BWAPIClient.isConnected())
+    std::cout << "Connection closed!" << std::endl;
+
+    std::cout << '\n' << "Press ENTER to continue..." << std::endl;
     std::cin.ignore();
 
     return 0;
