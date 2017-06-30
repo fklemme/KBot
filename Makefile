@@ -3,7 +3,7 @@
 CXXFLAGS += -std=c++14 \
             -Ibwapi/bwapi/include \
             -IBWEM/include \
-            -Wall \
+            -Wall -Wextra\
             -Wno-unknown-pragmas
 
 HEADERS := $(wildcard src/*.h)
