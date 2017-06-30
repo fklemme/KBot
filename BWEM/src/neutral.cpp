@@ -124,7 +124,7 @@ vector<const Area *> Neutral::BlockedAreas() const
 {
 	vector<const Area *> Result;
 	for (WalkPosition w : m_blockedAreas)
-		Result.push_back(GetMap()->GetArea(w));
+		Result.push_back(m_pMap->GetArea(w));
 
 	return Result;
 }
