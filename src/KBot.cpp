@@ -72,7 +72,7 @@ void KBot::onStart() {
 }
 
 // Called once at the end of a game.
-void KBot::onEnd(bool isWinner) {}
+void KBot::onEnd(bool /*isWinner*/) {}
 
 // Called once for every execution of a logical frame in Broodwar.
 void KBot::onFrame() {
@@ -107,16 +107,16 @@ void KBot::onFrame() {
 }
 
 // Called when the user attempts to send a text message.
-void KBot::onSendText(std::string text) {}
+void KBot::onSendText(std::string /*text*/) {}
 
 // Called when the client receives a message from another Player.
-void KBot::onReceiveText(BWAPI::Player player, std::string text) {}
+void KBot::onReceiveText(BWAPI::Player /*player*/, std::string /*text*/) {}
 
 // Called when a Player leaves the game.
-void KBot::onPlayerLeft(BWAPI::Player player) {}
+void KBot::onPlayerLeft(BWAPI::Player /*player*/) {}
 
 // Called when a Nuke has been launched somewhere on the map.
-void KBot::onNukeDetect(BWAPI::Position target) {}
+void KBot::onNukeDetect(BWAPI::Position /*target*/) {}
 
 // Called when a Unit becomes accessible.
 void KBot::onUnitDiscover(BWAPI::Unit unit) { assert(unit->exists()); }
@@ -187,7 +187,7 @@ void KBot::onUnitMorph(BWAPI::Unit unit) {
 }
 
 // Called when a unit changes ownership.
-void KBot::onUnitRenegade(BWAPI::Unit unit) {
+void KBot::onUnitRenegade(BWAPI::Unit /*unit*/) {
     // This occurs when the Protoss ability Mind Control is used, or if a unit changes ownership in
     // Use Map Settings.
     // TODO!
