@@ -73,7 +73,7 @@ void dispatchEvents(Bot &bot) {
         }
 }
 
-int main(int argc, const char **argv) {
+int main(int /*argc*/, const char ** /*argv*/) {
     int gameCounter = 0;
 
     std::cout << "Connecting to server..." << std::endl;
