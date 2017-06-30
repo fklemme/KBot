@@ -109,7 +109,7 @@ public:
 protected:
 									Neutral(BWAPI::Unit u, Map * pMap);
 									~Neutral();
-	Map * const 					GetMap()				{ return m_pMap; }
+	Map *							GetMap()				{ return m_pMap; }
 
 private:
 	void							PutOnTiles();
