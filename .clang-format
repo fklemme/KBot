@@ -8,7 +8,6 @@ ColumnLimit:          100
 
 AlignConsecutiveDeclarations:    true
 AlwaysBreakTemplateDeclarations: true
-#FixNamespaceComments:           true
 SpaceAfterCStyleCast:            true
 SpacesInContainerLiterals:       false
 ...
