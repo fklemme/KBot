@@ -3,7 +3,7 @@
 // This file is part of the BWEM Library.
 // BWEM is free software, licensed under the MIT/X11 License. 
 // A copy of the license is provided with the library in the LICENSE file.
-// Copyright (c) 2015, 2016, Igor Dimitrijevic
+// Copyright (c) 2015, 2017, Igor Dimitrijevic
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -12,6 +12,7 @@
 #define BWEM_EXAMPLES_H
 
 #include <BWAPI.h>
+#include "exampleWall.h"
 #include "defs.h"
 
 namespace BWEM
@@ -40,6 +41,11 @@ void pathExample(const Map & theMap);
 
 // Demonstrates the use of utils::GridMap.
 void gridMapExample(const Map & theMap);
+
+
+
+///////////////    See alse the examples in exampleWall.h    ///////////////
+
 
 }} // namespace BWEM::utils
 

@@ -3,7 +3,7 @@
 // This file is part of the BWEM Library.
 // BWEM is free software, licensed under the MIT/X11 License. 
 // A copy of the license is provided with the library in the LICENSE file.
-// Copyright (c) 2015, 2016, Igor Dimitrijevic
+// Copyright (c) 2015, 2017, Igor Dimitrijevic
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -55,12 +55,6 @@ Map & Map::Instance()
 	if (!m_gInstance) m_gInstance = make_unique<MapImpl>();
 
 	return *m_gInstance.get();
-}
-
-
-void Map::DestroyInstance()
-{
-    if (m_gInstance) m_gInstance.reset();
 }
 
 

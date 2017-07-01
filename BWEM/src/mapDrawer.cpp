@@ -3,7 +3,7 @@
 // This file is part of the BWEM Library.
 // BWEM is free software, licensed under the MIT/X11 License. 
 // A copy of the license is provided with the library in the LICENSE file.
-// Copyright (c) 2015, 2016, Igor Dimitrijevic
+// Copyright (c) 2015, 2017, Igor Dimitrijevic
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -34,7 +34,7 @@ namespace utils {
 bool MapDrawer::showSeas						= true;
 bool MapDrawer::showLakes						= true;
 bool MapDrawer::showUnbuildable					= true;
-bool MapDrawer::showHighGround					= false;
+bool MapDrawer::showGroundHeight				= true;
 bool MapDrawer::showMinerals					= true;
 bool MapDrawer::showGeysers						= true;
 bool MapDrawer::showStaticBuildings				= true;
@@ -71,7 +71,7 @@ bool MapDrawer::ProcessCommand(const string & command)
 	if (ProcessCommandVariants(command, "seas", showSeas))								return true;
 	if (ProcessCommandVariants(command, "lakes", showLakes))							return true;
 	if (ProcessCommandVariants(command, "unbuildable", showUnbuildable))				return true;
-	if (ProcessCommandVariants(command, "high ground", showHighGround))					return true;
+	if (ProcessCommandVariants(command, "gh", showGroundHeight))						return true;
 	if (ProcessCommandVariants(command, "minerals", showMinerals))						return true;
 	if (ProcessCommandVariants(command, "geysers", showGeysers))						return true;
 	if (ProcessCommandVariants(command, "static buildings", showStaticBuildings))		return true;
@@ -83,7 +83,7 @@ bool MapDrawer::ProcessCommand(const string & command)
 	if (ProcessCommandVariants(command, "all", showSeas))
 	if (ProcessCommandVariants(command, "all", showLakes))
 	if (ProcessCommandVariants(command, "all", showUnbuildable))
-	if (ProcessCommandVariants(command, "all", showHighGround))
+	if (ProcessCommandVariants(command, "all", showGroundHeight))
 	if (ProcessCommandVariants(command, "all", showMinerals))
 	if (ProcessCommandVariants(command, "all", showGeysers))
 	if (ProcessCommandVariants(command, "all", showStaticBuildings))

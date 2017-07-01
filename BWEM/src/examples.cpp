@@ -3,7 +3,7 @@
 // This file is part of the BWEM Library.
 // BWEM is free software, licensed under the MIT/X11 License. 
 // A copy of the license is provided with the library in the LICENSE file.
-// Copyright (c) 2015, 2016, Igor Dimitrijevic
+// Copyright (c) 2015, 2017, Igor Dimitrijevic
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -50,7 +50,7 @@ void drawMap(const Map & theMap)
 		if (MapDrawer::showUnbuildable && !tile.Buildable())
 			drawDiagonalCrossMap(Position(t), Position(t + 1), MapDrawer::Color::unbuildable);
 		
-		if (MapDrawer::showHighGround && (tile.GroundHeight() > 0))
+		if (MapDrawer::showGroundHeight && (tile.GroundHeight() > 0))
 		{
 			auto col = tile.GroundHeight() == 1 ? MapDrawer::Color::highGround : MapDrawer::Color::veryHighGround;
 			bw->drawBoxMap(Position(t), Position(t)+6, col, bool("isSolid"));
@@ -244,7 +244,7 @@ void printMap(const Map & theMap)
 				MapPrinter::Get().Rectangle(origin+1, origin + 2, MapPrinter::Color::unbuildable);
 			}
 
-	if (MapPrinter::showHighGround)
+	if (MapPrinter::showGroundHeight)
 		for (int y = 0 ; y < theMap.Size().y ; ++y)
 		for (int x = 0 ; x < theMap.Size().x ; ++x)
 		{

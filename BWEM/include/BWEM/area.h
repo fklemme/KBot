@@ -3,7 +3,7 @@
 // This file is part of the BWEM Library.
 // BWEM is free software, licensed under the MIT/X11 License. 
 // A copy of the license is provided with the library in the LICENSE file.
-// Copyright (c) 2015, 2016, Igor Dimitrijevic
+// Copyright (c) 2015, 2017, Igor Dimitrijevic
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -69,7 +69,7 @@ public:
 	// Bounding box of this Area.
 	const BWAPI::TilePosition &		TopLeft() const					{ return m_topLeft ; }
 	const BWAPI::TilePosition &		BottomRight() const				{ return m_bottomRight ; }
-	const BWAPI::TilePosition &		BoundingBoxSize() const;
+	BWAPI::TilePosition				BoundingBoxSize() const;
 
 	// Position of the MiniTile with the highest Altitude() value.
 	const BWAPI::WalkPosition &		Top() const						{ return m_top; }

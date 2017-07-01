@@ -96,7 +96,6 @@ int main(int /*argc*/, const char ** /*argv*/) {
 
         // Initialize game objects
         std::cout << ++gameCounter << ". game ready!" << std::endl;
-        BWEM::Map::DestroyInstance(); // clear BWEM::Map before game
         KBot::KBot kbot;
 
         // Dispatch events

@@ -3,7 +3,7 @@
 // This file is part of the BWEM Library.
 // BWEM is free software, licensed under the MIT/X11 License. 
 // A copy of the license is provided with the library in the LICENSE file.
-// Copyright (c) 2015, 2016, Igor Dimitrijevic
+// Copyright (c) 2015, 2017, Igor Dimitrijevic
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -42,7 +42,7 @@ public:
 	static const bool		showLakes;					// prints unwalkable MiniTiles in Areas
 	static const bool		showSeaSide;				// highlights Sea-MiniTiles next to Terrain-MiniTiles
 	static const bool		showUnbuildable;			// renders Tiles that are not Buildable()
-	static const bool		showHighGround;				// renders Tiles for which GroundHight() > 0
+	static const bool		showGroundHeight;			// renders Tiles for which GroundHeight() > 0
 	static const bool		showChokePoints;			// renders the ChokePoints suggested by BWEM
 	static const bool		showResources;
 	static const bool		showMinerals;				// prints the Minerals, unless showResources == false

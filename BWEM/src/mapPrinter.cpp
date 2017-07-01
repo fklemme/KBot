@@ -3,7 +3,7 @@
 // This file is part of the BWEM Library.
 // BWEM is free software, licensed under the MIT/X11 License. 
 // A copy of the license is provided with the library in the LICENSE file.
-// Copyright (c) 2015, 2016, Igor Dimitrijevic
+// Copyright (c) 2015, 2017, Igor Dimitrijevic
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -48,7 +48,7 @@ const bool MapPrinter::showContinents			= !showAreas &&			true;
 const bool MapPrinter::showLakes				=						true;
 const bool MapPrinter::showSeaSide				=						true;
 const bool MapPrinter::showUnbuildable			=						false;
-const bool MapPrinter::showHighGround			=						true;
+const bool MapPrinter::showGroundHeight			=						true;
 const bool MapPrinter::showChokePoints			=						true;
 const bool MapPrinter::showResources			=						true;
 const bool MapPrinter::showMinerals				= showResources &&		true;

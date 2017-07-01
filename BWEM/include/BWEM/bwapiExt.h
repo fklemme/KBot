@@ -3,7 +3,7 @@
 // This file is part of the BWEM Library.
 // BWEM is free software, licensed under the MIT/X11 License. 
 // A copy of the license is provided with the library in the LICENSE file.
-// Copyright (c) 2015, 2016, Igor Dimitrijevic
+// Copyright (c) 2015, 2017, Igor Dimitrijevic
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -155,6 +155,16 @@ inline bool overlap(const BWAPI::Point<T, Scale> & TopLeft1, const BWAPI::Point<
 	if (TopLeft1.x >= TopLeft2.x + Size2.x) return false;
 	if (TopLeft1.y >= TopLeft2.y + Size2.y) return false;
 	return true;
+}
+
+template<typename T, int Scale = 1>
+inline bool disjoint(const BWAPI::Point<T, Scale> & TopLeft1, const BWAPI::Point<T, Scale> & Size1, const BWAPI::Point<T, Scale> & TopLeft2, const BWAPI::Point<T, Scale> & Size2)
+{
+	if (TopLeft2.x > TopLeft1.x + Size1.x) return true;
+	if (TopLeft2.y > TopLeft1.y + Size1.y) return true;
+	if (TopLeft1.x > TopLeft2.x + Size2.x) return true;
+	if (TopLeft1.y > TopLeft2.y + Size2.y) return true;
+	return false;
 }
 
 

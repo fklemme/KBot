@@ -16,7 +16,7 @@ as it performs faster and shows better robustness while providing similar inform
 License:               MIT/X11
 
 -------------------------------------------------------------------------------
-Version:               1.3.1
+Version:               1.4
 
 -------------------------------------------------------------------------------
 Sourceforge project:   http://sourceforge.net/projects/BWEM

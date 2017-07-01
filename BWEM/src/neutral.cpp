@@ -3,7 +3,7 @@
 // This file is part of the BWEM Library.
 // BWEM is free software, licensed under the MIT/X11 License. 
 // A copy of the license is provided with the library in the LICENSE file.
-// Copyright (c) 2015, 2016, Igor Dimitrijevic
+// Copyright (c) 2015, 2017, Igor Dimitrijevic
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -124,7 +124,7 @@ vector<const Area *> Neutral::BlockedAreas() const
 {
 	vector<const Area *> Result;
 	for (WalkPosition w : m_blockedAreas)
-		Result.push_back(m_pMap->GetArea(w));
+		Result.push_back(GetMap()->GetArea(w));
 
 	return Result;
 }

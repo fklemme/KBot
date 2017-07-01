@@ -3,7 +3,7 @@
 // This file is part of the BWEM Library.
 // BWEM is free software, licensed under the MIT/X11 License. 
 // A copy of the license is provided with the library in the LICENSE file.
-// Copyright (c) 2015, 2016, Igor Dimitrijevic
+// Copyright (c) 2015, 2017, Igor Dimitrijevic
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -20,7 +20,7 @@
 namespace BWEM {
 
 class Neutral;
-
+class Map;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          //
@@ -93,7 +93,7 @@ public:
 	void				ReplaceBlockedAreaId(Area::id id)	{ bwem_assert((m_areaId == blockingCP) && (id >= 1)); m_areaId = id; }
 
 private:
-	altitude_t			m_altitude = -1;			// 0 for seas  ;  != 0 for terrain and lakes (-1 = not computed yet)  ;  1 = SeaOrLake intermediate value
+	altitude_t			m_altitude = -1;		// 0 for seas  ;  != 0 for terrain and lakes (-1 = not computed yet)  ;  1 = SeaOrLake intermediate value
 	Area::id			m_areaId = -1;			// 0 -> unwalkable  ;  > 0 -> index of some Area  ;  < 0 -> some walkable terrain, but too small to be part of an Area
 	static const Area::id blockingCP;
 };
@@ -172,7 +172,7 @@ public:
 	void				SetGroundHeight(int h)			{ bwem_assert((0 <= h) && (h <= 2)); m_bits.groundHeight = h; }
 	void				SetDoodad()						{ m_bits.doodad = 1; }
 	void				AddNeutral(Neutral * pNeutral)	{ bwem_assert(!m_pNeutral && pNeutral); m_pNeutral = pNeutral; }
-	void				SetAreaId(Area::id id)			{ bwem_assert((id == -1) || (!m_areaId && id)); m_areaId = id; }
+	void				SetAreaId(Area::id id)			{ bwem_assert((id == -1) || !m_areaId && id); m_areaId = id; }
 	void				ResetAreaId()					{ m_areaId = 0; }
 	void				SetMinAltitude(altitude_t a)	{ bwem_assert(a >= 0); m_minAltitude = a; }
 	void				RemoveNeutral(Neutral * pNeutral){ bwem_assert(pNeutral && (m_pNeutral == pNeutral)); utils::unused(pNeutral); m_pNeutral = nullptr; }
@@ -195,6 +195,13 @@ private:
 	mutable int			m_internalData = 0;
 	Bits				m_bits;
 };
+
+// Note: the following 4 functions may change in the future...
+altitude_t minAltitudeTop(const BWAPI::TilePosition & tile, const Map & theMap);
+altitude_t minAltitudeBottom(const BWAPI::TilePosition & tile, const Map & theMap);
+altitude_t minAltitudeLeft(const BWAPI::TilePosition & tile, const Map & theMap);
+altitude_t minAltitudeRight(const BWAPI::TilePosition & tile, const Map & theMap);
+
 
 
 namespace utils {
@@ -233,7 +240,6 @@ struct PositionOfTile<MiniTile>
 {
 	typedef BWAPI::WalkPosition type;
 };
-
 
 
 

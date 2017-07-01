@@ -3,7 +3,7 @@
 // This file is part of the BWEM Library.
 // BWEM is free software, licensed under the MIT/X11 License. 
 // A copy of the license is provided with the library in the LICENSE file.
-// Copyright (c) 2015, 2016, Igor Dimitrijevic
+// Copyright (c) 2015, 2017, Igor Dimitrijevic
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -58,8 +58,8 @@ ChokePoint::ChokePoint(detail::Graph * pGraph, index idx, const Area * area1, co
 			nodeInArea = GetMap()->BreadthFirstSearch(m_nodes[n],
 				[pArea, this](const MiniTile & miniTile, WalkPosition w)	// findCond
 					{ return (miniTile.AreaId() == pArea->Id()) && !GetMap()->GetTile(TilePosition(w), check_t::no_check).GetNeutral(); },
-                [pArea, this](const MiniTile & miniTile, WalkPosition w)    // visitCond
-                    { return (miniTile.AreaId() == pArea->Id()) || (Blocked() && (miniTile.Blocked() || GetMap()->GetTile(TilePosition(w), check_t::no_check).GetNeutral())); }
+				[pArea, this](const MiniTile & miniTile, WalkPosition w)	// visitCond
+					{ return (miniTile.AreaId() == pArea->Id()) || (Blocked() && (miniTile.Blocked() || GetMap()->GetTile(TilePosition(w), check_t::no_check).GetNeutral())); }
 				);
 		}
 }

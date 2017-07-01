@@ -3,7 +3,7 @@
 // This file is part of the BWEM Library.
 // BWEM is free software, licensed under the MIT/X11 License. 
 // A copy of the license is provided with the library in the LICENSE file.
-// Copyright (c) 2015, 2016, Igor Dimitrijevic
+// Copyright (c) 2015, 2017, Igor Dimitrijevic
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -64,10 +64,10 @@ public:
 
 	// Returns a Cell, given its coordinates
 	const Cell &				GetCell(int i, int j, check_t checkMode = check_t::check) const					{ bwem_assert((checkMode == check_t::no_check) || ValidCoords(i, j)); utils::unused(checkMode); return m_Cells[m_width * j + i]; }
-	Cell &						GetCell(int i, int j, check_t checkMode = check_t::check)							{ bwem_assert((checkMode == check_t::no_check) || ValidCoords(i, j)); utils::unused(checkMode); return m_Cells[m_width * j + i]; }
+	Cell &						GetCell(int i, int j, check_t checkMode = check_t::check)						{ bwem_assert((checkMode == check_t::no_check) || ValidCoords(i, j)); utils::unused(checkMode); return m_Cells[m_width * j + i]; }
 
 	// Returns the Cell thats contains the Tile t
-	const Cell &				GetCell(const BWAPI::TilePosition & t, check_t checkMode = check_t::check) const	{ bwem_assert((checkMode == check_t::no_check) || m_pMap->Valid(t)); utils::unused(checkMode); return GetCell(t.x/N, t.y/N, check_t::no_check); }
+	const Cell &				GetCell(const BWAPI::TilePosition & t, check_t checkMode = check_t::check) const{ bwem_assert((checkMode == check_t::no_check) || m_pMap->Valid(t)); utils::unused(checkMode); return GetCell(t.x/N, t.y/N, check_t::no_check); }
 	Cell &						GetCell(const BWAPI::TilePosition & t, check_t checkMode = check_t::check)		{ bwem_assert((checkMode == check_t::no_check) || m_pMap->Valid(t)); utils::unused(checkMode); return GetCell(t.x/N, t.y/N, check_t::no_check); }
 
 	// Returns the coordinates of the Cell thats contains the Tile t
@@ -76,7 +76,7 @@ public:
 	// Returns specific tiles of a Cell, given its coordinates.
 	BWAPI::TilePosition			GetTopLeft(int i, int j, check_t checkMode = check_t::check) const				{ bwem_assert((checkMode == check_t::no_check) || ValidCoords(i, j)); utils::unused(checkMode); return BWAPI::TilePosition(i*N, j*N); }
 	BWAPI::TilePosition			GetBottomRight(int i, int j, check_t checkMode = check_t::check) const			{ bwem_assert((checkMode == check_t::no_check) || ValidCoords(i, j)); utils::unused(checkMode); using namespace BWAPI_ext; return BWAPI::TilePosition((i+1)*N, (j+1)*N) - 1; }
-	BWAPI::TilePosition			GetCenter(int i, int j, check_t checkMode = check_t::check) const					{ bwem_assert((checkMode == check_t::no_check) || ValidCoords(i, j)); utils::unused(checkMode); using namespace BWAPI_ext; return BWAPI::TilePosition(i*N, j*N) + N/2; }
+	BWAPI::TilePosition			GetCenter(int i, int j, check_t checkMode = check_t::check) const				{ bwem_assert((checkMode == check_t::no_check) || ValidCoords(i, j)); utils::unused(checkMode); using namespace BWAPI_ext; return BWAPI::TilePosition(i*N, j*N) + N/2; }
 
 	// Provides access to the internal array of Cells.
 	const std::vector<Cell> &	Cells() const						{ return m_Cells; }
