@@ -278,10 +278,10 @@ inline TPosition Map::BreadthFirstSearch(TPosition start, Pred1 findCond, Pred2 
 			TPosition next = current + delta;
 			if (Valid(next))
 			{
-				const Tile_t & Next = GetTTile(next, check_t::no_check); 
+				const Tile_t & Next = GetTTile(next, utils::check_t::no_check); 
 				if (findCond(Next, next)) return next;
 
-				if (visitCond(Next, next) && !contains(Visited, next))
+				if (visitCond(Next, next) && !utils::contains(Visited, next))
 				{
 					ToVisit.push(next);
 					Visited.push_back(next);
