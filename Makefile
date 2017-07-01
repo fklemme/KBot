@@ -3,6 +3,7 @@
 CXXFLAGS += -std=c++14 \
             -Ibwapi/bwapi/include \
             -IBWEM/include \
+            -Inana/include \
             -Wall -Wextra\
             -Wno-unknown-pragmas
 

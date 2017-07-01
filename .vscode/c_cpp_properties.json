@@ -3,8 +3,9 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceRoot}/BWEM/include",
                 "${workspaceRoot}/bwapi/bwapi/include",
+                "${workspaceRoot}/BWEM/include",
+                "${workspaceRoot}/nana/include",
                 "/usr/include",
                 "/usr/local/include"
             ],
@@ -22,8 +23,9 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceRoot}/BWEM/include",
                 "${workspaceRoot}/bwapi/bwapi/include",
+                "${workspaceRoot}/BWEM/include",
+                "${workspaceRoot}/nana/include",
                 "/usr/include/c++/6",
                 "/usr/include/x86_64-linux-gnu/c++/6",
                 "/usr/local/include",
@@ -49,8 +51,9 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceRoot}/BWEM/include",
                 "${workspaceRoot}/bwapi/bwapi/include",
+                "${workspaceRoot}/BWEM/include",
+                "${workspaceRoot}/nana/include",
                 "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include"
             ],
             "defines": [
