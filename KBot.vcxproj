@@ -104,6 +104,7 @@
     <ClInclude Include="src\BuildTask.h" />
     <ClInclude Include="src\Enemy.h" />
     <ClInclude Include="src\General.h" />
+    <ClInclude Include="src\Gui.h" />
     <ClInclude Include="src\KBot.h" />
     <ClInclude Include="src\Manager.h" />
     <ClInclude Include="src\Squad.h" />
@@ -114,6 +115,7 @@
     <ClCompile Include="src\BuildTask.cpp" />
     <ClCompile Include="src\Enemy.cpp" />
     <ClCompile Include="src\General.cpp" />
+    <ClCompile Include="src\Gui.cpp" />
     <ClCompile Include="src\KBot.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Manager.cpp" />

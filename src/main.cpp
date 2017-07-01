@@ -1,42 +1,14 @@
+#include "Gui.h"
 #include "KBot.h"
-#include <BWAPI.h>
 #include <BWAPI/Client.h>
 #include <chrono>
 #include <iostream>
-#include <nana/gui.hpp>
-#include <nana/gui/widgets/button.hpp>
-#include <nana/gui/widgets/label.hpp>
+#include <memory>
+#include <set>
 #include <thread>
 
-void nanaHelloWorld() {
-    using namespace nana;
-
-    // Define a form.
-    form fm;
-
-    // Define a label and display a text.
-    label lab{fm, "Hello, <bold blue size=16>Nana C++ Library</>"};
-    lab.format(true);
-
-    // Define a button and answer the click event.
-    button btn{fm, "Quit"};
-    btn.events().click([&fm] { fm.close(); });
-
-    // Layout management
-    fm.div("vert <><<><weight=80% text><>><><weight=24<><button><>><>");
-    fm["text"] << lab;
-    fm["button"] << btn;
-    fm.collocate();
-
-    // Show the form
-    fm.show();
-
-    // Start to event loop process, it blocks until the form is closed.
-    exec();
-}
-
 template <typename Bot>
-void dispatchEvents(Bot &bot) {
+static void dispatchEvents(Bot &bot) {
     for (auto &e : BWAPI::Broodwar->getEvents())
         switch (e.getType()) {
         case BWAPI::EventType::MatchStart:
@@ -104,15 +76,14 @@ void dispatchEvents(Bot &bot) {
 }
 
 int main(int argc, const char **argv) {
-    if (argc == 2 && std::string(argv[1]) == "--gui") {
-        // Run nana test in thread so that is doesn't block.
-        std::thread gui(nanaHelloWorld);
-        gui.detach(); // fine for now...
-    }
+    // Read commandline options (very simple approach, good enough for now)
+    std::set<std::string> options;
+    for (int i = 1; i < argc; ++i)
+        options.emplace(argv[i]);
 
     std::cout << "Connecting to server..." << std::endl;
     while (!BWAPI::BWAPIClient.connect()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds{300});
+        std::this_thread::sleep_for(std::chrono::milliseconds{100});
     }
 
     // Main loop
@@ -128,15 +99,28 @@ int main(int argc, const char **argv) {
         if (BWAPI::Broodwar->self() == nullptr || BWAPI::Broodwar->isReplay())
             return EXIT_FAILURE;
 
-        // Initialize game objects
         std::cout << gameCounter << ". game ready!" << std::endl;
+
+        // Initialize bot
         KBot::KBot kbot;
 
-        // Dispatch events
+        // Create GUI, if enabled
+        auto gui = [&]() -> std::unique_ptr<KBot::Gui> {
+            if (options.count("--gui"))
+                return std::make_unique<KBot::Gui>(kbot);
+            else
+                return nullptr;
+        }();
+
         while (BWAPI::BWAPIClient.isConnected() && BWAPI::Broodwar->isInGame()) {
+            // Dispatch new events from server
             dispatchEvents(kbot);
 
-            // Trigger shared memory update. Blocks until next frame.
+            // Update GUI, if enabled
+            if (gui)
+                gui->update();
+
+            // Update shared memory. Blocks until next frame.
             BWAPI::BWAPIClient.update();
         }
         std::cout << "Game ended!" << std::endl;

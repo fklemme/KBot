@@ -51,6 +51,9 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Gui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\KBot.h">
@@ -75,6 +78,9 @@
       <Filter>Header Files\Economy</Filter>
     </ClInclude>
     <ClInclude Include="src\Enemy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
