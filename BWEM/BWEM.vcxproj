@@ -96,6 +96,7 @@
     <ClCompile Include="src\bwem.cpp" />
     <ClCompile Include="src\cp.cpp" />
     <ClCompile Include="src\examples.cpp" />
+    <ClCompile Include="src\exampleWall.cpp" />
     <ClCompile Include="src\graph.cpp" />
     <ClCompile Include="src\gridMap.cpp" />
     <ClCompile Include="src\map.cpp" />
@@ -119,6 +120,7 @@
     <ClInclude Include="include\BWEM\cp.h" />
     <ClInclude Include="include\BWEM\defs.h" />
     <ClInclude Include="include\BWEM\examples.h" />
+    <ClInclude Include="include\BWEM\exampleWall.h" />
     <ClInclude Include="include\BWEM\graph.h" />
     <ClInclude Include="include\BWEM\gridMap.h" />
     <ClInclude Include="include\BWEM\map.h" />
