@@ -3,7 +3,37 @@
 #include <BWAPI/Client.h>
 #include <chrono>
 #include <iostream>
+#include <nana/gui.hpp>
+#include <nana/gui/widgets/button.hpp>
+#include <nana/gui/widgets/label.hpp>
 #include <thread>
+
+void nanaHelloWorld() {
+    using namespace nana;
+
+    // Define a form.
+    form fm;
+
+    // Define a label and display a text.
+    label lab{fm, "Hello, <bold blue size=16>Nana C++ Library</>"};
+    lab.format(true);
+
+    // Define a button and answer the click event.
+    button btn{fm, "Quit"};
+    btn.events().click([&fm] { fm.close(); });
+
+    // Layout management
+    fm.div("vert <><<><weight=80% text><>><><weight=24<><button><>><>");
+    fm["text"] << lab;
+    fm["button"] << btn;
+    fm.collocate();
+
+    // Show the form
+    fm.show();
+
+    // Start to event loop process, it blocks until the form is closed.
+    exec();
+}
 
 template <typename Bot>
 void dispatchEvents(Bot &bot) {
@@ -73,8 +103,12 @@ void dispatchEvents(Bot &bot) {
         }
 }
 
-int main(int /*argc*/, const char ** /*argv*/) {
-    int gameCounter = 0;
+int main(int argc, const char **argv) {
+    if (argc == 2 && std::string(argv[1]) == "--gui") {
+        // Run nana test in thread so that is doesn't block.
+        std::thread gui(nanaHelloWorld);
+        gui.detach(); // fine for now...
+    }
 
     std::cout << "Connecting to server..." << std::endl;
     while (!BWAPI::BWAPIClient.connect()) {
@@ -82,7 +116,7 @@ int main(int /*argc*/, const char ** /*argv*/) {
     }
 
     // Main loop
-    while (BWAPI::BWAPIClient.isConnected()) {
+    for (int gameCounter = 1; BWAPI::BWAPIClient.isConnected(); ++gameCounter) {
         std::cout << "Waiting for a game to begin..." << std::endl;
         while (BWAPI::BWAPIClient.isConnected() && !BWAPI::Broodwar->isInGame())
             BWAPI::BWAPIClient.update(); // update shared memory
@@ -95,7 +129,7 @@ int main(int /*argc*/, const char ** /*argv*/) {
             return EXIT_FAILURE;
 
         // Initialize game objects
-        std::cout << ++gameCounter << ". game ready!" << std::endl;
+        std::cout << gameCounter << ". game ready!" << std::endl;
         KBot::KBot kbot;
 
         // Dispatch events
