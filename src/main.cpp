@@ -1,6 +1,7 @@
 #include "Gui.h"
 #include "KBot.h"
 #include <BWAPI/Client.h>
+#include <cassert>
 #include <chrono>
 #include <iostream>
 #include <memory>
@@ -77,16 +78,15 @@ static void dispatchEvents(Bot &bot) {
 
 int main(int argc, const char **argv) {
     // Read commandline options (very simple approach, good enough for now)
-    std::set<std::string> options;
-    for (int i = 1; i < argc; ++i)
-        options.emplace(argv[i]);
+    const std::set<std::string> options(std::next(argv), std::next(argv, argc));
+    assert(options.size() == argc - 1);
 
+    // Wait for server connection
     std::cout << "Connecting to server..." << std::endl;
-    while (!BWAPI::BWAPIClient.connect()) {
+    while (!BWAPI::BWAPIClient.connect())
         std::this_thread::sleep_for(std::chrono::milliseconds{100});
-    }
 
-    // Main loop
+    // Main loop, playing games
     for (int gameCounter = 1; BWAPI::BWAPIClient.isConnected(); ++gameCounter) {
         std::cout << "Waiting for a game to begin..." << std::endl;
         while (BWAPI::BWAPIClient.isConnected() && !BWAPI::Broodwar->isInGame())
@@ -99,17 +99,16 @@ int main(int argc, const char **argv) {
         if (BWAPI::Broodwar->self() == nullptr || BWAPI::Broodwar->isReplay())
             return EXIT_FAILURE;
 
-        std::cout << gameCounter << ". game ready!" << std::endl;
+        std::cout << gameCounter << ". game started!" << std::endl;
 
         // Initialize bot
         KBot::KBot kbot;
 
         // Create GUI, if enabled
         auto gui = [&]() -> std::unique_ptr<KBot::Gui> {
-            if (options.count("--gui"))
+            if (options.count("--gui") == 1)
                 return std::make_unique<KBot::Gui>(kbot);
-            else
-                return nullptr;
+            return nullptr;
         }();
 
         while (BWAPI::BWAPIClient.isConnected() && BWAPI::Broodwar->isInGame()) {

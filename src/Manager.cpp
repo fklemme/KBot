@@ -90,7 +90,7 @@ void Manager::buildTaskOnUnitDestroyed(const Unit &unit) {
     }
 }
 
-void Manager::buildTaskOnUnitCompleted(const Unit &) {
+void Manager::buildTaskOnUnitCompleted(const Unit & /*unit*/) {
     // Since BuildTasks are busy waiting for completion right now, this is unused.
 }
 
