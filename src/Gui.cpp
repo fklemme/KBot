@@ -14,26 +14,23 @@ Gui::Gui(const KBot &kbot) : m_kbot(kbot) {
         m_mainForm = &form; // store reference in Gui
 
         // Define a label and display a text.
-        nana::label lab{form, "Hello, <bold blue size=16>Nana C++ Library</>"};
-        lab.format(true);
+        nana::label frameCounterText{form, "Frame counter:"};
+        nana::label frameCounterValue(form, "123");
 
         // Define a button and answer the click event.
-        nana::button btn{form, "Quit"};
-        btn.events().click([&form] { form.close(); });
+        nana::button closeButton{form, "Close"};
+        closeButton.events().click([&form] { form.close(); });
 
         // Layout management
-        form.div("vert <><<><weight=80% text><>><><weight=24<><button><>><>");
-        form["text"] << lab;
-        form["button"] << btn;
+        // (http://qpcr4vir.github.io/nana-doxy/html/dc/de3/classnana_1_1place.html#details)
+        form.div("margin=10 vertical <frameCounter> <weight=50 closeButton>");
+        form["frameCounter"] << frameCounterText << frameCounterValue;
+        form["closeButton"] << closeButton;
         form.collocate();
 
-        // Show the form
+        // Show the form and block until it's closed.
         form.show();
-        std::cout << "Gui opened!" << std::endl; // DEBUG
-
-        // Start to event loop process, it blocks until the form is closed.
         nana::exec();
-        std::cout << "Gui closed!" << std::endl; // DEBUG
 
         // Main form is about to be destroyed. Clear reference.
         m_mainForm = nullptr;
