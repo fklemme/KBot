@@ -4,7 +4,7 @@
 #include <cassert>
 #include <chrono>
 #include <iostream>
-#include <optional>
+#include <memory>
 #include <set>
 #include <thread>
 
@@ -79,7 +79,6 @@ static void dispatchEvents(Bot &bot) {
 int main(int argc, const char **argv) {
     // Read commandline options (very simple approach, good enough for now)
     const std::set<std::string> options(std::next(argv), std::next(argv, argc));
-    assert((argc >= 1) && (options.size() == argc - 1));
 
     // Wait for server connection
     std::cout << "Connecting to server..." << std::endl;
@@ -105,10 +104,10 @@ int main(int argc, const char **argv) {
         KBot::KBot kbot;
 
         // Create GUI, if enabled
-        auto gui = [&]() -> std::optional<KBot::Gui> {
+        auto gui = [&]() -> std::unique_ptr<KBot::Gui> {
             if (options.count("--gui") == 1)
-                return kbot;
-            return {};
+                return std::make_unique<KBot::Gui>(kbot);
+            return nullptr;
         }();
 
         while (BWAPI::BWAPIClient.isConnected() && BWAPI::Broodwar->isInGame()) {
