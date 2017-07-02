@@ -13,13 +13,12 @@ addons:
 
 compiler:
     - gcc
-    - clang
+  # - clang
 
 install:
     # Prepare compiler
     - if [ "$CXX" = "g++" ];     then export CXX="g++-7"       CC="gcc-7";     fi
     - if [ "$CXX" = "clang++" ]; then export CXX="clang++-4.0" CC="clang-4.0"; fi
-    - $CXX --version
 
 script:
     - make
