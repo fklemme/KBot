@@ -6,10 +6,10 @@ addons:
     apt:
         sources:
             - ubuntu-toolchain-r-test
-          # - llvm-toolchain-trusty
+            - llvm-toolchain-trusty
         packages:
-            - g++-6
-            - clang-3.8
+            - g++-7
+            - clang-4.0
 
 compiler:
     - gcc
@@ -17,8 +17,8 @@ compiler:
 
 install:
     # Prepare compiler
-    - if [ "$CXX" = "g++" ];     then export CXX="g++-6"       CC="gcc-6";     fi
-    - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.8" CC="clang-3.8"; fi
+    - if [ "$CXX" = "g++" ];     then export CXX="g++-7"       CC="gcc-7";     fi
+    - if [ "$CXX" = "clang++" ]; then export CXX="clang++-4.0" CC="clang-4.0"; fi
 
 script:
     - make
