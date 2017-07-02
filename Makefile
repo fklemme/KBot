@@ -1,6 +1,6 @@
 # This is just to test weather the code compiles when developing under Linux.
 
-CXXFLAGS += -std=c++17 \
+CXXFLAGS += -std=c++1z \
             -Ibwapi/bwapi/include \
             -IBWEM/include \
             -Inana/include \
