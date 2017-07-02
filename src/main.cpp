@@ -79,7 +79,6 @@ static void dispatchEvents(Bot &bot) {
 int main(int argc, const char **argv) {
     // Read commandline options (very simple approach, good enough for now)
     const std::set<std::string> options(std::next(argv), std::next(argv, argc));
-    assert(options.size() == argc - 1);
 
     // Wait for server connection
     std::cout << "Connecting to server..." << std::endl;
