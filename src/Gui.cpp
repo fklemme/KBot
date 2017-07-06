@@ -1,32 +1,45 @@
 #include "Gui.h"
 
+#include <BWAPI.h>
+#include <nana/gui.hpp>
 #include <nana/gui/widgets/button.hpp>
 #include <nana/gui/widgets/label.hpp>
 #include <thread>
 
 namespace KBot {
 
+class MainForm : public nana::form {
+public:
+    MainForm()
+        : m_frameCounterText{*this, "Frame counter:"}, m_frameCounterValue{*this, "-"},
+          m_closeButton{*this, "Close"} {
+        m_closeButton.events().click([this] { close(); });
+
+        // Layout management
+        // (http://qpcr4vir.github.io/nana-doxy/html/dc/de3/classnana_1_1place.html#details)
+        auto &place = get_place();
+        place.div("margin=10 vertical <frameCounter> <weight=25 closeButton>");
+        place["frameCounter"] << m_frameCounterText << m_frameCounterValue;
+        place["closeButton"] << m_closeButton;
+        place.collocate();
+    }
+
+    void update(const KBot &kbot) {
+        m_frameCounterValue.caption(std::to_string(BWAPI::Broodwar->getFrameCount()));
+    }
+
+private:
+    nana::label  m_frameCounterText;
+    nana::label  m_frameCounterValue;
+    nana::button m_closeButton;
+};
+
 Gui::Gui(const KBot &kbot) : m_kbot(kbot) {
     // Open gui in a new thread.
     m_guiThread = std::make_unique<std::thread>([this]() {
         // All gui elements have to be created by the thread that runs nana::exec().
-        nana::form form;    // main form
+        MainForm form;
         m_mainForm = &form; // store reference in Gui
-
-        // Define a label and display a text.
-        nana::label frameCounterText{form, "Frame counter:"};
-        nana::label frameCounterValue(form, "123");
-
-        // Define a button and answer the click event.
-        nana::button closeButton{form, "Close"};
-        closeButton.events().click([&form] { form.close(); });
-
-        // Layout management
-        // (http://qpcr4vir.github.io/nana-doxy/html/dc/de3/classnana_1_1place.html#details)
-        form.div("margin=10 vertical <frameCounter> <weight=50 closeButton>");
-        form["frameCounter"] << frameCounterText << frameCounterValue;
-        form["closeButton"] << closeButton;
-        form.collocate();
 
         // Show the form and block until it's closed.
         form.show();
@@ -44,8 +57,9 @@ Gui::~Gui() {
         m_guiThread->join();
 }
 
-void Gui::update() {
-    // TODO: magic!
+void Gui::update(const KBot &kbot) {
+    if (m_mainForm)
+        m_mainForm->update(kbot);
 }
 
 } // namespace KBot
