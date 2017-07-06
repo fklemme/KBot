@@ -92,11 +92,13 @@ int main(int argc, const char **argv) {
             BWAPI::BWAPIClient.update(); // update shared memory
 
         if (!BWAPI::BWAPIClient.isConnected())
-            break;
+            break; // disconnected
 
         // Handle non-playing cases right here so we can remove them from the bot entirly. (TODO!)
-        if (BWAPI::Broodwar->self() == nullptr || BWAPI::Broodwar->isReplay())
+        if (BWAPI::Broodwar->self() == nullptr || BWAPI::Broodwar->isReplay()) {
+            std::cerr << "Watching replays is not supported!" << std::endl;
             return EXIT_FAILURE;
+        }
 
         std::cout << gameCounter << ". game started!" << std::endl;
 
@@ -116,7 +118,7 @@ int main(int argc, const char **argv) {
 
             // Update GUI, if enabled
             if (gui)
-                gui->update();
+                gui->update(kbot);
 
             // Update shared memory. Blocks until next frame.
             BWAPI::BWAPIClient.update();
