@@ -7,6 +7,7 @@ namespace KBot {
 
 class KBot;
 
+/// Informational data base about the enemy.
 class Enemy {
 public:
     Enemy(KBot &kBot);
@@ -17,7 +18,7 @@ public:
     Enemy &operator=(const Enemy &) = delete;
     Enemy &operator=(Enemy &&) = delete;
 
-    // Called every KBot::onFrame().
+    /// Called every KBot::onFrame().
     void update();
 
     void addPosition(const BWAPI::TilePosition &position);
@@ -26,7 +27,7 @@ public:
 
 private:
     KBot &                           m_kBot;
-    std::vector<BWAPI::TilePosition> m_positions; // ordered!
+    std::vector<BWAPI::TilePosition> m_positions; //< ordered!
 };
 
 } // namespace

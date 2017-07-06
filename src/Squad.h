@@ -7,6 +7,7 @@ namespace KBot {
 
 class KBot;
 
+/// A group of military units sharing a task.
 class Squad : public BWAPI::Unitset {
 public:
     enum class State { scout, attack, defend };
@@ -14,7 +15,7 @@ public:
 public:
     Squad(KBot &kBot);
 
-    // Called every KBot::onFrame().
+    /// Called every KBot::onFrame().
     void  update();
     State getState() const { return m_state; }
 

@@ -9,6 +9,7 @@ namespace KBot {
 
 class KBot;
 
+/// Handles all economic units and tasks.
 class Manager {
 public:
     Manager(KBot &kBot);
@@ -19,13 +20,13 @@ public:
     Manager &operator=(const Manager &) = delete;
     Manager &operator=(Manager &&) = delete;
 
-    // Called every KBot::onFrame().
+    /// Called every KBot::onFrame().
     void update();
 
-    // Transfer ownership of a unit to manager.
+    /// Transfer ownership of a unit to manager.
     void giveOwnership(const BWAPI::Unit &unit);
 
-    // Take ownership of a unit from manager (forcibly).
+    /// Take ownership of a unit from manager (forcibly).
     void takeOwnership(const BWAPI::Unit &unit);
 
     void addBuildTask(const BuildTask &buildTask);
@@ -51,7 +52,7 @@ private:
     std::vector<BuildTask>   m_buildQueue;
     int                      m_reservedMinerals = 0;
     int                      m_reservedGas = 0;
-    std::vector<BWAPI::Unit> m_workers; // for build tasks
+    std::vector<BWAPI::Unit> m_workers; //< for build tasks
 };
 
 } // namespace

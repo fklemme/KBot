@@ -8,6 +8,7 @@ namespace KBot {
 
 class KBot;
 
+/// Handles all military units and tasks.
 class General {
 public:
     General(KBot &kBot);
@@ -18,13 +19,13 @@ public:
     General &operator=(const General &) = delete;
     General &operator=(General &&) = delete;
 
-    // Called every KBot::onFrame().
+    /// Called every KBot::onFrame().
     void update();
 
-    // Transfer ownership of a unit to general.
+    /// Transfer ownership of a unit to general.
     void giveOwnership(const BWAPI::Unit &unit);
 
-    // Take ownership of a unit from general (forcibly).
+    /// Take ownership of a unit from general (forcibly).
     void takeOwnership(const BWAPI::Unit &unit);
 
 private:

@@ -1,3 +1,8 @@
+/** \mainpage
+ *
+ * Here will be some text. Maybe all the stuff from Readme.
+ */
+
 #pragma once
 
 #include <BWAPI.h>
@@ -9,6 +14,7 @@
 
 namespace KBot {
 
+/// Implements the BWAPI interface.
 class KBot : public BWAPI::AIModule {
 public:
     KBot();

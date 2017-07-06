@@ -264,3 +264,6 @@ __pycache__/
 
 # VS Code, do I need that file?
 .vscode/settings.json
+
+# Should the docs be in here?
+docs/
