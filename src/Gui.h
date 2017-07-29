@@ -5,6 +5,7 @@
 #include <thread>
 
 namespace KBot {
+namespace Gui {
 
 class MainForm;
 
@@ -21,4 +22,5 @@ private:
     std::unique_ptr<std::thread> m_guiThread;
 };
 
+} // namespace Gui
 } // namespace KBot

@@ -106,9 +106,9 @@ int main(int argc, const char **argv) {
         KBot::KBot kbot;
 
         // Create GUI, if enabled
-        auto gui = [&]() -> std::unique_ptr<KBot::Gui> {
+        auto gui = [&]() -> std::unique_ptr<KBot::Gui::Gui> {
             if (options.count("--gui") == 1)
-                return std::make_unique<KBot::Gui>(kbot);
+                return std::make_unique<KBot::Gui::Gui>(kbot);
             return nullptr;
         }();
 

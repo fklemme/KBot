@@ -20,9 +20,6 @@ KBot::KBot() : m_manager(*this), m_general(*this), m_enemy(*this) {}
 
 // Called only once at the beginning of a game.
 void KBot::onStart() {
-    if (Broodwar->isReplay() || Broodwar->self() == nullptr)
-        return;
-
     // Print build information
     Broodwar << "KBot build " << (buildNumber.empty() ? "local" : buildNumber) << std::endl;
 
@@ -76,8 +73,8 @@ void KBot::onEnd(bool /*isWinner*/) {}
 
 // Called once for every execution of a logical frame in Broodwar.
 void KBot::onFrame() {
-    // Return if the game is a replay or is paused
-    if (Broodwar->isReplay() || Broodwar->isPaused() || Broodwar->self() == nullptr)
+    // Return if the game is paused
+    if (Broodwar->isPaused())
         return;
 
     // Display some debug information
@@ -215,4 +212,4 @@ void KBot::onUnitComplete(BWAPI::Unit unit) {
     }
 }
 
-} // namespace
+} // namespace KBot
