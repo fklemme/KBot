@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KBot", "KBot.vcxproj", "{B3B00EDB-613D-48A1-86A6-1C83E969E61B}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -15,30 +15,20 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nana", "nana\nana.vcxproj",
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B3B00EDB-613D-48A1-86A6-1C83E969E61B}.Debug|x64.ActiveCfg = Debug|Win32
 		{B3B00EDB-613D-48A1-86A6-1C83E969E61B}.Debug|x86.ActiveCfg = Debug|Win32
 		{B3B00EDB-613D-48A1-86A6-1C83E969E61B}.Debug|x86.Build.0 = Debug|Win32
-		{B3B00EDB-613D-48A1-86A6-1C83E969E61B}.Release|x64.ActiveCfg = Release|Win32
 		{B3B00EDB-613D-48A1-86A6-1C83E969E61B}.Release|x86.ActiveCfg = Release|Win32
 		{B3B00EDB-613D-48A1-86A6-1C83E969E61B}.Release|x86.Build.0 = Release|Win32
-		{D3875E76-E311-46B8-9502-BEF75A2EE3BE}.Debug|x64.ActiveCfg = Debug|Win32
 		{D3875E76-E311-46B8-9502-BEF75A2EE3BE}.Debug|x86.ActiveCfg = Debug|Win32
 		{D3875E76-E311-46B8-9502-BEF75A2EE3BE}.Debug|x86.Build.0 = Debug|Win32
-		{D3875E76-E311-46B8-9502-BEF75A2EE3BE}.Release|x64.ActiveCfg = Release|Win32
 		{D3875E76-E311-46B8-9502-BEF75A2EE3BE}.Release|x86.ActiveCfg = Release|Win32
 		{D3875E76-E311-46B8-9502-BEF75A2EE3BE}.Release|x86.Build.0 = Release|Win32
-		{826AFA57-E8EA-4BFA-8C21-2DC8A3C53194}.Debug|x64.ActiveCfg = Debug|x64
-		{826AFA57-E8EA-4BFA-8C21-2DC8A3C53194}.Debug|x64.Build.0 = Debug|x64
 		{826AFA57-E8EA-4BFA-8C21-2DC8A3C53194}.Debug|x86.ActiveCfg = Debug|Win32
 		{826AFA57-E8EA-4BFA-8C21-2DC8A3C53194}.Debug|x86.Build.0 = Debug|Win32
-		{826AFA57-E8EA-4BFA-8C21-2DC8A3C53194}.Release|x64.ActiveCfg = Release|x64
-		{826AFA57-E8EA-4BFA-8C21-2DC8A3C53194}.Release|x64.Build.0 = Release|x64
 		{826AFA57-E8EA-4BFA-8C21-2DC8A3C53194}.Release|x86.ActiveCfg = Release|Win32
 		{826AFA57-E8EA-4BFA-8C21-2DC8A3C53194}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
