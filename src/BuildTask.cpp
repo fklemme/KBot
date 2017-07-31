@@ -127,29 +127,31 @@ bool BuildTask::onUnitDestroyed(const Unit &unit) {
     return false;
 }
 
-std::string BuildTask::toString() const {
+std::string BuildTask::toString(bool withBuildNamePrefix) const {
+    const std::string prefix = withBuildNamePrefix ? m_toBuild.getName() + ": " : "";
+
     switch (m_state) {
     case State::initialize:
-        return m_toBuild.getName() + ": Initialization";
+        return prefix + "Initialization";
     case State::acquireResources:
-        return m_toBuild.getName() + ": Acquiring resources...";
+        return prefix + "Acquiring resources...";
     case State::acquireWorker:
-        return m_toBuild.getName() + ": Acquiring worker...";
+        return prefix + "Acquiring worker...";
     case State::moveToPosition:
-        return m_toBuild.getName() + ": Moving to position...";
+        return prefix + "Moving to position...";
     case State::startBuild:
     case State::waitForUnit:
-        return m_toBuild.getName() + ": Start building...";
+        return prefix + "Start building...";
     case State::building: {
         const int progress =
             100 - (100 * m_buildingUnit->getRemainingBuildTime() / m_toBuild.buildTime());
-        return m_toBuild.getName() + " (" + std::to_string(progress) + " %)";
+        return prefix + "Building - " + std::to_string(progress) + " %";
     }
     case State::finalize:
-        return m_toBuild.getName() + ": Finalization";
+        return prefix + "Finalization";
     default:
         throw std::logic_error("Unknown BuildTask::State!");
     }
 }
 
-} // namespace
+} // namespace KBot

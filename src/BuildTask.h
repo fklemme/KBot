@@ -38,9 +38,10 @@ public:
     bool onUnitCreatedOrMorphed(const BWAPI::Unit &unit);
     bool onUnitDestroyed(const BWAPI::Unit &unit);
 
-    State       getState() const { return m_state; }
-    Priority    getPriority() const { return m_priority; }
-    std::string toString() const;
+    BWAPI::UnitType getToBuild() const { return m_toBuild; }
+    State           getState() const { return m_state; }
+    Priority        getPriority() const { return m_priority; }
+    std::string     toString(bool withBuildNamePrefix = true) const;
 
 private:
     Manager *           m_manager;
@@ -56,4 +57,4 @@ private:
     BWAPI::Unit         m_buildingUnit = nullptr;
 };
 
-} // namespace
+} // namespace KBot
