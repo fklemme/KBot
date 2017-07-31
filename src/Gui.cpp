@@ -4,10 +4,12 @@
 #include <nana/gui.hpp>
 #include <nana/gui/widgets/button.hpp>
 #include <nana/gui/widgets/label.hpp>
+#include <nana/gui/widgets/listbox.hpp>
 #include <nana/gui/widgets/panel.hpp>
 #include <nana/gui/widgets/tabbar.hpp>
 #include <string>
 #include <thread>
+#include <vector>
 
 namespace KBot {
 namespace Gui {
@@ -19,7 +21,7 @@ public:
 
 class Overview : public nana::panel<false>, public updatable {
 public:
-    Overview(nana::window parent) : nana::panel<false>(parent) {
+    Overview(nana::window parent, const KBot &kbot) : nana::panel<false>(parent) {
         m_place.div("<framecounter>");
         m_place["framecounter"] << m_frameCounterText << m_frameCounterValue;
     }
@@ -37,23 +39,35 @@ private:
 
 class Manager : public nana::panel<false>, public updatable {
 public:
-    Manager(nana::window parent) : nana::panel<false>(parent) {
-        m_place.div("<status>");
-        m_place["status"] << m_status;
+    Manager(nana::window parent, const KBot &kbot) : nana::panel<false>(parent) {
+        m_buildorder.append_header("Build task");
+        m_buildorder.append_header("Priority");
+        m_buildorder.append_header("State");
+
+        auto cellTranslator = [](const BuildTask &task) {
+            std::vector<nana::listbox::cell> cells;
+            cells.emplace_back(task.getToBuild().getName());
+            cells.emplace_back(std::to_string((int) task.getPriority()));
+            cells.emplace_back(task.toString(false)); // no build name prefix
+            return cells;
+        };
+
+        m_buildorder.at(0).shared_model<std::mutex>(kbot.manager().getBuildQueue(), cellTranslator);
+
+        m_place.div("<buildorder>");
+        m_place["buildorder"] << m_buildorder;
     }
 
     void update(const KBot &kbot) override {}
 
 private:
-    nana::place m_place{*this};
-    nana::label m_status{*this, "TODO!"};
+    nana::place   m_place{*this};
+    nana::listbox m_buildorder{*this};
 };
 
 class MainForm : public nana::form, public updatable {
 public:
-    MainForm() {
-        m_closeButton.events().click([this] { close(); });
-
+    MainForm(const KBot &kbot) : m_overview{*this, kbot}, m_manager{*this, kbot} {
         m_tabbar.append("Overview", m_overview);
         m_tabbar.append("Manager", m_manager);
         m_tabbar.activated(0);
@@ -63,12 +77,10 @@ public:
         auto &place = get_place();
         place.div("margin=5 vertical"
                   "<weight=25 tabbar>"
-                  "<margin=[5,0] tabpages>"
-                  "<weight=25 closeButton>");
+                  "<margin=[5,0] tabpages>"); // TODO: now double margin at the bottom!
         place["tabbar"] << m_tabbar;
         place["tabpages"].fasten(m_overview);
         place["tabpages"].fasten(m_manager);
-        place["closeButton"] << m_closeButton;
         place.collocate();
     }
 
@@ -80,17 +92,15 @@ public:
 private:
     nana::tabbar<std::string> m_tabbar{*this};
 
-    Overview m_overview{*this};
-    Manager  m_manager{*this};
-
-    nana::button m_closeButton{*this, "Close"};
+    Overview m_overview;
+    Manager  m_manager;
 };
 
 Gui::Gui(const KBot &kbot) : m_kbot(kbot) {
     // Open gui in a new thread.
     m_guiThread = std::make_unique<std::thread>([this]() {
         // All gui elements have to be created by the thread that runs nana::exec().
-        MainForm form;
+        MainForm form(m_kbot);
         m_mainForm = &form; // store reference in Gui
 
         // Show the form and block until it's closed.

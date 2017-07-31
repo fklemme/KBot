@@ -29,8 +29,8 @@ public:
     /// Take ownership of a unit from manager (forcibly).
     void takeOwnership(const BWAPI::Unit &unit);
 
-    void addBuildTask(const BuildTask &buildTask);
-    // const auto &getBuildQueue() const { return m_buildQueue; }
+    void        addBuildTask(const BuildTask &buildTask);
+    const auto &getBuildQueue() const { return m_buildQueue; }
 
     // Notify BuildTasks
     void buildTaskOnUnitCreatedOrMorphed(const BWAPI::Unit &unit);
@@ -38,13 +38,13 @@ public:
     void buildTaskOnUnitCompleted(const BWAPI::Unit &unit);
 
     // Interface for BuildTask
-    int  getAvailableMinerals() const;
-    int  getAvailableGas() const;
-    bool acquireResources(int minerals, int gas, BuildTask::Priority priority);
-    void releaseResources(int minerals, int gas);
+    int         getAvailableMinerals() const;
+    int         getAvailableGas() const;
+    bool        acquireResources(int minerals, int gas, BuildTask::Priority priority);
+    void        releaseResources(int minerals, int gas);
     BWAPI::Unit acquireWorker(const BWAPI::UnitType &workerType,
                               const BWAPI::Position &nearPosition);
-    void releaseWorker(const BWAPI::Unit &worker);
+    void        releaseWorker(const BWAPI::Unit &worker);
 
 private:
     KBot &                   m_kBot;
@@ -55,4 +55,4 @@ private:
     std::vector<BWAPI::Unit> m_workers; //< for build tasks
 };
 
-} // namespace
+} // namespace KBot
