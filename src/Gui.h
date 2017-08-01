@@ -17,9 +17,10 @@ public:
     void update(const KBot &kbot);
 
 private:
-    const KBot &                 m_kbot;
-    MainForm *                   m_mainForm = nullptr; // FIXME: Protect with mutex!
-    std::unique_ptr<std::thread> m_guiThread;
+    const KBot &m_kbot;
+    MainForm *  m_mainForm = nullptr; // FIXME: Protect with mutex!
+
+    std::unique_ptr<std::thread> m_guiThread; // Owns MainForm instance
 };
 
 } // namespace Gui

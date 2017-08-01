@@ -65,12 +65,11 @@ public:
     void update(const KBot &kbot) override {
         // m_buildQueueValue.caption(std::to_string(kbot.manager().getBuildQueue().size()));
 
-        auto modelGuard = m_buildQueueView.at(0).model(); // acquire lock
+        const auto modelGuard = m_buildQueueView.at(0).model(); // acquire lock
         nana::API::refresh_window(m_buildQueueView);
 
         using ContainerType = std::decay<decltype(kbot.manager().getBuildQueue())>::type;
-        const auto &container =
-            modelGuard.container<ContainerType>(); // FIXME: throws std::runtime_error!
+        const auto &container = modelGuard.container<ContainerType>();
         m_buildQueueValue.caption(std::to_string(container.size()));
     }
 
