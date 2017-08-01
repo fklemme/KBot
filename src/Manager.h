@@ -29,8 +29,8 @@ public:
     /// Take ownership of a unit from manager (forcibly).
     void takeOwnership(const BWAPI::Unit &unit);
 
-    void        addBuildTask(const BuildTask &buildTask);
-    const auto &getBuildQueue() const { return m_buildQueue; }
+    void                          addBuildTask(const BuildTask &buildTask);
+    const std::vector<BuildTask> &getBuildQueue() const { return m_buildQueue; }
 
     // Notify BuildTasks
     void buildTaskOnUnitCreatedOrMorphed(const BWAPI::Unit &unit);

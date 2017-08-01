@@ -9,9 +9,9 @@ namespace KBot {
 
 using namespace BWAPI;
 
-BuildTask::BuildTask(Manager &manager, UnitType toBuild, Priority priority, TilePosition position,
-                     bool exactPosition)
-    : m_manager(&manager), m_toBuild(std::move(toBuild)), m_priority(priority),
+BuildTask::BuildTask(Manager &manager, UnitType targetType, Priority priority,
+                     TilePosition position, bool exactPosition)
+    : m_manager(&manager), m_targetType(std::move(targetType)), m_priority(priority),
       m_position(std::move(position)), m_exactPosition(exactPosition) {}
 
 void BuildTask::update() {
@@ -26,14 +26,15 @@ void BuildTask::update() {
         m_state = State::acquireResources; // go to next state
         break;
     case State::acquireResources:
-        if (m_manager->acquireResources(m_toBuild.mineralPrice(), m_toBuild.gasPrice(), m_priority))
+        if (m_manager->acquireResources(m_targetType.mineralPrice(), m_targetType.gasPrice(),
+                                        m_priority))
             m_state = State::acquireWorker; // go to next state
         break;
     case State::acquireWorker:
-        m_worker = m_manager->acquireWorker(m_toBuild.whatBuilds().first, Position(m_position));
+        m_worker = m_manager->acquireWorker(m_targetType.whatBuilds().first, Position(m_position));
         if (m_worker != nullptr) {
             // Go to next state
-            if (m_toBuild.isBuilding())
+            if (m_targetType.isBuilding())
                 m_state = State::moveToPosition;
             else
                 m_state = State::startBuild;
@@ -42,12 +43,12 @@ void BuildTask::update() {
     case State::moveToPosition: {
         if (!m_allocatedBuildPosition) {
             m_buildPosition =
-                m_exactPosition ? m_position : Broodwar->getBuildLocation(m_toBuild, m_position);
+                m_exactPosition ? m_position : Broodwar->getBuildLocation(m_targetType, m_position);
             m_allocatedBuildPosition = true;
         }
         assert(m_worker != nullptr);
         const Position movePosition =
-            Position(m_buildPosition) + Position(m_toBuild.tileSize()) / 2;
+            Position(m_buildPosition) + Position(m_targetType.tileSize()) / 2;
 
         // DEBUG
         Broodwar->registerEvent([worker = m_worker, movePosition](Game *) {
@@ -65,10 +66,10 @@ void BuildTask::update() {
         break;
     }
     case State::startBuild:
-        if (m_toBuild.isBuilding()) {
+        if (m_targetType.isBuilding()) {
             // Construct building
-            if (Broodwar->canBuildHere(m_buildPosition, m_toBuild, m_worker)) {
-                if (m_worker->build(m_toBuild, m_buildPosition))
+            if (Broodwar->canBuildHere(m_buildPosition, m_targetType, m_worker)) {
+                if (m_worker->build(m_targetType, m_buildPosition))
                     m_state = State::waitForUnit; // go to next state
             } else {
                 m_allocatedBuildPosition = false;
@@ -76,13 +77,13 @@ void BuildTask::update() {
             }
         } else {
             // Train unit
-            if (m_worker->train(m_toBuild))
+            if (m_worker->train(m_targetType))
                 m_state = State::waitForUnit; // go to next state
         }
         break;
     case State::waitForUnit:
         if (m_buildingUnit != nullptr) {
-            m_manager->releaseResources(m_toBuild.mineralPrice(), m_toBuild.gasPrice());
+            m_manager->releaseResources(m_targetType.mineralPrice(), m_targetType.gasPrice());
             m_state = State::building; // go to next state
         }
         break;
@@ -107,7 +108,7 @@ bool BuildTask::onUnitCreatedOrMorphed(const Unit &unit) {
         return false;
 
     // Make sure we don't already have a unit and it's the right type.
-    if (m_buildingUnit == nullptr && unit->getType() == m_toBuild) {
+    if (m_buildingUnit == nullptr && unit->getType() == m_targetType) {
         m_buildingUnit = unit;
         return true;
     }
@@ -128,7 +129,7 @@ bool BuildTask::onUnitDestroyed(const Unit &unit) {
 }
 
 std::string BuildTask::toString(bool withBuildNamePrefix) const {
-    const std::string prefix = withBuildNamePrefix ? m_toBuild.getName() + ": " : "";
+    const std::string prefix = withBuildNamePrefix ? m_targetType.getName() + ": " : "";
 
     switch (m_state) {
     case State::initialize:
@@ -144,7 +145,7 @@ std::string BuildTask::toString(bool withBuildNamePrefix) const {
         return prefix + "Start building...";
     case State::building: {
         const int progress =
-            100 - (100 * m_buildingUnit->getRemainingBuildTime() / m_toBuild.buildTime());
+            100 - (100 * m_buildingUnit->getRemainingBuildTime() / m_targetType.buildTime());
         return prefix + "Building - " + std::to_string(progress) + " %";
     }
     case State::finalize:

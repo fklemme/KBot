@@ -28,7 +28,7 @@ public:
     enum class Priority : int { low = -100, normal = 0, high = 100, buildorder = 200 };
 
 public:
-    BuildTask(Manager &manager, BWAPI::UnitType toBuild, Priority priority = Priority::normal,
+    BuildTask(Manager &manager, BWAPI::UnitType targetType, Priority priority = Priority::normal,
               BWAPI::TilePosition position = BWAPI::Broodwar->self()->getStartLocation(),
               bool                exactPosition = false);
 
@@ -38,14 +38,14 @@ public:
     bool onUnitCreatedOrMorphed(const BWAPI::Unit &unit);
     bool onUnitDestroyed(const BWAPI::Unit &unit);
 
-    BWAPI::UnitType getToBuild() const { return m_toBuild; }
+    BWAPI::UnitType getTargetType() const { return m_targetType; }
     State           getState() const { return m_state; }
     Priority        getPriority() const { return m_priority; }
     std::string     toString(bool withBuildNamePrefix = true) const;
 
 private:
     Manager *           m_manager;
-    BWAPI::UnitType     m_toBuild;
+    BWAPI::UnitType     m_targetType;
     Priority            m_priority;
     BWAPI::TilePosition m_position;
     bool                m_exactPosition;
