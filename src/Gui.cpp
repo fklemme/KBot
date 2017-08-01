@@ -9,6 +9,7 @@
 #include <nana/gui/widgets/tabbar.hpp>
 #include <string>
 #include <thread>
+#include <type_traits>
 #include <vector>
 
 namespace KBot {
@@ -40,29 +41,46 @@ private:
 class Manager : public nana::panel<false>, public updatable {
 public:
     Manager(nana::window parent, const KBot &kbot) : nana::panel<false>(parent) {
-        m_buildorder.append_header("Build task");
-        m_buildorder.append_header("Priority");
-        m_buildorder.append_header("State");
+        m_buildQueueView.append_header("Build task");
+        m_buildQueueView.append_header("Priority");
+        m_buildQueueView.append_header("State");
 
         auto cellTranslator = [](const BuildTask &task) {
             std::vector<nana::listbox::cell> cells;
-            cells.emplace_back(task.getToBuild().getName());
+            cells.emplace_back(task.getTargetType().getName());
             cells.emplace_back(std::to_string((int) task.getPriority()));
             cells.emplace_back(task.toString(false)); // no build name prefix
             return cells;
         };
 
-        m_buildorder.at(0).shared_model<std::mutex>(kbot.manager().getBuildQueue(), cellTranslator);
+        // TODO: Do we really need a *recursive* mutex here?
+        m_buildQueueView.at(0).shared_model<std::recursive_mutex>(kbot.manager().getBuildQueue(),
+                                                                  cellTranslator);
 
-        m_place.div("<buildorder>");
-        m_place["buildorder"] << m_buildorder;
+        m_place.div("vertical <weight=20 buildQueue> <buildQueueView>");
+        m_place["buildQueue"] << m_buildQueueText << m_buildQueueValue;
+        m_place["buildQueueView"] << m_buildQueueView;
     }
 
-    void update(const KBot &kbot) override {}
+    void update(const KBot &kbot) override {
+        // m_buildQueueValue.caption(std::to_string(kbot.manager().getBuildQueue().size()));
+
+        auto modelGuard = m_buildQueueView.at(0).model(); // acquire lock
+        nana::API::refresh_window(m_buildQueueView);
+
+        using ContainerType = std::decay<decltype(kbot.manager().getBuildQueue())>::type;
+        const auto &container =
+            modelGuard.container<ContainerType>(); // FIXME: throws std::runtime_error!
+        m_buildQueueValue.caption(std::to_string(container.size()));
+    }
 
 private:
-    nana::place   m_place{*this};
-    nana::listbox m_buildorder{*this};
+    nana::place m_place{*this};
+
+    nana::listbox m_buildQueueView{*this};
+
+    nana::label m_buildQueueText{*this, "Build tasks:"};
+    nana::label m_buildQueueValue{*this, "-"};
 };
 
 class MainForm : public nana::form, public updatable {
