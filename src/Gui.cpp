@@ -12,6 +12,8 @@
 #include <type_traits>
 #include <vector>
 
+#include <iostream> // DEBUG
+
 namespace KBot {
 namespace Gui {
 
@@ -22,7 +24,7 @@ public:
 
 class Overview : public nana::panel<false>, public updatable {
 public:
-    Overview(nana::window parent, const KBot &kbot) : nana::panel<false>(parent) {
+    Overview(nana::window parent) : nana::panel<false>(parent) {
         m_place.div("<framecounter>");
         m_place["framecounter"] << m_frameCounterText << m_frameCounterValue;
     }
@@ -35,27 +37,48 @@ private:
     nana::place m_place{*this};
 
     nana::label m_frameCounterText{*this, "Frame counter:"};
-    nana::label m_frameCounterValue{*this, "-"};
+    nana::label m_frameCounterValue{*this, "0"};
 };
 
 class Manager : public nana::panel<false>, public updatable {
+    // For C++17: Move to template lambda?
+    template <typename Access>
+    struct ValueCompare {
+        ValueCompare(Access func) : access{func} {}
+
+        bool operator()(const std::string &a, nana::any *lhs, const std::string &b, nana::any *rhs,
+                        bool reverse) {
+            if (lhs)
+                std::cout << "lhs type: " << lhs->type().name() << std::endl;
+            else
+                std::cout << "lhs was nullptr" << std::endl;
+            if (rhs)
+                std::cout << "rhs type: " << lhs->type().name() << std::endl;
+            else
+                std::cout << "rhs was nullptr" << std::endl;
+            // auto a = access(nana::any_cast<BuildTask>(*lhs));
+            // auto b = access(nana::any_cast<BuildTask>(*rhs));
+            return reverse ? a > b : a < b;
+        }
+
+        Access access;
+    };
+
+    template <typename Access>
+    ValueCompare<Access> makeValueCompare(Access func) {
+        return ValueCompare<Access>(func);
+    }
+
 public:
-    Manager(nana::window parent, const KBot &kbot) : nana::panel<false>(parent) {
-        m_buildQueueView.append_header("Build task");
-        m_buildQueueView.append_header("Priority");
-        m_buildQueueView.append_header("State");
+    Manager(nana::window parent) : nana::panel<false>(parent) {
+        auto taskCol = m_buildQueueView.append_header("Build task");
+        auto prioCol = m_buildQueueView.append_header("Priority", 50);
+        auto stateCol = m_buildQueueView.append_header("State");
 
-        auto cellTranslator = [](const BuildTask &task) {
-            std::vector<nana::listbox::cell> cells;
-            cells.emplace_back(task.getTargetType().getName());
-            cells.emplace_back(std::to_string((int) task.getPriority()));
-            cells.emplace_back(task.toString(false)); // no build name prefix
-            return cells;
-        };
-
-        // TODO: Do we really need a *recursive* mutex here?
-        m_buildQueueView.at(0).shared_model<std::recursive_mutex>(kbot.manager().getBuildQueue(),
-                                                                  cellTranslator);
+        // m_buildQueueView.set_sort_compare(
+        //    prioCol, makeValueCompare([](const BuildTask &task) { return task.getPriority(); }));
+        // m_buildQueueView.set_sort_compare(
+        //    stateCol, makeValueCompare([](const BuildTask &task) { return task.getState(); }));
 
         m_place.div("vertical <weight=20 buildQueue> <buildQueueView>");
         m_place["buildQueue"] << m_buildQueueText << m_buildQueueValue;
@@ -63,28 +86,39 @@ public:
     }
 
     void update(const KBot &kbot) override {
-        // m_buildQueueValue.caption(std::to_string(kbot.manager().getBuildQueue().size()));
+        const auto &buildQueue = kbot.manager().getBuildQueue();
 
-        const auto modelGuard = m_buildQueueView.at(0).model(); // acquire lock
-        nana::API::refresh_window(m_buildQueueView);
+        // Due to restrictions, we need a new model if queue size changes
+        if (m_buildQueueSize != buildQueue.size()) {
+            auto cellTranslator = [](const BuildTask &task) {
+                std::vector<nana::listbox::cell> cells;
+                cells.emplace_back(task.getTargetType().getName());
+                cells.emplace_back(std::to_string((int) task.getPriority()));
+                cells.emplace_back(task.toString(false)); // no build name prefix
+                return cells;
+            };
 
-        using ContainerType = std::decay<decltype(kbot.manager().getBuildQueue())>::type;
-        const auto &container = modelGuard.container<ContainerType>();
-        m_buildQueueValue.caption(std::to_string(container.size()));
+            m_buildQueueView.at(0).shared_model<std::mutex>(buildQueue, cellTranslator);
+
+            m_buildQueueValue.caption(std::to_string(buildQueue.size()));
+            m_buildQueueSize = buildQueue.size(); // remember last queue size
+        }
+
+        nana::API::refresh_window(m_buildQueueView); // redraw listbox
     }
 
 private:
     nana::place m_place{*this};
 
     nana::listbox m_buildQueueView{*this};
-
-    nana::label m_buildQueueText{*this, "Build tasks:"};
-    nana::label m_buildQueueValue{*this, "-"};
+    std::size_t   m_buildQueueSize = 0;
+    nana::label   m_buildQueueText{*this, "Build tasks:"};
+    nana::label   m_buildQueueValue{*this, "0"};
 };
 
 class MainForm : public nana::form, public updatable {
 public:
-    MainForm(const KBot &kbot) : m_overview{*this, kbot}, m_manager{*this, kbot} {
+    MainForm(const KBot &kbot) {
         m_tabbar.append("Overview", m_overview);
         m_tabbar.append("Manager", m_manager);
         m_tabbar.activated(0);
@@ -109,8 +143,8 @@ public:
 private:
     nana::tabbar<std::string> m_tabbar{*this};
 
-    Overview m_overview;
-    Manager  m_manager;
+    Overview m_overview{*this};
+    Manager  m_manager{*this};
 };
 
 Gui::Gui(const KBot &kbot) : m_kbot(kbot) {
