@@ -3,6 +3,14 @@
 The details of release
 http://nanapro.org/release_note.htm
 
+Version 1.5.4
+July 25, 2017
+
+===============
+Version 1.5.3
+July 3, 2017
+
+===============
 Version 1.5.2
 June 21, 2017
 
