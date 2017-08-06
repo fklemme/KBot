@@ -16,14 +16,14 @@ namespace KBot {
 
 /// Implements the BWAPI interface.
 class KBot : public BWAPI::AIModule {
-public:
-    KBot();
-
     // Prohibit copy & move.
     KBot(const KBot &) = delete;
     KBot(KBot &&) = delete;
     KBot &operator=(const KBot &) = delete;
     KBot &operator=(KBot &&) = delete;
+
+public:
+    KBot();
 
     // Implement BWAPI interface.
     void onStart() override;
@@ -61,4 +61,4 @@ private:
     BWEM::Map &m_map = BWEM::Map::Instance();
 };
 
-} // namespace
+} // namespace KBot

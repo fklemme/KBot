@@ -11,14 +11,14 @@ class KBot;
 
 /// Handles all economic units and tasks.
 class Manager {
-public:
-    Manager(KBot &kBot);
-
     // Prohibit copy & move. There is only one manager.
     Manager(const Manager &) = delete;
     Manager(Manager &&) = delete;
     Manager &operator=(const Manager &) = delete;
     Manager &operator=(Manager &&) = delete;
+
+public:
+    Manager(KBot &kBot);
 
     /// Called every KBot::onFrame().
     void update();
@@ -29,7 +29,8 @@ public:
     /// Take ownership of a unit from manager (forcibly).
     void takeOwnership(const BWAPI::Unit &unit);
 
-    void                          addBuildTask(const BuildTask &buildTask);
+    void addBuildTask(const BuildTask &buildTask);
+
     const std::vector<BuildTask> &getBuildQueue() const { return m_buildQueue; }
 
     // Notify BuildTasks
@@ -40,6 +41,8 @@ public:
     // Interface for BuildTask
     int         getAvailableMinerals() const;
     int         getAvailableGas() const;
+    int         getReservedMinerals() const { return m_reservedMinerals; }
+    int         getReservedGas() const { return m_reservedGas; }
     bool        acquireResources(int minerals, int gas, BuildTask::Priority priority);
     void        releaseResources(int minerals, int gas);
     BWAPI::Unit acquireWorker(const BWAPI::UnitType &workerType,
@@ -52,7 +55,7 @@ private:
     std::vector<BuildTask>   m_buildQueue;
     int                      m_reservedMinerals = 0;
     int                      m_reservedGas = 0;
-    std::vector<BWAPI::Unit> m_workers; //< for build tasks
+    std::vector<BWAPI::Unit> m_workers; ///< for build tasks
 };
 
 } // namespace KBot

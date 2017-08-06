@@ -160,14 +160,14 @@ void Squad::update() {
 std::string to_string(Squad::State state) {
     switch (state) {
     case Squad::State::scout:
-        return "Scout";
+        return "Scouting";
     case Squad::State::attack:
-        return "Attack";
+        return "Attacking";
     case Squad::State::defend:
-        return "Defend";
+        return "Defending";
     default:
         throw std::logic_error("Unknown Squad::State!");
     }
 }
 
-} // namespace
+} // namespace KBot

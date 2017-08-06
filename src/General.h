@@ -10,14 +10,14 @@ class KBot;
 
 /// Handles all military units and tasks.
 class General {
-public:
-    General(KBot &kBot);
-
     // Prohibit copy & move. There is only one general.
     General(const General &) = delete;
     General(General &&) = delete;
     General &operator=(const General &) = delete;
     General &operator=(General &&) = delete;
+
+public:
+    General(KBot &kBot);
 
     /// Called every KBot::onFrame().
     void update();
@@ -28,9 +28,11 @@ public:
     /// Take ownership of a unit from general (forcibly).
     void takeOwnership(const BWAPI::Unit &unit);
 
+    const std::vector<Squad> &getSquads() const { return m_squads; }
+
 private:
     KBot &             m_kBot;
     std::vector<Squad> m_squads;
 };
 
-} // namespace
+} // namespace KBot
