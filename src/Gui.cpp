@@ -2,94 +2,87 @@
 
 #include <BWAPI.h>
 #include <nana/gui.hpp>
-#include <nana/gui/widgets/button.hpp>
 #include <nana/gui/widgets/label.hpp>
 #include <nana/gui/widgets/listbox.hpp>
 #include <nana/gui/widgets/panel.hpp>
 #include <nana/gui/widgets/tabbar.hpp>
 #include <string>
 #include <thread>
-#include <type_traits>
 #include <vector>
-
-#include <iostream> // DEBUG
 
 namespace KBot {
 namespace Gui {
 
-class updatable {
-public:
-    virtual void update(const KBot &kbot) = 0;
-};
-
-class Overview : public nana::panel<false>, public updatable {
+class Overview : public nana::panel<false> {
 public:
     Overview(nana::window parent) : nana::panel<false>(parent) {
         m_place.div("<framecounter>");
         m_place["framecounter"] << m_frameCounterText << m_frameCounterValue;
     }
 
-    void update(const KBot &kbot) override {
+    void update(const KBot &kbot) {
         m_frameCounterValue.caption(std::to_string(BWAPI::Broodwar->getFrameCount()));
     }
 
 private:
     nana::place m_place{*this};
-
     nana::label m_frameCounterText{*this, "Frame counter:"};
     nana::label m_frameCounterValue{*this, "0"};
 };
 
-class Manager : public nana::panel<false>, public updatable {
-    // For C++17: Move to template lambda?
-    template <typename Access>
-    struct ValueCompare {
-        ValueCompare(Access func) : access{func} {}
+class Manager : public nana::panel<false> {
+    // Generic value compare functor for nana::listbox
+    template <typename T, typename Compare>
+    class ValueCompare {
+    public:
+        ValueCompare(Compare comp) : m_comp{comp} {}
 
-        bool operator()(const std::string &a, nana::any *lhs, const std::string &b, nana::any *rhs,
-                        bool reverse) {
-            if (lhs)
-                std::cout << "lhs type: " << lhs->type().name() << std::endl;
-            else
-                std::cout << "lhs was nullptr" << std::endl;
-            if (rhs)
-                std::cout << "rhs type: " << lhs->type().name() << std::endl;
-            else
-                std::cout << "rhs was nullptr" << std::endl;
-            // auto a = access(nana::any_cast<BuildTask>(*lhs));
-            // auto b = access(nana::any_cast<BuildTask>(*rhs));
-            return reverse ? a > b : a < b;
+        bool operator()(const std::string &, nana::any *lhsAnyPtr, const std::string &,
+                        nana::any *rhsAnyPtr, bool reverse) {
+            if (lhsAnyPtr && rhsAnyPtr) {
+                auto lhs = nana::any_cast<T>(*lhsAnyPtr);
+                auto rhs = nana::any_cast<T>(*rhsAnyPtr);
+                return reverse ? m_comp(rhs, lhs) : m_comp(lhs, rhs);
+            }
+            return false;
         }
 
-        Access access;
+    private:
+        Compare m_comp;
     };
 
-    template <typename Access>
-    ValueCompare<Access> makeValueCompare(Access func) {
-        return ValueCompare<Access>(func);
+    template <typename T, typename Compare>
+    ValueCompare<T, Compare> makeValueCompare(Compare comp) {
+        return ValueCompare<T, Compare>(comp);
     }
 
 public:
-    Manager(nana::window parent) : nana::panel<false>(parent) {
-        auto taskCol = m_buildQueueView.append_header("Build task");
-        auto prioCol = m_buildQueueView.append_header("Priority", 50);
-        auto stateCol = m_buildQueueView.append_header("State");
+    Manager(nana::window parent) : panel<false>(parent) {
+        const auto taskCol = m_buildQueueListbox.append_header("Build task");
+        const auto prioCol = m_buildQueueListbox.append_header("Priority", 50);
+        const auto stateCol = m_buildQueueListbox.append_header("State");
 
-        // m_buildQueueView.set_sort_compare(
-        //    prioCol, makeValueCompare([](const BuildTask &task) { return task.getPriority(); }));
-        // m_buildQueueView.set_sort_compare(
-        //    stateCol, makeValueCompare([](const BuildTask &task) { return task.getState(); }));
+        using BuildTaskPtr = const BuildTask *; // value type stored in category
+        m_buildQueueListbox.set_sort_compare(
+            prioCol, makeValueCompare<BuildTaskPtr>([](BuildTaskPtr lhs, BuildTaskPtr rhs) {
+                return lhs->getPriority() < rhs->getPriority();
+            }));
+        m_buildQueueListbox.set_sort_compare(
+            stateCol, makeValueCompare<BuildTaskPtr>([](BuildTaskPtr lhs, BuildTaskPtr rhs) {
+                return lhs->getState() < rhs->getState();
+            }));
 
-        m_place.div("vertical <weight=20 buildQueue> <buildQueueView>");
+        m_place.div("vertical <weight=20 buildQueue> <buildQueueListbox>");
         m_place["buildQueue"] << m_buildQueueText << m_buildQueueValue;
-        m_place["buildQueueView"] << m_buildQueueView;
+        m_place["buildQueueListbox"] << m_buildQueueListbox;
     }
 
-    void update(const KBot &kbot) override {
+    void update(const KBot &kbot) {
         const auto &buildQueue = kbot.manager().getBuildQueue();
+        m_buildQueueValue.caption(std::to_string(buildQueue.size()));
 
         // Due to restrictions, we need a new model if queue size changes
-        if (m_buildQueueSize != buildQueue.size()) {
+        if (m_buildQueueListbox.at(0).size() != buildQueue.size()) {
             auto cellTranslator = [](const BuildTask &task) {
                 std::vector<nana::listbox::cell> cells;
                 cells.emplace_back(task.getTargetType().getName());
@@ -98,53 +91,57 @@ public:
                 return cells;
             };
 
-            m_buildQueueView.at(0).shared_model<std::mutex>(buildQueue, cellTranslator);
-
-            m_buildQueueValue.caption(std::to_string(buildQueue.size()));
-            m_buildQueueSize = buildQueue.size(); // remember last queue size
+            // FIXME: This triggers ess_->lister.sort() before back-references can be set.
+            m_buildQueueListbox.at(0).shared_model<std::mutex>(buildQueue, cellTranslator);
         }
 
-        nana::API::refresh_window(m_buildQueueView); // redraw listbox
+        // Set back-references for compare functions
+        // It might happen that a value in buildQueue was just replaced
+        // so update references every time to prevent dangling pointers.
+        auto category = m_buildQueueListbox.at(0); // default category
+        for (std::size_t i = 0; i < buildQueue.size(); ++i)
+            category.at(i).value(&buildQueue[i]);
+
+        nana::API::refresh_window(m_buildQueueListbox); // redraw listbox
     }
 
 private:
-    nana::place m_place{*this};
-
-    nana::listbox m_buildQueueView{*this};
-    std::size_t   m_buildQueueSize = 0;
+    nana::place   m_place{*this};
+    nana::listbox m_buildQueueListbox{*this};
     nana::label   m_buildQueueText{*this, "Build tasks:"};
     nana::label   m_buildQueueValue{*this, "0"};
 };
 
-class MainForm : public nana::form, public updatable {
+class MainForm : public nana::form {
 public:
-    MainForm(const KBot &kbot) {
+    MainForm(const KBot &kbot) : nana::form(nana::API::make_center(400, 300)) {
+        caption("KBot Viewer");
+
         m_tabbar.append("Overview", m_overview);
         m_tabbar.append("Manager", m_manager);
-        m_tabbar.activated(0);
+        m_tabbar.activated(0); // activate the overview tab
 
         // Layout management
         // (http://qpcr4vir.github.io/nana-doxy/html/dc/de3/classnana_1_1place.html#details)
         auto &place = get_place();
         place.div("margin=5 vertical"
                   "<weight=25 tabbar>"
-                  "<margin=[5,0] tabpages>"); // TODO: now double margin at the bottom!
+                  "<margin=[5,0,0,0] tabpages>"); // [top, right, bottom, left]
         place["tabbar"] << m_tabbar;
         place["tabpages"].fasten(m_overview);
         place["tabpages"].fasten(m_manager);
         place.collocate();
     }
 
-    void update(const KBot &kbot) override {
+    void update(const KBot &kbot) {
         m_overview.update(kbot);
         m_manager.update(kbot);
     }
 
 private:
     nana::tabbar<std::string> m_tabbar{*this};
-
-    Overview m_overview{*this};
-    Manager  m_manager{*this};
+    Overview                  m_overview{*this};
+    Manager                   m_manager{*this};
 };
 
 Gui::Gui(const KBot &kbot) : m_kbot(kbot) {
