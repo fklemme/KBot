@@ -11,9 +11,9 @@ A simple, built-from-scratch Starcraft bot using BWAPI and modern C++.
 [vs build]: https://kruecke.visualstudio.com/KBot
 [vs master]: https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/3/badge
 [vs develop]: https://kruecke.visualstudio.com/_apis/public/build/definitions/30f6aa6a-33ee-4633-a315-57f354033160/2/badge
-[travis build]: https://travis-ci.org/Kruecke/KBot
-[travis master]: https://travis-ci.org/Kruecke/KBot.svg?branch=master
-[travis develop]: https://travis-ci.org/Kruecke/KBot.svg?branch=development
+[travis build]: https://travis-ci.org/fklemme/KBot
+[travis master]: https://travis-ci.org/fklemme/KBot.svg?branch=master
+[travis develop]: https://travis-ci.org/fklemme/KBot.svg?branch=development
 
 KBot is developed with Visual Studio 2017 on Windows but build services ensure it can be compiled on Linux with GCC and clang as well.
 
