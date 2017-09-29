@@ -15,7 +15,7 @@
     <ProjectGuid>{B3B00EDB-613D-48A1-86A6-1C83E969E61B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>KBot</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
